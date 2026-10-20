@@ -468,6 +468,8 @@ textarea.inp{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;resize
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:700;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
 #toast.on{opacity:1}
 @media (min-width:900px){#toast{bottom:24px}}
+/* no celular o aviso fica no alto, para não cobrir o total do dia nem a barra de navegação */
+@media (max-width:899px){#toast{bottom:auto;top:calc(12px + env(safe-area-inset-top,0px))}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -1046,10 +1048,15 @@ function vVendas(){
   const row=i=>{const q=(day[i.id]||{}).q||0;return `<div class="vrow"><div class="vname">${esc(i.nome)}</div><div class="vprice">${brl(i.preco)} · <span id="st-${i.id}">${q?brl(q*((day[i.id]||{}).p??i.preco)):'—'}</span></div>
     <div class="step"><button data-act="dec" data-id="${i.id}" aria-label="Diminuir ${esc(i.nome)}">−</button><input id="q-${i.id}" data-qid="${i.id}" type="number" inputmode="numeric" min="0" value="${q||''}" placeholder="0" aria-label="Quantidade de ${esc(i.nome)}"><button class="plus" data-act="inc" data-id="${i.id}" aria-label="Aumentar ${esc(i.nome)}">+</button></div></div>`};
   const serv=S.itens.filter(i=>i.ativo&&i.tipo==='servico'),prod=S.itens.filter(i=>i.ativo&&i.tipo!=='servico');
-  return `${topbar('Vendas do dia','Toque no + a cada venda. Salva sozinho.')}
+  const opt=l=>l.map(i=>`<option value="${i.id}" ${ui.vAddId===i.id?'selected':''}>${esc(i.nome)} · ${brl(i.preco)}</option>`).join('');
+  return `${topbar('Vendas do dia','A cada venda, adicione. Vai somando ao longo do dia e salva sozinho.')}
   <div class="entry-head"><div class="datebox"><button class="icon-btn" data-act="vday" data-n="-1" aria-label="Dia anterior">‹</button>
     <input type="date" id="vdate" value="${d}" max="${TODAY}" aria-label="Data"><button class="icon-btn" data-act="vday" data-n="1" aria-label="Próximo dia" ${d>=TODAY?'disabled':''}>›</button></div>
     <div class="muted">${SEML[wd]}${d===TODAY?' · hoje':''}${fechado?' · normalmente fechado':''}</div></div>
+  ${serv.length||prod.length?`<section class="card"><div class="card-h"><h2>Lançar venda</h2><p>Soma ao que já foi lançado no dia.</p></div><div class="form-row dq">
+    <div class="field"><label for="v-add-it">Serviço ou produto</label><select class="inp" id="v-add-it">${serv.length?`<optgroup label="Serviços">${opt(serv)}</optgroup>`:''}${prod.length?`<optgroup label="Produtos">${opt(prod)}</optgroup>`:''}</select></div>
+    <div class="field"><label for="v-add-q">Quantidade</label><input class="inp" id="v-add-q" type="number" inputmode="numeric" min="1" value="1"></div>
+    <div><button class="btn pri" data-act="v-add">Adicionar</button></div></div></section>`:''}
   ${serv.length?`<section class="card"><h2 class="group-t">Serviços</h2><div class="vlist">${serv.map(row).join('')}</div></section>`:''}
   ${prod.length?`<section class="card"><h2 class="group-t">Produtos</h2><div class="vlist">${prod.map(row).join('')}</div></section>`:''}
   ${!serv.length&&!prod.length?`<section class="card"><p class="note">Nenhum serviço ou produto cadastrado. <button class="btn sm" data-tab="cadastros">Cadastrar</button></p></section>`:''}
@@ -1707,6 +1714,10 @@ document.addEventListener('click',e=>{
   else if(a==='view'){ui.view=b.dataset.v;ui.ref=ui.mode==='dia'?lastDataDay():TODAY;render();window.scrollTo(0,0)}
   else if(a==='lancar'){ui.tab='vendas';ui.vDate=b.dataset.d||TODAY;render();window.scrollTo(0,0)}
   else if(a==='step'){let nx=stepRef(n);if(nx>TODAY)nx=TODAY;ui.ref=nx;render(true)}
+  else if(a==='v-add'){const id=($('#v-add-it')||{}).value,q=Math.floor(+(($('#v-add-q')||{}).value)||0),it=itemById(id);if(!it)return;
+    if(q<1){toast('Informe a quantidade');return}
+    ui.vAddId=id;setQty(id,(((S.vendas[ui.vDate]||{})[id]||{}).q||0)+q);render(true);
+    toast(`+${q} ${it.nome} · total do dia ${brl(dayFat(ui.vDate)||0)}`)}
   else if(a==='vday'){let nx=addDays(ui.vDate,n);if(nx>TODAY)return;ui.vDate=nx;render(true)}
   else if(a==='inc'||a==='dec'){const id=b.dataset.id,cur=((S.vendas[ui.vDate]||{})[id]||{}).q||0;setQty(id,cur+(a==='inc'?1:-1));const inp=$('#q-'+id);if(inp)inp.value=((S.vendas[ui.vDate]||{})[id]||{}).q||''}
   else if(a==='gfreq'){ui.gFreq=b.dataset.v;render(true)}
