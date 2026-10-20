@@ -444,6 +444,18 @@ tr:last-child td{border-bottom:0}
 .danger-card{border-color:var(--bad-bd)}
 textarea.inp{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;resize:vertical}
 
+/* driver.js 1.3.1 (tour) */
+.driver-active .driver-overlay,.driver-active *{pointer-events:none}.driver-active .driver-active-element,.driver-active .driver-active-element *,.driver-popover,.driver-popover *{pointer-events:auto}@keyframes animate-fade-in{0%{opacity:0}to{opacity:1}}.driver-fade .driver-overlay{animation:animate-fade-in .2s ease-in-out}.driver-fade .driver-popover{animation:animate-fade-in .2s}.driver-popover{all:unset;box-sizing:border-box;color:#2d2d2d;margin:0;padding:15px;border-radius:5px;min-width:250px;max-width:300px;box-shadow:0 1px 10px #0006;z-index:1000000000;position:fixed;top:0;right:0;background-color:#fff}.driver-popover *{font-family:Helvetica Neue,Inter,ui-sans-serif,"Apple Color Emoji",Helvetica,Arial,sans-serif}.driver-popover-title{font:19px/normal sans-serif;font-weight:700;display:block;position:relative;line-height:1.5;zoom:1;margin:0}.driver-popover-close-btn{all:unset;position:absolute;top:0;right:0;width:32px;height:28px;cursor:pointer;font-size:18px;font-weight:500;color:#d2d2d2;z-index:1;text-align:center;transition:color;transition-duration:.2s}.driver-popover-close-btn:hover,.driver-popover-close-btn:focus{color:#2d2d2d}.driver-popover-title[style*=block]+.driver-popover-description{margin-top:5px}.driver-popover-description{margin-bottom:0;font:14px/normal sans-serif;line-height:1.5;font-weight:400;zoom:1}.driver-popover-footer{margin-top:15px;text-align:right;zoom:1;display:flex;align-items:center;justify-content:space-between}.driver-popover-progress-text{font-size:13px;font-weight:400;color:#727272;zoom:1}.driver-popover-footer button{all:unset;display:inline-block;box-sizing:border-box;padding:3px 7px;text-decoration:none;text-shadow:1px 1px 0 #fff;background-color:#fff;color:#2d2d2d;font:12px/normal sans-serif;cursor:pointer;outline:0;zoom:1;line-height:1.3;border:1px solid #ccc;border-radius:3px}.driver-popover-footer .driver-popover-btn-disabled{opacity:.5;pointer-events:none}:not(body):has(>.driver-active-element){overflow:hidden!important}.driver-no-interaction,.driver-no-interaction *{pointer-events:none!important}.driver-popover-footer button:hover,.driver-popover-footer button:focus{background-color:#f7f7f7}.driver-popover-navigation-btns{display:flex;flex-grow:1;justify-content:flex-end}.driver-popover-navigation-btns button+button{margin-left:4px}.driver-popover-arrow{content:"";position:absolute;border:5px solid #fff}.driver-popover-arrow-side-over{display:none}.driver-popover-arrow-side-left{left:100%;border-right-color:transparent;border-bottom-color:transparent;border-top-color:transparent}.driver-popover-arrow-side-right{right:100%;border-left-color:transparent;border-bottom-color:transparent;border-top-color:transparent}.driver-popover-arrow-side-top{top:100%;border-right-color:transparent;border-bottom-color:transparent;border-left-color:transparent}.driver-popover-arrow-side-bottom{bottom:100%;border-left-color:transparent;border-top-color:transparent;border-right-color:transparent}.driver-popover-arrow-side-center{display:none}.driver-popover-arrow-side-left.driver-popover-arrow-align-start,.driver-popover-arrow-side-right.driver-popover-arrow-align-start{top:15px}.driver-popover-arrow-side-top.driver-popover-arrow-align-start,.driver-popover-arrow-side-bottom.driver-popover-arrow-align-start{left:15px}.driver-popover-arrow-align-end.driver-popover-arrow-side-left,.driver-popover-arrow-align-end.driver-popover-arrow-side-right{bottom:15px}.driver-popover-arrow-side-top.driver-popover-arrow-align-end,.driver-popover-arrow-side-bottom.driver-popover-arrow-align-end{right:15px}.driver-popover-arrow-side-left.driver-popover-arrow-align-center,.driver-popover-arrow-side-right.driver-popover-arrow-align-center{top:50%;margin-top:-5px}.driver-popover-arrow-side-top.driver-popover-arrow-align-center,.driver-popover-arrow-side-bottom.driver-popover-arrow-align-center{left:50%;margin-left:-5px}.driver-popover-arrow-none{display:none}
+
+.driver-popover.gc-tour{background:var(--glass);color:var(--ink);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 48px rgba(14,23,38,.28);font-family:var(--f-body);max-width:340px;padding:18px}
+.driver-popover.gc-tour .driver-popover-title{font-family:var(--f-display);font-size:1.05rem;font-weight:700}
+.driver-popover.gc-tour .driver-popover-description{color:var(--muted);font-size:.9rem;line-height:1.5}
+.driver-popover.gc-tour .driver-popover-description b{color:var(--ink)}
+.driver-popover.gc-tour .driver-popover-progress-text{color:var(--faint);font-size:.75rem}
+.driver-popover.gc-tour .driver-popover-footer button{font-family:var(--f-body);text-shadow:none;border-radius:9px;padding:7px 12px;font-weight:700;border:1px solid var(--line-2);background:var(--glass);color:var(--ink)}
+.driver-popover.gc-tour .driver-popover-footer .driver-popover-next-btn{background:var(--pri);color:var(--accent-ink);border-color:transparent}
+.driver-popover.gc-tour .driver-popover-close-btn{color:var(--faint)}
+.ts-host{min-height:65px}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-weight:700;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
 #toast.on{opacity:1}
 @media (min-width:900px){#toast{bottom:24px}}
@@ -717,8 +729,8 @@ function periodNav(){
     <div class="lbl">${rangeLabel(ui.mode,P.r0)}<small>${P.partial?`até ${dShort(P.r.e)} · `:''}comparando com ${P.ctx}</small></div>
     <button class="icon-btn" data-act="step" data-n="1" aria-label="Próximo período" ${nextDisabled?'disabled':''}>›</button></div>`;
 }
-const modeSeg=(labels)=>`<div class="seg" role="group" aria-label="Período">${[['dia',labels[0]],['semana',labels[1]],['mes',labels[2]]].map(([k,l])=>`<button data-act="mode" data-v="${k}" aria-pressed="${ui.mode===k}">${l}</button>`).join('')}</div>`;
-const viewSeg=()=>`<div class="seg view" role="group" aria-label="Tipo de visão">${[['geral','Resumo'],['detalhe','Detalhes']].map(([k,l])=>`<button data-act="view" data-v="${k}" aria-pressed="${ui.view===k}">${l}</button>`).join('')}</div>`;
+const modeSeg=(labels)=>`<div class="seg" role="group" aria-label="Período" data-tour="periodo">${[['dia',labels[0]],['semana',labels[1]],['mes',labels[2]]].map(([k,l])=>`<button data-act="mode" data-v="${k}" aria-pressed="${ui.mode===k}">${l}</button>`).join('')}</div>`;
+const viewSeg=()=>`<div class="seg view" role="group" aria-label="Tipo de visão" data-tour="views">${[['geral','Resumo'],['detalhe','Detalhes']].map(([k,l])=>`<button data-act="view" data-v="${k}" aria-pressed="${ui.view===k}">${l}</button>`).join('')}</div>`;
 function vPainel(){if(ui.view!=='detalhe')ui.view='geral';if(ui.mode==='dia'&&ui.ref===TODAY&&!S.vendas[TODAY])ui.ref=lastDataDay();calc();return ui.view==='geral'?vGeral():vDetalhe()}
 
 /* ---------- cálculos usados pelas duas telas ---------- */
@@ -778,7 +790,7 @@ function eqCard(){const eq=equilibrio();
   if(eq.estado!=='ok'){const msg={semfixo:['Lance suas contas fixas para ver a meta','Cadastre e lance as contas fixas do mês (aluguel, internet, contador). Com elas o app calcula quanto você precisa vender para pagar tudo.','despesas','Lançar contas'],
       semvenda:[`Ainda não há vendas em ${eq.mes}`,`As contas fixas do mês somam ${brl0(eq.fixoMes)}. Lance as vendas para o app calcular quando elas estarão pagas.`,'vendas','Lançar vendas'],
       mcneg:['As vendas não estão cobrindo nem os custos variáveis',`Produtos, comissões e taxas estão levando tudo o que entra. Assim, nenhum volume de vendas paga as contas fixas (${brl0(eq.fixoMes)}). Reveja preços e custos variáveis.`,'cadastros','Rever preços']}[eq.estado];
-    return `<section class="card"><div class="card-h"><h2>Contas de ${eq.mes}</h2><span class="status ${eq.estado==='mcneg'?'bad':'warn'}"><i></i>${eq.estado==='mcneg'?'Atenção':'Sem dados'}</span></div>
+    return `<section class="card" data-tour="contas"><div class="card-h"><h2>Contas de ${eq.mes}</h2><span class="status ${eq.estado==='mcneg'?'bad':'warn'}"><i></i>${eq.estado==='mcneg'?'Atenção':'Sem dados'}</span></div>
       <p class="eq-head">${msg[0]}</p><p class="eq-sub">${msg[1]}</p><button class="btn sm" data-tab="${msg[2]}">${msg[3]}</button></section>`}
   const ok=!!eq.dia,max=Math.max(eq.pe,eq.feito,1),mk=eq.pe/max*100;
   const head=ok?`Você pagou as contas ${eq.atual?'':'de '+eq.mes+' '}no dia ${pd(eq.dia).getDate()}.`:eq.atual?`Faltam ${brl0(eq.pe-eq.feito)} para pagar as contas.`:`As vendas de ${eq.mes} não cobriram as contas.`;
@@ -786,7 +798,7 @@ function eqCard(){const eq=equilibrio();
     :!eq.atual?`Faltaram ${brl0(eq.pe-eq.feito)}.`
     :eq.prev?`No ritmo atual (${brl0(eq.media)} por dia), você chega lá por volta do <b>dia ${pd(eq.prev).getDate()}</b>.`
     :`No ritmo atual (${brl0(eq.media)} por dia), o mês fecha sem cobrir tudo: faltariam <b class="tb">${brl0(eq.faltaFim)}</b>.`;
-  return `<section class="card"><div class="card-h"><h2>Contas de ${eq.mes}</h2><span class="status ${ok?'good':eq.prev||!eq.atual?'warn':'bad'}"><i></i>${ok?'Pagas':eq.atual?'Em andamento':'Não cobertas'}</span></div>
+  return `<section class="card" data-tour="contas"><div class="card-h"><h2>Contas de ${eq.mes}</h2><span class="status ${ok?'good':eq.prev||!eq.atual?'warn':'bad'}"><i></i>${ok?'Pagas':eq.atual?'Em andamento':'Não cobertas'}</span></div>
     <p class="eq-head">${head}</p><p class="eq-sub">${sub}</p>
     <div class="eq-bar" role="img" aria-label="Vendido ${brl0(eq.feito)} de uma meta de ${brl0(eq.pe)}">
       <i class="eq-c ${ok?'':'prog'}" style="width:${Math.min(eq.feito,eq.pe)/max*100}%"></i>${ok?`<i class="eq-l" style="left:${mk}%;width:${100-mk}%"></i>`:''}<span class="eq-mk" style="left:${mk}%"></span></div>
@@ -847,8 +859,8 @@ function vGeral(){
     <div class="say">${say}</div>
     ${cur.fat>0?`<div class="say say2h">${cur.lucro>=0?`De cada <b>R$ 100</b> vendidos, sobraram <b>R$ ${Math.round(cur.lucro/cur.fat*100)}</b>.`:`Para cada <b>R$ 100</b> vendidos, faltaram <b>R$ ${Math.round(-cur.lucro/cur.fat*100)}</b> para pagar os custos.`}</div>`:''}
   </section>
-  <div class="duo">${tile('in','Entrou (vendas)',cur.fat,prev.fat)}${tile('out','Saiu (custos e contas)',cur.custo,prev.custo,true)}</div>
-  ${semVendasDia()||`<section class="card"><div class="card-h"><h2>O que mais pesou no resultado</h2><p>comparado com ${esc(P.ctx)}</p></div><div class="aa">${one(I.pos[0],true)}${one(I.neg[0],false)}</div></section>`}
+  <div class="duo" data-tour="duo">${tile('in','Entrou (vendas)',cur.fat,prev.fat)}${tile('out','Saiu (custos e contas)',cur.custo,prev.custo,true)}</div>
+  ${semVendasDia()||`<section class="card" data-tour="pesou"><div class="card-h"><h2>O que mais pesou no resultado</h2><p>comparado com ${esc(P.ctx)}</p></div><div class="aa">${one(I.pos[0],true)}${one(I.neg[0],false)}</div></section>`}
   ${eqCard()}
   <button class="btn big" data-act="view" data-v="detalhe">Ver detalhes →</button>`;
 }
@@ -1151,14 +1163,14 @@ function vAjustes(){
 /* ================= CONTA: tutorial, login, cadastro, senha, assinatura, privacidade, exclusão =================
    Mesmo padrão do Chat Conex. No protótipo tudo fica neste navegador; nada é enviado para servidor. */
 const AKEY='balcao.conta',SESS='balcao.sessao',INTRO='balcao.intro',TERMOS_V='1.0',TRIAL_DIAS=14,SUPORTE='suporte@gestorconex.com.br';
-const PLANOS={mensal:{nome:'Mensal',preco:39.9,per:'mês',meses:1},anual:{nome:'Anual',preco:399,per:'ano',meses:12,tag:'2 meses grátis'}};
+const PLANOS={mensal:{nome:'Mensal',preco:79.9,per:'mês',meses:1}};
 let C=null;try{C=JSON.parse(localStorage.getItem(AKEY))}catch(e){}
 const saveC=()=>{try{C?localStorage.setItem(AKEY,JSON.stringify(C)):localStorage.removeItem(AKEY)}catch(e){}};
 let logged=false;try{logged=!!C&&localStorage.getItem(SESS)===C.email}catch(e){}
 const setSess=v=>{logged=v;try{v?localStorage.setItem(SESS,C.email):localStorage.removeItem(SESS)}catch(e){}};
 let A={scr:'intro',slide:0,err:'',info:'',reg:null,pend:null,code:null,overlay:false,legalBack:'login',lastEmail:'',proto:'',cap:{}};
 // Widget de verificação: imita o fluxo do Cloudflare Turnstile usado no Chat Conex (o real não carrega dentro do artifact)
-const capW=id=>{const ok=!!A.cap[id];return `<div class="cap ${ok?'ok':''}" id="cap-${id}"><button type="button" class="cap-box" data-act="a-cap" data-id="${id}" aria-label="Verificação de segurança: não sou um robô"><span class="cap-chk" aria-hidden="true"></span><span class="cap-t">${ok?'Verificado':'Não sou um robô'}</span></button><div class="cap-brand" aria-hidden="true">${IC.conta}<small>Verificação<br>de segurança</small></div><input type="checkbox" id="${id}" ${ok?'checked':''} hidden></div>`};
+const capW=id=>{if(TS_REAL)return `<div class="ts-host" data-id="${id}"></div><input type="checkbox" id="${id}" hidden>`;const ok=!!A.cap[id];return `<div class="cap ${ok?'ok':''}" id="cap-${id}"><button type="button" class="cap-box" data-act="a-cap" data-id="${id}" aria-label="Verificação de segurança: não sou um robô"><span class="cap-chk" aria-hidden="true"></span><span class="cap-t">${ok?'Verificado':'Não sou um robô'}</span></button><div class="cap-brand" aria-hidden="true">${IC.conta}<small>Verificação<br>de segurança</small></div><input type="checkbox" id="${id}" ${ok?'checked':''} hidden></div>`};
 try{if(localStorage.getItem(INTRO))A.scr='login'}catch(e){}
 Object.assign(ui,{plano:'mensal',metodo:'cartao',renov:true,payStep:null,payErr:'',pix:null,chgPw:false,export:false,delStep:0,delErr:'',legal:'privacidade'});
 IC.conta='<svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>';
@@ -1218,7 +1230,7 @@ function vAssinatura(){const st=assinStatus(),a=C.assin;
   return `${topbar('Assinatura')}
   <section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p>
     ${a.status==='ativa'?`<div class="btns">${a.renov?`<button class="btn danger sm" data-act="s-cancel">Cancelar renovação automática</button>`:a.metodo==='cartao'?`<button class="btn sm" data-act="s-reativar">Reativar renovação automática</button>`:''}</div>${a.renov?'<p class="note" style="margin:8px 0 0">Se cancelar, a assinatura continua valendo até o fim do período já pago.</p>':''}`:''}</section>
-  <section class="card"><div class="card-h"><h2>${a.status==='ativa'?'Renovar ou trocar de plano':'Escolha seu plano'}</h2><p>valores de exemplo</p></div>
+  <section class="card"><div class="card-h"><h2>${a.status==='ativa'?'Renovar ou trocar de plano':'Escolha seu plano'}</h2><p>R$ 79,90 por mês, sem fidelidade</p></div>
     <div class="plans">${Object.entries(PLANOS).map(([k,x])=>`<button class="plan" data-act="s-plano" data-v="${k}" aria-pressed="${ui.plano===k}">${x.tag?`<span class="tag">${x.tag}</span>`:''}<b>${x.nome}</b><span class="pr">${brl(x.preco)}</span><span class="muted">por ${x.per}${k==='anual'?` · ${brl(x.preco/12)} por mês`:''}</span></button>`).join('')}</div>
     <p class="a-sec" style="margin-top:18px">Forma de pagamento</p>
     <div class="seg" role="group" aria-label="Forma de pagamento">${[['cartao','Cartão de crédito'],['pix','Pix']].map(([k,l])=>`<button data-act="s-metodo" data-v="${k}" aria-pressed="${ui.metodo===k}">${l}</button>`).join('')}</div>
@@ -1243,12 +1255,12 @@ function contaCards(){const st=assinStatus();
       <div class="field"><label for="c-new">Nova senha</label><div class="pw"><input class="inp" id="c-new" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-chg')}</div>
       <div class="field"><label for="c-new2">Repita a nova senha</label><input class="inp" id="c-new2" type="password" autocomplete="new-password"></div>
       ${ui.chgErr?`<div class="a-err" role="alert">${esc(ui.chgErr)}</div>`:''}<button class="btn pri" type="submit">Salvar nova senha</button></form>`:''}</section>
-  <section class="card"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:0 0 12px">${st.x}</p><button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button></section>
+  <section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:0 0 12px">${st.x}</p><button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button></section>
   <section class="card" id="priv"><div class="card-h"><h2>Privacidade e dados</h2><p>seus direitos pela LGPD</p></div>
     <div class="link-list"><button data-act="c-export">Exportar meus dados<span>›</span></button><button data-act="legal" data-v="privacidade">Política de privacidade<span>›</span></button><button data-act="legal" data-v="termos">Termos de uso<span>›</span></button><button data-act="legal" data-v="excluir-info">Como funciona a exclusão de conta<span>›</span></button></div>
     ${ui.export?`<div style="margin-top:12px"><p class="note">Copie o texto abaixo e guarde. Ele tem todos os seus dados (formato JSON, abre em qualquer planilha ou sistema).</p><textarea id="exp-txt" class="inp" rows="6" readonly>${esc(exportJson())}</textarea><button class="btn sm" data-act="c-copy" style="margin-top:8px">Copiar dados</button></div>`:''}
     <p class="note" style="margin:12px 0 0">O Gestor Conex usa só armazenamento essencial, para manter você conectado. Não usamos rastreamento de terceiros nem publicidade.</p></section>
-  <section class="card"><div class="card-h"><h2>Ajuda</h2></div><div class="link-list"><button data-act="c-tutorial">Ver o tutorial de novo<span>›</span></button></div>
+  <section class="card" data-tour="ajuda"><div class="card-h"><h2>Ajuda</h2></div><div class="link-list"><button data-act="c-tutorial">Ver o tutorial de novo<span>›</span></button></div>
     <p class="note" style="margin:10px 0 0">Suporte: <b class="sel">${SUPORTE}</b> <button class="lnk" data-act="c-copysup">copiar</button></p></section>`}
 const contaDanger=()=>`<section class="card danger-card"><div class="card-h"><h2>Excluir conta</h2></div><p class="note" style="margin:0 0 12px">Apaga sua conta e todos os dados. Não dá para desfazer.</p><button class="btn danger" data-tab="excluir">Excluir minha conta</button></section>`;
 const PERDAS=['Todas as vendas lançadas, dia a dia.','Todas as despesas mensais, semanais e diárias.','Seus serviços, produtos e cadastros de despesas.','O histórico e os indicadores do painel.','O acesso à conta, no celular e no computador. A assinatura feita pelo site é encerrada.'];
@@ -1276,7 +1288,7 @@ function legalHtml(k){
   if(k==='termos')return `<h1>Termos de uso</h1><p class="faint">Versão ${TERMOS_V} · Última atualização: ${upd}</p>
     <h2>1. O serviço</h2><p>O Gestor Conex é um aplicativo de gestão para pequenos negócios. Você registra vendas e despesas e o app mostra indicadores como faturamento, custos e lucro. É oferecido por ${emp}, CNPJ ${cnpj}.</p>
     <h2>2. Sua conta</h2><p>Você precisa ter 18 anos ou mais e informar dados verdadeiros. A senha é pessoal: não compartilhe. Avise o suporte se suspeitar de uso indevido.</p>
-    <h2>3. Teste grátis e assinatura</h2><ul><li>Toda conta nova tem ${TRIAL_DIAS} dias de teste grátis, sem cartão.</li><li>Depois do teste, o uso depende de uma assinatura mensal ou anual.</li><li>No cartão, a assinatura renova sozinha até você cancelar. No Pix, você paga cada período.</li><li>Ao cancelar, o acesso continua até o fim do período pago. Não há multa.</li><li>Assinaturas feitas pela App Store ou pelo Google Play seguem as regras e o cancelamento da loja.</li></ul>
+    <h2>3. Teste grátis e assinatura</h2><ul><li>Toda conta nova tem ${TRIAL_DIAS} dias de teste grátis, sem cartão.</li><li>Depois do teste, o uso depende de uma assinatura mensal de R$ 79,90, sem fidelidade.</li><li>No cartão, a assinatura renova sozinha até você cancelar. No Pix, você paga cada período.</li><li>Ao cancelar, o acesso continua até o fim do período pago. Não há multa.</li><li>Assinaturas feitas pela App Store ou pelo Google Play seguem as regras e o cancelamento da loja.</li></ul>
     <h2>4. Seus dados e os indicadores</h2><p>Os dados lançados são seus. Os indicadores são calculados a partir do que você lança e servem para apoiar suas decisões. Eles não substituem a contabilidade nem orientação de um contador.</p>
     <h2>5. Uso não permitido</h2><p>Não é permitido usar o app para fins ilegais, tentar acessar contas de outras pessoas ou atrapalhar o funcionamento do serviço.</p>
     <h2>6. Disponibilidade</h2><p>Trabalhamos para manter o serviço no ar, mas podem ocorrer pausas para manutenção ou falhas fora do nosso controle.</p>
@@ -1308,7 +1320,7 @@ const SLIDES=[
   {ic:'despesas',t:'Registre suas contas',x:'Aluguel, energia, internet: mensais, semanais ou diárias. O app divide pelos dias para comparar certo.'},
   {ic:'painel',t:'Veja quanto sobrou',x:'Na tela inicial: o lucro, se está melhor ou pior que o mês passado e as 3 coisas mais importantes.'},
   {ic:'ajustes',t:'Entenda o que mudou',x:'O que ajudou e o que atrapalhou o lucro, item por item, e quanto precisa vender para pagar as contas.'},
-  {ic:'conta',t:`${TRIAL_DIAS} dias grátis`,x:'Teste tudo sem cartão. Depois, escolha o plano mensal ou anual. Cancele quando quiser.'}];
+  {ic:'conta',t:`${TRIAL_DIAS} dias grátis`,x:'Teste tudo sem cartão. Depois, assine por R$ 79,90 por mês. Cancele quando quiser.'}];
 const errBox=()=>A.err?`<div class="a-err" role="alert">${esc(A.err)}</div>`:'';
 const infoBox=()=>A.info?`<div class="a-info" role="status">${A.info}</div>`:'';
 const LEGAL_SCR=['termos','privacidade','excluir-info'];
@@ -1372,11 +1384,12 @@ function renderAuth(){
     <div class="auth-main"><div class="brand auth-mbrand"><div class="mark">G</div><div><b style="color:var(--ink)">Gestor Conex</b><small style="color:var(--muted)">Gestão para pequenos negócios</small></div></div>
       <div class="auth-card">${body}</div>
       <nav class="auth-legal" aria-label="Documentos"><button data-act="a-go" data-v="termos">Termos de uso</button><button data-act="a-go" data-v="privacidade">Privacidade</button><button data-act="a-go" data-v="excluir-info">Excluir conta</button></nav></div></div>`;
+  mountTurnstile();
 }
 async function entrarDemo(){
   C={nome:'Conta de demonstração',email:'demo@gestorconex.com.br',tel:'(11) 99999-0000',emp:'Barbearia do Zé',seg:'Barbearia',dt:'CNPJ',doc:'11.222.333/0001-81',pw:await hashPw('Demo@2026'),
     criado:TODAY,trialFim:addDays(TODAY,TRIAL_DIAS),emailOk:true,telOk:true,termos:{versao:TERMOS_V,em:TODAY},assin:{status:'trial',hist:[]},demo:true};
-  saveC();S=seedExemplo({seed:(Math.random()*1e9)|0});save();setSess(true);ui.tab='painel';ui.view='geral';A.err='';A.info='';render();window.scrollTo(0,0);toast('Você está na conta de demonstração')}
+  saveC();S=seedExemplo({seed:(Math.random()*1e9)|0});save();setSess(true);ui.tab='painel';ui.view='geral';A.err='';A.info='';render();window.scrollTo(0,0);toast('Você está na conta de demonstração');maybeTour()}
 function authAct(a,b){
   if(a==='a-cap'){const id=b.dataset.id,box=$('#cap-'+id);if(!box||box.classList.contains('ok')||box.classList.contains('loading'))return;
     box.classList.add('loading');b.querySelector('.cap-t').textContent='Verificando…';
@@ -1402,7 +1415,7 @@ async function onAuthSubmit(id){
     if(C&&C.email===em&&C.tempPw&&h===C.tempPw&&Date.now()<C.tempExp){A.err='';A.scr='nova-senha';return render()}
     // como no Chat Conex: login recusado reseta a verificação
     if(!C||C.email!==em||h!==C.pw){A.err='E-mail ou senha incorretos.';A.cap['l-robo']=false;return render()}
-    A.err='';A.cap={};setSess(true);ui.tab='painel';render();window.scrollTo(0,0);toast(`Bem-vindo de volta, ${C.nome.split(' ')[0]}!`)}
+    A.err='';A.cap={};setSess(true);ui.tab='painel';render();window.scrollTo(0,0);toast(`Bem-vindo de volta, ${C.nome.split(' ')[0]}!`);maybeTour()}
   else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini=rad('r-ini')||'exemplo';
     A.reg={'r-nome':nome,'r-email':em,'r-tel':tel,'r-emp':emp,'r-seg':seg,'r-dt':dt,'r-doc':doc,'r-ini':ini,'r-ok':chk('r-ok'),'r-robo':chk('r-robo')};
     let er='';
@@ -1416,13 +1429,13 @@ async function onAuthSubmit(id){
   else if(id==='f-ver'){if(g('v-code')!==A.code){A.err='Código incorreto. Confira o SMS ou peça um novo.';A.info='';return render()}
     const p=A.pend;C={nome:p.nome,email:p.email,tel:p.tel,emp:p.emp,seg:p.seg,dt:p.dt,doc:p.doc,pw:p.pw,criado:TODAY,trialFim:addDays(TODAY,TRIAL_DIAS),emailOk:false,telOk:true,termos:{versao:TERMOS_V,em:TODAY},assin:{status:'trial',hist:[]}};saveC();
     if(p.ini==='exemplo'){S=seedExemplo({seed:(Math.random()*1e9)|0});S.negocio.nome=p.emp}else S=novoNegocio(p.seg,p.emp);save();
-    A.pend=null;A.reg=null;A.code=null;A.err='';A.info='';setSess(true);ui.tab=p.ini==='exemplo'?'painel':'cadastros';ui.view='geral';render();window.scrollTo(0,0);toast(`Conta criada. Seu teste grátis vai até ${fmtD(C.trialFim)}.`)}
+    A.pend=null;A.reg=null;A.code=null;A.err='';A.info='';setSess(true);ui.tab=p.ini==='exemplo'?'painel':'cadastros';ui.view='geral';render();window.scrollTo(0,0);toast(`Conta criada. Seu teste grátis vai até ${fmtD(C.trialFim)}.`);maybeTour()}
   else if(id==='f-esq'){const em=g('e-email').toLowerCase();if(!emailOk(em)){A.err='Informe um e-mail válido.';return render()}
     let proto='nenhuma conta com esse e-mail neste aparelho.';
     if(C&&C.email===em){const t=tempPass();C.tempPw=await hashPw(t);C.tempExp=Date.now()+3600e3;saveC();proto=`e-mail recebido. Sua senha temporária é <b class="sel">${t}</b>`}
     A.lastEmail=em;A.proto=proto;A.err='';A.scr='enviada';render()}
   else if(id==='f-nova'){const pw=($('#n-pw')||{}).value||'',pw2=($('#n-pw2')||{}).value||'';const er=pwError(pw,C.email)||(pw!==pw2?'As duas senhas não são iguais.':'');
-    if(er){A.err=er;return render()}C.pw=await hashPw(pw);delete C.tempPw;delete C.tempExp;saveC();A.err='';A.scr='login';setSess(true);ui.tab='painel';render();toast('Senha trocada. Use a nova no próximo login.')}
+    if(er){A.err=er;return render()}C.pw=await hashPw(pw);delete C.tempPw;delete C.tempExp;saveC();A.err='';A.scr='login';setSess(true);ui.tab='painel';render();toast('Senha trocada. Use a nova no próximo login.');maybeTour()}
   else if(id==='f-chg'){const cur=await hashPw(($('#c-cur')||{}).value||''),pw=($('#c-new')||{}).value||'',pw2=($('#c-new2')||{}).value||'';
     ui.chgErr=cur!==C.pw?'A senha atual não confere.':pwError(pw,C.email)||(pw!==pw2?'As duas senhas não são iguais.':'');
     if(ui.chgErr)return render(true);C.pw=await hashPw(pw);saveC();ui.chgPw=false;render(true);toast('Senha trocada. Use a nova no próximo login.')}
@@ -1451,7 +1464,7 @@ function contaAct(a,b){
   else if(a==='c-export-go'){ui.tab='ajustes';ui.export=true;render();const p=$('#priv');if(p)p.scrollIntoView({block:'start'})}
   else if(a==='c-copy'){const t=$('#exp-txt');if(t){t.select();copyTxt(t.value,'Dados copiados')}}
   else if(a==='c-copysup')copyTxt(SUPORTE,'E-mail do suporte copiado');
-  else if(a==='c-tutorial'){A.overlay=true;A.scr='intro';A.slide=0;render();window.scrollTo(0,0)}
+  else if(a==='c-tutorial')startTour();
   else if(a==='c-confirm-email'){C.emailOk=true;saveC();render(true);toast('E-mail confirmado (simulação)')}
   else if(a==='legal'){ui.tab='legal';ui.legal=v;render();window.scrollTo(0,0)}
   else if(a==='d-next'){ui.delStep=1;ui.delErr='';render();window.scrollTo(0,0)}
@@ -1460,6 +1473,62 @@ function contaAct(a,b){
   return true;
 }
 setInterval(()=>{if(!ui.pix)return;const t=$('#pix-timer');const left=ui.pix.exp-Date.now();if(left<=0){ui.pix=null;if(ui.tab==='assinatura'&&logged)render(true);return}if(t)t.textContent=mmss(left)},1000);
+
+/* ---------- tutorial de primeiro login (driver.js, mesmo padrão do Chat Conex: tours encadeados por página) ---------- */
+const visivel=sel=>()=>[...document.querySelectorAll(sel)].find(e=>e.offsetParent!==null)||document.querySelector(sel);
+const TOURS=[
+  {tab:'painel',prep:()=>{ui.view='geral';ui.mode='mes';ui.ref=TODAY},steps:[
+    ['[data-tour="views"]','Resumo e Detalhes','O <b>Resumo</b> mostra o essencial em poucos segundos. Em <b>Detalhes</b> você vê o que mudou, item por item.'],
+    ['[data-tour="periodo"]','Escolha o período','Veja o resultado do <b>dia</b>, da <b>semana</b> ou do <b>mês</b>. A comparação é sempre com o período anterior.'],
+    ['.hero','Quanto sobrou','O lucro do período e se está melhor ou pior que antes.'],
+    ['[data-tour="duo"]','Entrou e saiu','Quanto você vendeu e quanto gastou, com a diferença para antes.'],
+    ['[data-tour="pesou"]','O que mais pesou','O que mais ajudou e o que mais atrapalhou o lucro, com o porquê.'],
+    ['[data-tour="contas"]','Contas do mês','Quanto você precisa vender para pagar as contas fixas e em que dia isso acontece.']]},
+  {tab:'vendas',steps:[
+    [visivel('nav [data-tab="vendas"]'),'Lance as vendas','No fim de cada dia, abra <b>Vendas</b>.'],
+    ['.vrow .step','Toque no +','A cada serviço ou produto vendido, toque no <b>+</b>. Salva sozinho.'],
+    ['.daybar','Total do dia','O total aparece aqui, comparado com o mesmo dia da semana passada.']]},
+  {tab:'despesas',steps:[
+    ['[aria-label="Frequência"]','Mensais, semanais ou diárias','Escolha o tipo da conta: aluguel é mensal, a feira pode ser semanal, o café é diário.'],
+    ['#f-desp-q','Conta nova','Cadastre uma conta aqui mesmo e já lance o valor.']]},
+  {tab:'ajustes',steps:[
+    ['[data-tour="assin"]','Sua assinatura',`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 79,90 por mês, no cartão ou no Pix.`],
+    ['[data-tour="ajuda"]','Quer rever?','Este tutorial fica aqui, em <b>Ajuda</b>, sempre que precisar.']]}
+];
+let tourOn=false;
+function loadDriver(){return new Promise((res,rej)=>{if(window.driver&&window.driver.js)return res();
+  const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js';
+  s.onload=()=>res();s.onerror=()=>rej(new Error('Não foi possível abrir o tutorial agora. Tente de novo em Ajustes → Ajuda.'));document.head.appendChild(s)})}
+async function startTour(){if(tourOn)return;tourOn=true;try{await loadDriver()}catch(e){tourOn=false;toast(e.message);return}runTourAt(0)}
+const maybeTour=()=>{if(C&&!C.tourDone)setTimeout(startTour,600)};
+function finishTour(msg){tourOn=false;if(C){C.tourDone=true;saveC()}ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg)}
+function runTourAt(i){const t=TOURS[i];if(!t)return finishTour('Pronto! Agora é com você.');if(t.prep)t.prep();ui.tab=t.tab;render();window.scrollTo(0,0);
+  setTimeout(()=>{
+    const steps=t.steps.map(([el,title,description])=>({element:typeof el==='function'?el():document.querySelector(el),popover:{title,description}})).filter(s=>s.element);
+    if(!steps.length)return runTourAt(i+1);
+    const last=i===TOURS.length-1;let done=false;
+    const d=window.driver.js.driver({showProgress:true,progressText:`Parte ${i+1} de ${TOURS.length} · {{current}} de {{total}}`,
+      nextBtnText:'Próximo',prevBtnText:'Voltar',doneBtnText:last?'Concluir':'Continuar',popoverClass:'gc-tour',overlayOpacity:.55,stagePadding:8,stageRadius:12,
+      onHighlightStarted:el=>{if(el)el.scrollIntoView({block:'center',behavior:'auto'})},
+      // só a última etapa de cada parte encadeia a próxima; fechar (X, Esc ou clique fora) encerra o tutorial
+      onNextClick:(el,step,{driver:dv})=>{if(dv.isLastStep()){done=true;dv.destroy()}else dv.moveNext()},
+      onDestroyed:()=>{if(done)runTourAt(i+1);else finishTour('Tutorial fechado. Ele fica em Ajustes → Ajuda.')},
+      steps});
+    d.drive()},350)}
+
+/* ---------- captcha real (Cloudflare Turnstile) quando o app roda no domínio próprio ---------- */
+const TS_SITEKEY='0x4AAAAAAFdyqka-0SlpHJ-V';
+const TS_REAL=typeof location!=='undefined'&&/(^|\.)gestorconex\.com\.br$|(^|\.)gestorconex\.pages\.dev$/.test(location.hostname);
+let tsLoad=null;A.capTok={};
+function loadTurnstile(){if(tsLoad)return tsLoad;tsLoad=new Promise((res,rej)=>{if(window.turnstile)return res();
+  const s=document.createElement('script');s.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';s.async=true;s.onload=()=>res();s.onerror=()=>{tsLoad=null;rej()};document.head.appendChild(s)});return tsLoad}
+async function mountTurnstile(){if(!TS_REAL)return;const hosts=[...document.querySelectorAll('.ts-host')];if(!hosts.length)return;
+  try{await loadTurnstile()}catch(e){hosts.forEach(h=>h.innerHTML='<div class="a-err">Não foi possível carregar a verificação de segurança. Recarregue a página.</div>');return}
+  for(const h of hosts){if(h.dataset.mounted)continue;h.dataset.mounted='1';const id=h.dataset.id;A.cap[id]=false;A.capTok[id]='';const inp=$('#'+id);if(inp)inp.checked=false;
+    window.turnstile.render(h,{sitekey:TS_SITEKEY,language:'pt-br',theme:ui.look==='escuro'?'dark':'light',
+      callback:tok=>{A.cap[id]=true;A.capTok[id]=tok;const i=$('#'+id);if(i)i.checked=true},
+      'expired-callback':()=>{A.cap[id]=false;const i=$('#'+id);if(i)i.checked=false},
+      'error-callback':()=>{A.cap[id]=false}})}}
 
 /* ---------- render / eventos ---------- */
 const VIEWS={painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
