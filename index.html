@@ -1133,6 +1133,7 @@ function vCadastros(){
       <div class="field"><label for="i-c-${i.id}">Custo R$</label><input class="inp" id="i-c-${i.id}" data-item="${i.id}" data-f="custo" inputmode="decimal" value="${fmtIn(i.custo)}"></div>
       <button class="btn danger sm" data-act="rm-item" data-id="${i.id}">Remover</button></div>`).join('')}</div></section>
   <section class="card"><div class="card-h"><h2>Despesas</h2><p>Fixa: quase não muda (aluguel). Variável: muda (energia). Frequência: de quanto em quanto tempo você lança.</p></div>
+    <div class="cta" style="margin-bottom:14px"><div><b>Aqui você só cria a lista de contas.</b><span class="note">Os valores de cada conta você lança na aba Despesas.</span></div><button class="btn pri sm" data-tab="despesas">Lançar valores</button></div>
     <form class="form-row desp" id="f-desp" style="padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:4px">
       <div class="field"><label for="nd-nome">Nome</label><input class="inp" id="nd-nome" required placeholder="Ex.: Seguro"></div>
       <div class="field"><label for="nd-cat">Tipo</label>${catSel('fixa','id="nd-cat"')}</div>
