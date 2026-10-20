@@ -35,7 +35,7 @@ const manifest = {
   short_name: 'Gestor Conex',
   description: 'Gestão simples para pequenos negócios: vendas, despesas e quanto sobrou.',
   lang: 'pt-BR',
-  start_url: '/',
+  start_url: '/app/',
   scope: '/',
   display: 'standalone',
   orientation: 'portrait',
@@ -57,10 +57,16 @@ const headers = `/*
 `;
 const notFound = '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=/"><title>Gestor Conex</title></head><body><a href="/">Ir para o Gestor Conex</a></body></html>\n';
 
+// site: página inicial (landing) em / e o sistema em /app/ · app (Capacitor): só o sistema
 function write(dir, { pagesFiles }) {
   if (existsSync(dir)) rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'index.html'), html);
+  if (pagesFiles) {
+    writeFileSync(join(dir, 'index.html'), readFileSync(join(here, 'landing.html'), 'utf8'));
+    mkdirSync(join(dir, 'app'), { recursive: true });
+    writeFileSync(join(dir, 'app', 'index.html'), html);
+    if (existsSync(join(here, 'public', 'og.png'))) cpSync(join(here, 'public', 'og.png'), join(dir, 'og.png'));
+  } else writeFileSync(join(dir, 'index.html'), html);
   writeFileSync(join(dir, 'manifest.webmanifest'), JSON.stringify(manifest, null, 2));
   cpSync(join(here, 'public', 'icons'), join(dir, 'icons'), { recursive: true });
   if (pagesFiles) { writeFileSync(join(dir, '_headers'), headers); writeFileSync(join(dir, '404.html'), notFound); }

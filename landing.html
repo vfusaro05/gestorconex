@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gestor Conex — saiba quanto sobrou no fim do mês</title>
+<meta name="description" content="Gestão simples para pequenos negócios. Lance vendas e despesas em 1 minuto por dia e veja quanto entrou, quanto saiu, quanto sobrou e o que mudou. Teste grátis por 14 dias, sem cartão.">
+<meta name="theme-color" content="#0e1726">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Gestor Conex — saiba quanto sobrou no fim do mês">
+<meta property="og:description" content="Vendas, despesas e lucro do seu negócio em um só lugar, no celular e no computador. 14 dias grátis, sem cartão.">
+<meta property="og:image" content="https://gestorconex.com.br/og.png">
+<meta property="og:url" content="https://gestorconex.com.br/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap">
+<style>
+/* Página de apresentação do Gestor Conex: mesma identidade do app (marinho + dourado, Sora + Plus Jakarta Sans). */
+:root{
+  --bg:#f2f4f7;--card:#ffffff;--ink:#0e1726;--muted:#526075;--faint:#8691a4;--line:#e1e5eb;
+  --navy:#0e1726;--navy-2:#16223a;--gold:#c39a3e;--gold-2:#e2be63;--acc:#1e3f8f;
+  --good:#0b8457;--good-soft:#e7f5ee;--bad:#cc3645;--cost:#b9472f;
+  --f-display:"Sora","Segoe UI",system-ui,sans-serif;--f-body:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);margin:0;letter-spacing:-.025em;text-wrap:balance}
+h1{font-size:clamp(2.1rem,5.4vw,3.6rem);line-height:1.08;font-weight:700}
+h2{font-size:clamp(1.6rem,3.4vw,2.3rem);line-height:1.15;font-weight:700}
+h3{font-size:1.08rem;font-weight:600}
+p{margin:0}
+.eyebrow{font-size:.74rem;text-transform:uppercase;letter-spacing:.14em;font-weight:800;color:var(--gold)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:12px;font-weight:800;text-decoration:none;font-size:1rem;border:1.5px solid transparent;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,#d2a94a,#e8c66b);color:var(--navy);box-shadow:0 8px 24px rgba(195,154,62,.35)}
+.btn-line{border-color:rgba(255,255,255,.28);color:#fff}
+.btn-navy{background:var(--navy);color:#fff}
+/* cabeçalho */
+.top{position:sticky;top:0;z-index:20;background:rgba(14,23,38,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding-top:env(safe-area-inset-top,0px)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:68px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-family:var(--f-display);font-weight:700;font-size:1.15rem;letter-spacing:-.01em}
+.logo img{width:38px;height:38px}
+.logo .cx{color:var(--gold-2)}
+.top nav{display:flex;align-items:center;gap:8px}
+.top nav a.link{color:#cdd5e3;text-decoration:none;font-weight:600;padding:10px 12px;border-radius:10px}
+.top nav a.link:hover{color:#fff}
+.top .btn{padding:10px 16px;font-size:.92rem}
+@media (max-width:620px){.top nav a.hide-s{display:none}}
+/* destaque */
+.hero{background:radial-gradient(900px 480px at 85% 10%,rgba(195,154,62,.16),transparent 60%),var(--navy);color:#fff;padding:64px 0 88px;overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr}.hero{padding-top:40px}}
+.hero p.sub{font-size:1.15rem;color:#c3cbda;margin:20px 0 28px;max-width:34em}
+.hero .ctas{display:flex;gap:12px;flex-wrap:wrap}
+.hero .nocard{margin-top:14px;font-size:.9rem;color:#a3aec1}
+.hero .nocard b{color:var(--gold-2)}
+/* prévia do app */
+.phone{justify-self:center;width:min(340px,100%);background:#0b1220;border-radius:36px;padding:12px;box-shadow:0 30px 80px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.08)}
+.screen{background:var(--bg);border-radius:26px;padding:18px 14px;color:var(--ink);display:flex;flex-direction:column;gap:10px}
+.s-top{display:flex;justify-content:space-between;align-items:center}
+.s-top small{font-size:.62rem;letter-spacing:.12em;font-weight:800;color:var(--muted)}
+.s-top img{width:26px;height:26px}
+.s-hero{background:var(--navy);color:#fff;border-radius:14px;padding:16px;position:relative}
+.s-hero:before{content:"";position:absolute;left:16px;top:0;width:36px;height:3px;background:var(--gold)}
+.s-hero .t{display:flex;justify-content:space-between;align-items:center;font-size:.6rem;letter-spacing:.1em;color:#a3aec1;font-weight:700}
+.s-hero .pill{font-size:.62rem;color:#4fd69c;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:99px;padding:3px 8px;letter-spacing:0}
+.s-hero .v{font-family:var(--f-display);font-size:2rem;font-weight:600;margin:8px 0 4px;letter-spacing:-.04em}
+.s-hero .d{font-size:.74rem;color:#a3aec1}.s-hero .d b{color:#4fd69c}
+.s-duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.s-tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.s-tile small{font-size:.56rem;letter-spacing:.1em;color:var(--muted);font-weight:800}
+.s-tile b{display:block;font-family:var(--f-display);font-size:1.05rem;margin-top:2px}
+.s-tile i{font-style:normal;font-size:.66rem;font-weight:800}
+.s-bar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.s-bar small{font-size:.66rem;color:var(--muted);font-weight:700}
+.s-bar .track{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:6px;gap:2px}
+.s-bar .c{background:var(--cost);width:46%}.s-bar .l{background:var(--acc);flex:1}
+/* seções */
+section.blk{padding:84px 0}
+.center{text-align:center;max-width:720px;margin:0 auto 44px}
+.center p{color:var(--muted);margin-top:12px;font-size:1.05rem}
+.pains{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.pain{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;gap:14px;align-items:flex-start}
+.pain .x{flex:none;width:32px;height:32px;border-radius:10px;background:#fcedef;color:var(--bad);display:grid;place-items:center;font-weight:800}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.grid3{grid-template-columns:1fr}}
+.feat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.feat .ic{width:44px;height:44px;border-radius:12px;background:var(--navy);display:grid;place-items:center}
+.feat .ic svg{width:22px;height:22px;stroke:var(--gold-2);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.feat p{color:var(--muted);font-size:.96rem}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;counter-reset:s;list-style:none;padding:0;margin:0}
+@media (max-width:900px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.steps{grid-template-columns:1fr}}
+.steps li{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;position:relative}
+.steps li:before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--navy);font-family:var(--f-display);font-weight:700;margin-bottom:14px}
+.steps p{color:var(--muted);font-size:.95rem;margin-top:6px}
+.dark{background:var(--navy);color:#fff}
+.dark .center p{color:#c3cbda}
+.niches{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.niche{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);border-radius:16px;padding:20px;text-align:center;font-weight:700}
+.niche span{display:block;font-size:1.6rem;margin-bottom:6px;color:var(--gold-2);font-family:var(--f-display)}
+.price{max-width:520px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:32px;text-align:center;box-shadow:0 20px 50px rgba(14,23,38,.08)}
+.price .v{font-family:var(--f-display);font-size:3rem;font-weight:700;letter-spacing:-.04em;margin:8px 0 2px}
+.price .v small{font-size:1rem;color:var(--muted);font-weight:600;letter-spacing:0}
+.price ul{list-style:none;padding:0;margin:22px 0;text-align:left;display:flex;flex-direction:column;gap:10px}
+.price li{display:flex;gap:10px;align-items:flex-start}
+.price li:before{content:"✓";color:var(--good);font-weight:800}
+.offer{position:relative;background:linear-gradient(135deg,#16223a,#0e1726);color:#fff;border-radius:26px;padding:48px 32px;text-align:center;overflow:hidden;border:1px solid rgba(195,154,62,.35)}
+.offer .rib{display:inline-block;background:var(--gold);color:var(--navy);font-weight:800;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:99px;margin-bottom:16px}
+.offer p{color:#c3cbda;margin:12px auto 24px;max-width:36em}
+.offer ul{list-style:none;padding:0;margin:0 auto 28px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;color:#e9eef7;font-weight:600}
+.offer li:before{content:"✓ ";color:var(--gold-2)}
+.faq{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 20px}
+.faq summary{cursor:pointer;list-style:none;font-weight:700;padding:16px 0;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:after{content:"+";font-size:1.3rem;color:var(--gold);line-height:1}
+.faq details[open] summary:after{content:"–"}
+.faq details p{color:var(--muted);padding:0 0 18px}
+footer{background:var(--navy);color:#a3aec1;padding:44px 0 calc(44px + env(safe-area-inset-bottom,0px));font-size:.92rem}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:flex-start}
+footer nav{display:flex;flex-wrap:wrap;gap:8px 20px}
+footer a{color:#cdd5e3;text-decoration:none}
+footer a:hover{color:#fff;text-decoration:underline}
+footer .sel{user-select:all;color:#fff}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Gestor Conex, início"><img src="/icons/icon-192.png" alt="" width="38" height="38">Gestor <span class="cx">Conex</span></a>
+    <nav aria-label="Principal">
+      <a class="link hide-s" href="#como-funciona">Como funciona</a>
+      <a class="link hide-s" href="#preco">Preço</a>
+      <a class="link" href="/app/">Entrar</a>
+      <a class="btn btn-gold" href="/app/#cadastro">Testar grátis</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Gestão simples para pequenos negócios</p>
+      <h1 style="margin-top:14px">Saiba quanto sobrou no fim do mês. Sem planilha.</h1>
+      <p class="sub">Lance as vendas e as contas em 1 minuto por dia. O Gestor Conex mostra quanto entrou, quanto saiu, quanto sobrou e o que ajudou ou atrapalhou o seu lucro.</p>
+      <div class="ctas">
+        <a class="btn btn-gold" href="/app/#cadastro">Testar grátis por 14 dias</a>
+        <a class="btn btn-line" href="#como-funciona">Ver como funciona</a>
+      </div>
+      <p class="nocard"><b>Sem cartão de crédito.</b> No celular e no computador.</p>
+    </div>
+    <div class="phone" aria-label="Prévia do Gestor Conex no celular">
+      <div class="screen">
+        <div class="s-top"><div><small>BARBEARIA DO ZÉ</small><div style="font-family:var(--f-display);font-weight:700;font-size:1.2rem">Início</div></div><img src="/icons/icon-192.png" alt=""></div>
+        <div class="s-hero"><div class="t">QUANTO SOBROU NESTE MÊS <span class="pill">● Indo bem</span></div><div class="v">R$ 7.850</div><div class="d"><b>▲ R$ 620 a mais</b> que em setembro.<br>De cada R$ 100 vendidos, sobraram R$ 54.</div></div>
+        <div class="s-duo"><div class="s-tile"><small>ENTROU</small><b>R$ 14.520</b><i style="color:var(--good)">▲ 6% a mais</i></div><div class="s-tile"><small>SAIU</small><b>R$ 6.670</b><i style="color:var(--good)">▼ 3% a menos</i></div></div>
+        <div class="s-bar"><small>Contas de outubro: pagas no dia 6</small><div class="track"><span class="c"></span><span class="l"></span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blk">
+  <div class="wrap">
+    <div class="center"><p class="eyebrow">Você se identifica?</p><h2 style="margin-top:10px">Vender bem não é o mesmo que sobrar dinheiro</h2></div>
+    <div class="pains">
+      <div class="pain"><span class="x">✕</span><p>No fim do mês o dinheiro some e você não sabe para onde foi.</p></div>
+      <div class="pain"><span class="x">✕</span><p>A planilha dá trabalho, fica desatualizada e ninguém entende.</p></div>
+      <div class="pain"><span class="x">✕</span><p>Você não sabe se o preço que cobra cobre os custos.</p></div>
+      <div class="pain"><span class="x">✕</span><p>Uma conta sobe ou um serviço cai e você só percebe tarde demais.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" style="padding-top:0">
+  <div class="wrap">
+    <div class="center"><p class="eyebrow">O que o Gestor Conex faz</p><h2 style="margin-top:10px">Respostas rápidas, em português claro</h2><p>Feito para quem não é da área de finanças: números grandes, frases simples e o detalhe só quando você quiser.</p></div>
+    <div class="grid3">
+      <div class="feat"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V11M10 20V5M16 20v-6M21 20H3"/></svg></span><h3>Quanto sobrou, na hora</h3><p>Lucro do dia, da semana ou do mês, e se está melhor ou pior que antes.</p></div>
+      <div class="feat"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 10l7-7 7 7"/></svg></span><h3>O que ajudou e o que atrapalhou</h3><p>"Barba caiu: 12 atendimentos a menos." Cada mudança explicada, item por item.</p></div>
+      <div class="feat"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h3>Quando as contas estarão pagas</h3><p>Quanto falta vender para pagar as contas do mês e em que dia isso acontece (ponto de equilíbrio).</p></div>
+      <div class="feat"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/></svg></span><h3>Contas mensais, semanais e diárias</h3><p>Aluguel, feira, café: cada conta no seu ritmo, e o app faz a conta certa por dia.</p></div>
+      <div class="feat"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span><h3>Indicadores que importam</h3><p>Lucratividade, margem de contribuição, ticket médio e curva ABC, no padrão do Sebrae.</p></div>
+      <div class="feat"><span class="ic"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><h3>Celular e computador</h3><p>Aplicativo para Android e iPhone e acesso pelo navegador. Seus dados protegidos (LGPD).</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" id="como-funciona" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="center"><p class="eyebrow">Como funciona</p><h2 style="margin-top:10px">Comece hoje, em poucos minutos</h2></div>
+    <ol class="steps">
+      <li><h3>Crie sua conta</h3><p>Escolha seu segmento e o app já vem com a lista de serviços, produtos e contas mais comuns.</p></li>
+      <li><h3>Lance as vendas do dia</h3><p>No fim do dia, toque no + de cada serviço ou produto vendido. Leva menos de 1 minuto.</p></li>
+      <li><h3>Lance as contas</h3><p>Aluguel, energia, comissão, taxas. Mensais, semanais ou diárias.</p></li>
+      <li><h3>Veja o resultado</h3><p>Quanto sobrou, o que mudou e quanto falta para pagar as contas do mês.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="blk dark">
+  <div class="wrap">
+    <div class="center"><p class="eyebrow">Para quem é</p><h2 style="margin-top:10px">Feito para o seu tipo de negócio</h2><p>Modelos prontos para começar rápido. Serve para qualquer negócio que vende serviços ou produtos.</p></div>
+    <div class="niches">
+      <div class="niche"><span>✂</span>Barbearia</div>
+      <div class="niche"><span>✦</span>Salão de beleza</div>
+      <div class="niche"><span>◍</span>Lanchonete</div>
+      <div class="niche"><span>✿</span>Pet shop</div>
+      <div class="niche"><span>⚙</span>Oficina</div>
+      <div class="niche"><span>+</span>Outro negócio</div>
+    </div>
+  </div>
+</section>
+
+<section class="blk" id="preco">
+  <div class="wrap">
+    <div class="center"><p class="eyebrow">Preço</p><h2 style="margin-top:10px">Um plano, tudo incluso</h2></div>
+    <div class="price">
+      <h3>Gestor Conex</h3>
+      <div class="v">R$ 79,90 <small>por mês</small></div>
+      <p style="color:var(--muted)">Sem fidelidade. Cancele quando quiser.</p>
+      <ul>
+        <li>Vendas, despesas e cadastros ilimitados</li>
+        <li>Resumo, detalhes, indicadores e histórico mês a mês</li>
+        <li>App para Android e iPhone e acesso pelo computador</li>
+        <li>Pagamento no Pix ou no cartão, com renovação automática</li>
+      </ul>
+      <a class="btn btn-navy" href="/app/#cadastro" style="width:100%">Começar o teste grátis</a>
+    </div>
+  </div>
+</section>
+
+<section class="blk" style="padding-top:0">
+  <div class="wrap">
+    <div class="offer">
+      <span class="rib">Sem risco, sem compromisso</span>
+      <h2>Teste grátis por 14 dias</h2>
+      <p>Use o Gestor Conex com os dados do seu negócio por 14 dias. Se não gostar, não paga nada.</p>
+      <ul><li>Sem cartão de crédito</li><li>Todos os recursos liberados</li><li>Seus dados ficam guardados se você assinar depois</li></ul>
+      <a class="btn btn-gold" href="/app/#cadastro">Criar minha conta grátis</a>
+    </div>
+  </div>
+</section>
+
+<section class="blk" style="padding-top:0">
+  <div class="wrap">
+    <div class="center"><p class="eyebrow">Perguntas frequentes</p><h2 style="margin-top:10px">Ficou alguma dúvida?</h2></div>
+    <div class="faq">
+      <details><summary>Preciso de cartão de crédito para testar?</summary><p>Não. O teste de 14 dias é grátis e sem cartão. Você só escolhe a forma de pagamento se decidir assinar.</p></details>
+      <details><summary>O que acontece depois dos 14 dias?</summary><p>Se quiser continuar, assine por R$ 79,90 por mês no Pix ou no cartão. Se não assinar, o acesso fica pausado, mas seus dados continuam guardados para quando você voltar.</p></details>
+      <details><summary>Funciona no celular?</summary><p>Sim. Tem aplicativo para Android e iPhone, e você também pode usar pelo navegador do celular ou do computador. Os dados são os mesmos em todos.</p></details>
+      <details><summary>Serve para o meu tipo de negócio?</summary><p>Serve para qualquer negócio que vende serviços ou produtos: barbearia, salão, lanchonete, pet shop, oficina e muitos outros. Você cadastra o que vende e as suas contas.</p></details>
+      <details><summary>Preciso entender de finanças?</summary><p>Não. O Gestor Conex foi feito para quem não é da área: mostra o resultado em frases simples, como "sobraram R$ 54 de cada R$ 100 vendidos".</p></details>
+      <details><summary>Meus dados ficam seguros?</summary><p>Sim. Os dados ficam em servidores com acesso restrito, trafegam criptografados e seguimos a LGPD. Você pode exportar ou excluir sua conta quando quiser.</p></details>
+      <details><summary>Posso cancelar quando quiser?</summary><p>Pode. Não há fidelidade nem multa. Ao cancelar, a assinatura vale até o fim do período já pago.</p></details>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a class="logo" href="/"><img src="/icons/icon-192.png" alt="" width="34" height="34">Gestor <span class="cx">Conex</span></a>
+      <span>Gestão simples para pequenos negócios.</span>
+      <span>Suporte: <span class="sel">suporte@gestorconex.com.br</span></span>
+    </div>
+    <nav aria-label="Documentos">
+      <a href="/app/">Entrar</a>
+      <a href="/app/#cadastro">Criar conta</a>
+      <a href="/app/#termos">Termos de uso</a>
+      <a href="/app/#privacidade">Política de privacidade</a>
+      <a href="/app/#excluir-conta">Excluir conta</a>
+    </nav>
+    <span style="width:100%">© 2026 Gestor Conex. Todos os direitos reservados.</span>
+  </div>
+</footer>
+</body>
+</html>

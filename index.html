@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Gestor Conex: gestão simples para pequenos negócios. Lance vendas e despesas e veja quanto entrou, quanto saiu e quanto sobrou.">
 <meta name="theme-color" content="#0e1726">
-<meta name="gc-api" content="https://api-production-0a15a.up.railway.app">
+<meta name="gc-api" content="https://api.gestorconex.com.br">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
@@ -1562,7 +1562,7 @@ async function api(path,{method,body}={}){
   catch(e){const er=new Error('Sem conexão com o servidor. Confira a internet e tente de novo.');er.status=0;throw er}
   const j=await res.json().catch(()=>({}));
   if(!res.ok){const er=new Error(j.error||'Algo deu errado. Tente de novo.');er.status=res.status;er.body=j;
-    if(res.status===401&&C&&C.real){sairReal('Sua sessão expirou. Entre de novo.')}throw er}
+    if(res.status===401&&C&&C.real){sairReal(j.code==='SESSION_REPLACED'?j.error:'Sua sessão expirou. Entre de novo.')}throw er}
   return j}
 let stateVer=0;
 const dsIso=s=>s?ds(new Date(s)):null;
@@ -1583,6 +1583,9 @@ async function enviaEstado(){if(syncBusy){syncT=setTimeout(enviaEstado,500);retu
     else if(e.status===402){toast(e.message)}
     else if(e.status!==401){syncPend=true;if(!offlineAvisado){offlineAvisado=true;toast('Sem conexão: suas alterações serão enviadas quando a internet voltar.')}syncT=setTimeout(enviaEstado,5000)}}
   finally{syncBusy=false}}
+// sessão única: ao voltar para o app/aba, confere se a conta não entrou em outro aparelho
+if(typeof document!=='undefined'&&document.addEventListener)document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&REAL&&C&&C.real&&logged)api('/me').then(aplicaMeSemPerder).catch(()=>{})});
+function aplicaMeSemPerder(me){if(!C||!C.real)return;const tour=C.tourDone;aplicaMe(me);C.tourDone=tour||me.tourDone;if(['painel','assinatura','ajustes'].includes(ui.tab))render(true)}
 if(typeof window!=='undefined'&&window.addEventListener)window.addEventListener('beforeunload',e=>{if(REAL&&syncPend){e.preventDefault();e.returnValue=''}});
 
 async function onAuthSubmitReal(id){
@@ -1654,7 +1657,7 @@ async function bootReal(){
     catch(e){if(e.status!==401){A.info=e.message}setTok('')}}
   if(em==='confirmado')A.info='E-mail confirmado. Entre na sua conta.';
   if(C&&!C.real&&logged)return render(); // conta de demonstração local
-  logged=false;if(!LEGAL_SCR.includes(A.scr))A.scr=A.scr==='intro'?'intro':'login';render()}
+  logged=false;if(!LEGAL_SCR.includes(A.scr)&&A.scr!=='cadastro')A.scr=A.scr==='intro'?'intro':'login';render()}
 const aDelConfirm=()=>`<h1>Excluir sua conta</h1><p class="muted" style="margin:0">Ao confirmar, apagamos sua conta e todos os dados do seu negócio. Isso não pode ser desfeito.</p>${errBox()}
   <button class="btn danger big" data-act="a-delconfirm">Confirmar exclusão</button><button class="lnk" data-act="a-go" data-v="login">Cancelar e voltar</button>`;
 async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:{token:A.delTok}});setTok('');C=null;logged=false;A.delTok=null;Object.assign(A,{scr:'excluida',err:''});render()}catch(e){A.err=e.message;render()}}
@@ -1739,7 +1742,8 @@ document.addEventListener('submit',e=>{
 let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(ui.tab==='painel')drawCharts()},150)});
 if(location.hash&&VIEWS[location.hash.slice(1)])ui.tab=location.hash.slice(1);
 // links públicos para as lojas (abrem sem login): /#privacidade, /#termos, /#excluir-conta
-{const lh={privacidade:'privacidade',termos:'termos','excluir-conta':'excluir-info'}[(location.hash||'').slice(1)];if(lh){A.scr=lh;A.legalBack='login';ui.legal=lh;if(logged&&C){ui.tab='legal'}}}
+{const lh={privacidade:'privacidade',termos:'termos','excluir-conta':'excluir-info'}[(location.hash||'').slice(1)];if(lh){A.scr=lh;A.legalBack='login';ui.legal=lh;if(logged&&C){ui.tab='legal'}}
+ if(location.hash==='#cadastro'&&!(logged&&C)){A.scr='cadastro';try{localStorage.setItem(INTRO,'1')}catch(e){}}} // botões "Testar grátis" da página inicial
 if(REAL)bootReal();else render();
 </script>
 
