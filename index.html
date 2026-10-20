@@ -5,7 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Gestor Conex: gestão simples para pequenos negócios. Lance vendas e despesas e veja quanto entrou, quanto saiu e quanto sobrou.">
 <meta name="theme-color" content="#0e1726">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%230e1726%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%2Csans-serif%22%20font-weight%3D%22700%22%20font-size%3D%2234%22%20fill%3D%22%23c39a3e%22%3EG%3C%2Ftext%3E%3C%2Fsvg%3E">
+<meta name="gc-api" content="https://api-production-0a15a.up.railway.app">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Gestor Conex">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Gestor Conex</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -65,7 +72,9 @@ main{min-width:0;padding-block:18px 112px;display:flex;flex-direction:column;gap
 /* nav */
 .side{display:none}
 .brand{display:flex;align-items:center;gap:10px}
-.mark{width:36px;height:36px;border-radius:9px;background:var(--gold);color:#0e1726;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:17px;box-shadow:var(--glow)}
+.mark{width:40px;height:40px;flex:none;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%3E%20%3Cdefs%3E%20%3ClinearGradient%20id%3D%22gc-borda%22%20x1%3D%224%22%20y1%3D%224%22%20x2%3D%2244%22%20y2%3D%2244%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%20%3Cstop%20stop-color%3D%22%23A57A26%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23EBCB72%22%2F%3E%20%3C%2FlinearGradient%3E%20%3C%2Fdefs%3E%20%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%2240%22%20height%3D%2240%22%20rx%3D%2213%22%20fill%3D%22%230E1726%22%2F%3E%20%3Crect%20x%3D%225%22%20y%3D%225%22%20width%3D%2238%22%20height%3D%2238%22%20rx%3D%2212%22%20stroke%3D%22url(%23gc-borda)%22%20stroke-width%3D%222%22%2F%3E%20%3Crect%20x%3D%2213%22%20y%3D%2227%22%20width%3D%225.5%22%20height%3D%229%22%20rx%3D%221.6%22%20fill%3D%22%23F5F7FB%22%2F%3E%20%3Crect%20x%3D%2221.25%22%20y%3D%2222%22%20width%3D%225.5%22%20height%3D%2214%22%20rx%3D%221.6%22%20fill%3D%22%23F5F7FB%22%2F%3E%20%3Crect%20x%3D%2229.5%22%20y%3D%2217.5%22%20width%3D%225.5%22%20height%3D%2218.5%22%20rx%3D%221.6%22%20fill%3D%22%23F5F7FB%22%2F%3E%20%3Cpath%20d%3D%22M15.75%2023.2%20L24%2018.4%20L30.6%2013.6%22%20stroke%3D%22%23E2BE63%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3Ccircle%20cx%3D%2233.4%22%20cy%3D%2211.6%22%20r%3D%223.3%22%20fill%3D%22%23E2BE63%22%2F%3E%20%3Ccircle%20cx%3D%2233.4%22%20cy%3D%2211.6%22%20r%3D%221.4%22%20fill%3D%22%230E1726%22%2F%3E%20%3C%2Fsvg%3E%20") center/contain no-repeat;font-size:0;color:transparent;box-shadow:none}
+.brand .cx{color:var(--gold)}
+.auth-mbrand .cx{color:#b08a33}
 .brand b{font-family:var(--f-display);font-size:1.08rem;display:block;line-height:1.1;font-weight:700;letter-spacing:.02em;color:var(--side-ink-strong)}
 .brand small{color:var(--side-ink);font-size:.8rem}
 .nav{display:flex;flex-direction:column;gap:2px}
@@ -468,7 +477,7 @@ textarea.inp{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;resize
 <div id="auth" hidden></div>
 <div class="app">
   <aside class="side">
-    <div class="brand"><div class="mark">G</div><div><b>Gestor Conex</b><small id="biz-side"></small></div></div>
+    <div class="brand"><div class="mark" role="img" aria-label="Gestor Conex">G</div><div><b>Gestor <span class="cx">Conex</span></b><small id="biz-side"></small></div></div>
     <nav class="nav" id="nav-side"></nav>
     <div class="side-foot">Protótipo · dados salvos neste navegador</div>
   </aside>
@@ -478,6 +487,9 @@ textarea.inp{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;resize
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
+// modo produção (site): a página traz <meta name="gc-api" content="https://…">; sem ela é o protótipo local
+const API_BASE=(typeof document!=='undefined'&&document.querySelector&&(document.querySelector('meta[name="gc-api"]')||{}).content)||'';
+const REAL=!!API_BASE;
 /* ---------- utilidades ---------- */
 const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
@@ -591,7 +603,7 @@ ui.look='clean';
 try{const u=JSON.parse(localStorage.getItem(UKEY));if(u){if(u.tab)ui.tab=u.tab;if(u.mode)ui.mode=u.mode;if(u.view)ui.view=u.view;if(u.look)ui.look=u.look}}catch(e){}
 const applyLook=()=>{if(ui.look==='escuro')document.documentElement.setAttribute('data-look','escuro');else document.documentElement.removeAttribute('data-look')};
 applyLook();
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const save=()=>{if(REAL&&C&&C.real)return queueSync();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const saveUi=()=>{try{localStorage.setItem(UKEY,JSON.stringify({tab:ui.tab,mode:ui.mode,view:ui.view,look:ui.look}))}catch(e){}};
 const itemById=id=>S.itens.find(i=>i.id===id);
 const despById=id=>S.despesas.find(i=>i.id===id);
@@ -699,8 +711,8 @@ $('#nav-bottom').innerHTML=TABS.map(([k,l])=>`<button data-tab="${k}">${IC[k]}<s
 
 function topbar(title,sub){
   // dados simulados: só um selo discreto (trocar cenário fica em Ajustes)
-  return `<div class="topbar"><div><div class="eyebrow">${esc(S.negocio.nome)}${S.exemplo?` <button class="chip" data-act="go-sim" title="Dados simulados. Toque para trocar o cenário.">simulação</button>`:''}</div><h1>${title}</h1>${sub?`<div class="muted" style="font-size:.88rem">${sub}</div>`:''}</div>
-  <div class="brand"><div class="mark">G</div></div></div>
+  return `<div class="topbar"><div><div class="eyebrow">${esc(S.negocio.nome)}${S.exemplo?` <button class="chip" data-act="go-sim" title="Dados de exemplo.">${C&&C.real?'dados de exemplo':'simulação'}</button>`:''}</div><h1>${title}</h1>${sub?`<div class="muted" style="font-size:.88rem">${sub}</div>`:''}</div>
+  <div class="brand"><div class="mark" role="img" aria-label="Gestor Conex">G</div></div></div>
   ${trialBanner()}`;
 }
 
@@ -1141,7 +1153,7 @@ function vAjustes(){
       <div class="field"><label>Dias de funcionamento</label><div class="days">${SEML.map((l,i)=>`<label><input type="checkbox" data-dia="${i}" ${dias.includes(i)?'checked':''}>${l.slice(0,3)}</label>`).join('')}</div>
       <p class="note">Usado para avisar dias sem lançamento e projetar o fim do mês.</p></div>
     </div></section>
-  <section class="card" id="sim"><div class="card-h"><h2>Base de simulação</h2><p>Gera dados fictícios de uma barbearia para testar os indicadores. Substitui os dados atuais deste aparelho.</p></div>
+  <section class="card" id="sim" ${C&&C.real?'hidden':''}><div class="card-h"><h2>Base de simulação</h2><p>Gera dados fictícios de uma barbearia para testar os indicadores. Substitui os dados atuais deste aparelho.</p></div>
     <div class="form-row" style="max-width:520px">
       <div class="field"><label for="sim-cen">Cenário do mês atual</label><select class="inp" id="sim-cen">${Object.entries(CENARIOS).map(([k,c])=>`<option value="${k}">${c.nome}</option>`).join('')}</select></div>
       <div class="field"><label for="sim-mov">Movimento</label><select class="inp" id="sim-mov"><option value=".6">Fraco (poucos clientes)</option><option value="1" selected>Médio</option><option value="1.5">Forte (muitos clientes)</option></select></div>
@@ -1149,7 +1161,7 @@ function vAjustes(){
       <p class="note" style="margin:0">Só o mês atual recebe o cenário. Os meses anteriores ficam normais, para você ver os indicadores reagirem à mudança. Cada vez que gerar, os números variam um pouco.</p>
       <div><button class="btn pri" data-act="simular">Gerar simulação</button></div>
     </div></section>
-  <section class="card"><div class="card-h"><h2>Começar com os seus dados</h2><p>Apaga tudo deste aparelho e cria listas iniciais para o seu segmento.</p></div>
+  <section class="card" id="novo"><div class="card-h"><h2>Começar com os seus dados</h2><p>Apaga tudo deste aparelho e cria listas iniciais para o seu segmento.</p></div>
     <div class="form-row" style="max-width:520px">
       <div class="field"><label for="n-nome">Nome do negócio</label><input class="inp" id="n-nome" placeholder="Ex.: Barbearia Navalha"></div>
       <div class="field"><label for="n-seg">Segmento</label><select class="inp" id="n-seg">${Object.keys(MODELOS).map(k=>`<option ${k==='Barbearia'?'selected':''}>${k}</option>`).join('')}</select></div>
@@ -1165,7 +1177,7 @@ function vAjustes(){
 const AKEY='balcao.conta',SESS='balcao.sessao',INTRO='balcao.intro',TERMOS_V='1.0',TRIAL_DIAS=14,SUPORTE='suporte@gestorconex.com.br';
 const PLANOS={mensal:{nome:'Mensal',preco:79.9,per:'mês',meses:1}};
 let C=null;try{C=JSON.parse(localStorage.getItem(AKEY))}catch(e){}
-const saveC=()=>{try{C?localStorage.setItem(AKEY,JSON.stringify(C)):localStorage.removeItem(AKEY)}catch(e){}};
+const saveC=()=>{if(C&&C.real){if(C.tourDone&&!C._tourSent){C._tourSent=true;api('/me',{method:'PATCH',body:{tourDone:true}}).catch(()=>{C._tourSent=false})}return}try{C?localStorage.setItem(AKEY,JSON.stringify(C)):localStorage.removeItem(AKEY)}catch(e){}};
 let logged=false;try{logged=!!C&&localStorage.getItem(SESS)===C.email}catch(e){}
 const setSess=v=>{logged=v;try{v?localStorage.setItem(SESS,C.email):localStorage.removeItem(SESS)}catch(e){}};
 let A={scr:'intro',slide:0,err:'',info:'',reg:null,pend:null,code:null,overlay:false,legalBack:'login',lastEmail:'',proto:'',cap:{}};
@@ -1201,8 +1213,9 @@ function assinStatus(){const a=C.assin;
     return a.renov?{c:'good',t:'Ativa',x:`Plano ${PLANOS[a.plano].nome} · próxima cobrança em ${fmtD(a.prox)}, no ${a.metodo==='pix'?'Pix':'cartão'}.`}:{c:'warn',t:'Ativa, sem renovação',x:`Vale até ${fmtD(a.prox)}. Depois disso, o acesso fica pausado até você renovar.`}}
   const l=daysBetween(TODAY,C.trialFim);
   if(l<0)return{c:'bad',t:'Teste encerrado',x:`Seu teste grátis terminou em ${fmtD(C.trialFim)}. Seus dados estão guardados.`};
+  if(a.renov)return{c:'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'}. Cartão cadastrado: a primeira cobrança de R$ 79,90 será em ${fmtD(C.trialFim)}.`};
   return{c:l<=3?'warn':'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'} (até ${fmtD(C.trialFim)}). Nenhuma cobrança até você assinar.`}}
-function acessoOk(){const a=C.assin;if(a.status==='ativa')return a.renov||TODAY<=a.prox;return daysBetween(TODAY,C.trialFim)>=0}
+function acessoOk(){const a=C.assin;if(C.real)return !!a.acessoSrv;if(a.status==='ativa')return a.renov||TODAY<=a.prox;return daysBetween(TODAY,C.trialFim)>=0}
 function trialBanner(){if(!C)return'';const a=C.assin;
   if(a.status==='trial'){const l=daysBetween(TODAY,C.trialFim);if(l<0)return'';return `<div class="banner"><span><b>Teste grátis:</b> faltam ${l} ${l===1?'dia':'dias'}.</span><button class="btn sm pri" data-tab="assinatura">Assinar</button></div>`}
   if(a.status==='ativa'&&!a.renov){const l=daysBetween(TODAY,a.prox);if(l>=0&&l<=7)return `<div class="banner"><span><b>Sua assinatura vence em ${l} ${l===1?'dia':'dias'}.</b></span><button class="btn sm pri" data-tab="assinatura">Renovar</button></div>`}
@@ -1220,12 +1233,13 @@ function cardPane(){const p=PLANOS[ui.plano];
   return `<div class="pane"><p class="note" style="margin:0">Você vai para o ambiente seguro do Mercado Pago para digitar os dados do cartão. O Gestor Conex não vê nem guarda o número do seu cartão.</p>
     <label class="chk"><input type="checkbox" id="s-renov" ${ui.renov?'checked':''}><span>Renovar automaticamente a cada ${p.per}. Dá para cancelar quando quiser.</span></label>
     ${ui.payErr?`<div class="a-err" role="alert">${ui.payErr}</div>`:''}
+    ${C.assin.status==='trial'&&daysBetween(TODAY,C.trialFim)>0?`<p class="note" style="margin:0">Você continua no teste grátis: a primeira cobrança só acontece em ${fmtD(C.trialFim)}.</p>`:''}
     <button class="btn pri big" data-act="s-pagar">Continuar para o pagamento · ${brl(p.preco)}</button></div>`}
 function pixPane(){const p=PLANOS[ui.plano];
   if(!ui.pix)return `<div class="pane"><p class="note" style="margin:0">O código Pix vale por 30 minutos. O Pix não renova sozinho: avisamos antes de vencer para você pagar o próximo período.</p><button class="btn pri big" data-act="s-pix">Gerar código Pix · ${brl(p.preco)}</button></div>`;
-  return `<div class="pix">${fakeQr(ui.pix.code)}<div class="pane" style="margin:0;min-width:0"><p style="margin:0;font-weight:600">Escaneie o QR code no app do seu banco ou copie o código Pix.</p>
+  return `<div class="pix">${ui.pix.img?`<img class="qr" src="data:image/png;base64,${ui.pix.img}" alt="QR code do Pix">`:fakeQr(ui.pix.code)}<div class="pane" style="margin:0;min-width:0"><p style="margin:0;font-weight:600">Escaneie o QR code no app do seu banco ou copie o código Pix.</p>
     <div class="codebox">${ui.pix.code}</div><div class="btns" style="margin:0"><button class="btn sm" data-act="s-pixcopy">Copiar código</button><button class="btn pri sm" data-act="s-aprovar" data-v="pix">Já paguei, verificar</button></div>
-    <p class="note" style="margin:0">Expira em <b id="pix-timer">${mmss(Math.max(0,ui.pix.exp-Date.now()))}</b>. <span class="faint">Protótipo: este código não é um Pix real.</span></p></div></div>`}
+    <p class="note" style="margin:0">Expira em <b id="pix-timer">${mmss(Math.max(0,ui.pix.exp-Date.now()))}</b>.${REAL&&C.real?' Assim que o pagamento cair, a tela atualiza sozinha.':' <span class="faint">Protótipo: este código não é um Pix real.</span>'}</p></div></div>`}
 function vAssinatura(){const st=assinStatus(),a=C.assin;
   return `${topbar('Assinatura')}
   <section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p>
@@ -1238,7 +1252,7 @@ function vAssinatura(){const st=assinStatus(),a=C.assin;
     <p class="note" style="margin:14px 0 0">Pagamento processado pelo Mercado Pago. Você recebe o comprovante por e-mail.</p></section>
   ${a.hist&&a.hist.length?`<section class="card"><div class="card-h"><h2>Pagamentos</h2></div><div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Plano</th><th>Forma</th><th class="r">Valor</th><th>Situação</th></tr></thead><tbody>${a.hist.map(h=>`<tr><td>${fmtD(h.d)}</td><td>${h.plano}</td><td>${h.metodo==='pix'?'Pix':'Cartão'}</td><td class="r">${brl(h.valor)}</td><td><span class="chip">${h.st}</span></td></tr>`).join('')}</tbody></table></div></section>`:''}
   <section class="card"><div class="card-h"><h2>No app de iPhone e Android</h2></div><p class="note" style="margin:0">Nos apps das lojas, a assinatura é feita pela App Store ou pelo Google Play, com os mesmos planos. Cobrança, renovação e cancelamento ficam na conta da loja.</p></section>
-  <section class="card proto"><b>Testes do protótipo</b><div class="btns"><button class="btn sm" data-act="s-sim-fim">Simular fim do teste grátis</button><button class="btn sm" data-act="s-sim-trial">Voltar para o teste grátis</button>${a.status==='ativa'?'<button class="btn sm" data-act="s-sim-venc">Simular assinatura vencida</button>':''}</div></section>`}
+  ${REAL&&C.real?'':`<section class="card proto"><b>Testes do protótipo</b><div class="btns"><button class="btn sm" data-act="s-sim-fim">Simular fim do teste grátis</button><button class="btn sm" data-act="s-sim-trial">Voltar para o teste grátis</button>${a.status==='ativa'?'<button class="btn sm" data-act="s-sim-venc">Simular assinatura vencida</button>':''}</div></section>`}`}
 function vBloqueado(){const st=assinStatus();
   return `${topbar('Acesso pausado')}<section class="card" style="max-width:600px"><div class="card-h"><h2>${st.t}</h2></div><p class="muted" style="margin:0 0 8px">${st.x}</p>
     <p class="muted" style="margin:0">Nada foi apagado: vendas, despesas e cadastros continuam guardados. Assine para voltar a usar.</p>
@@ -1266,7 +1280,7 @@ const contaDanger=()=>`<section class="card danger-card"><div class="card-h"><h2
 const PERDAS=['Todas as vendas lançadas, dia a dia.','Todas as despesas mensais, semanais e diárias.','Seus serviços, produtos e cadastros de despesas.','O histórico e os indicadores do painel.','O acesso à conta, no celular e no computador. A assinatura feita pelo site é encerrada.'];
 function vExcluir(){const st=ui.delStep||0;
   if(st===2)return `${topbar('Excluir conta')}<section class="card" style="max-width:640px"><div class="card-h"><h2>Confira seu e-mail</h2></div><p class="muted" style="margin:0 0 12px">Enviamos um link de confirmação para <b>${esc(maskEmail(C.email))}</b>. O link vale por 24 horas. A conta só é excluída depois que você abrir o link.</p>
-    <div class="proto"><b>Protótipo:</b> como não há e-mail de verdade, use o botão para simular a abertura do link.<div class="btns"><button class="btn danger" data-act="d-confirm">Abrir o link e excluir a conta</button></div></div>
+    ${REAL&&C.real?'<p class="note" style="margin:0">Abra o e-mail e toque em <b>Confirmar exclusão</b>. Se não chegar em alguns minutos, confira a caixa de spam.</p>':'<div class="proto"><b>Protótipo:</b> como não há e-mail de verdade, use o botão para simular a abertura do link.<div class="btns"><button class="btn danger" data-act="d-confirm">Abrir o link e excluir a conta</button></div></div>'}
     <div class="btns"><button class="btn" data-tab="ajustes">Desistir e voltar</button></div></section>`;
   if(st===1)return `${topbar('Excluir conta')}<section class="card" style="max-width:640px"><div class="card-h"><h2>Confirme que é você</h2></div><form id="f-del" class="a-form">
     <div class="field"><label for="d-pw">Sua senha</label><div class="pw"><input class="inp" id="d-pw" type="password" autocomplete="current-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
@@ -1359,29 +1373,29 @@ function aCadastro(){const r=A.reg||{},dt=r['r-dt']||'CNPJ',ini=r['r-ini']||'exe
     ${capW('r-robo')}
     <button class="btn pri big" type="submit">Continuar</button></form>`}
 function aVerificar(){const p=A.pend;if(!p){A.scr='cadastro';return aCadastro()}const t=onlyD(p.tel);
-  return `<button class="lnk" data-act="a-go" data-v="cadastro">← Corrigir dados</button><h1>Confirme seu celular</h1><p class="muted" style="margin:0">Etapa 2 de 2 · Enviamos um código de 6 dígitos por SMS para <b>(${t.slice(0,2)}) •••••-${t.slice(-4)}</b>.</p>${errBox()}${infoBox()}
-  <div class="proto"><b>Protótipo:</b> o SMS não é enviado de verdade. Seu código é <b class="sel">${A.code}</b></div>
-  <form id="f-ver" class="a-form"><div class="field"><label for="v-code">Código do SMS</label><input class="inp code-in" id="v-code" data-mask="code" inputmode="numeric" autocomplete="one-time-code" placeholder="000000"></div><button class="btn pri big" type="submit">Confirmar e criar conta</button></form>
+  return `<button class="lnk" data-act="a-go" data-v="cadastro">← Corrigir dados</button><h1>Confirme seu cadastro</h1><p class="muted" style="margin:0">Etapa 2 de 2 · Enviamos um código de 6 dígitos ${REAL?(p.via==='sms'?'por SMS':'por e-mail')+' para <b>'+esc(p.destino)+'</b>':'por SMS para <b>('+t.slice(0,2)+') •••••-'+t.slice(-4)+'</b>'}.</p>${errBox()}${infoBox()}
+  ${REAL?'':`<div class="proto"><b>Protótipo:</b> o SMS não é enviado de verdade. Seu código é <b class="sel">${A.code}</b></div>`}
+  <form id="f-ver" class="a-form"><div class="field"><label for="v-code">Código recebido</label><input class="inp code-in" id="v-code" data-mask="code" inputmode="numeric" autocomplete="one-time-code" placeholder="000000"></div><button class="btn pri big" type="submit">Confirmar e criar conta</button></form>
   <button class="lnk" data-act="a-resend">Não recebeu? Enviar outro código</button>
   <p class="note" style="margin:0">Também enviamos um link para <b>${esc(p.email)}</b>. Dá para confirmar o e-mail depois.</p>`}
 function aEsqueci(){return `<button class="lnk" data-act="a-go" data-v="login">← Voltar para o login</button><h1>Recuperar acesso</h1><p class="muted" style="margin:0">Informe o e-mail da conta. Vamos enviar uma senha temporária.</p>${errBox()}
-  <form id="f-esq" class="a-form" novalidate><div class="field"><label for="e-email">E-mail</label><input class="inp" id="e-email" type="email" autocomplete="email" value="${esc(A.lastEmail)}"></div><button class="btn pri big" type="submit">Enviar senha temporária</button></form>`}
+  <form id="f-esq" class="a-form" novalidate><div class="field"><label for="e-email">E-mail</label><input class="inp" id="e-email" type="email" autocomplete="email" value="${esc(A.lastEmail)}"></div>${capW('e-robo')}<button class="btn pri big" type="submit">Enviar senha temporária</button></form>`}
 function aEnviada(){return `<h1>Confira seu e-mail</h1><p class="muted" style="margin:0">Se existir uma conta com <b>${esc(A.lastEmail)}</b>, enviamos uma senha temporária. Ela vale por 1 hora. Entre com ela e crie uma senha nova.</p>
-  <div class="proto"><b>Protótipo:</b> ${A.proto}</div><button class="btn pri big" data-act="a-go" data-v="login">Voltar para o login</button>`}
+  ${REAL?'':`<div class="proto"><b>Protótipo:</b> ${A.proto}</div>`}<button class="btn pri big" data-act="a-go" data-v="login">Voltar para o login</button>`}
 function aNovaSenha(){return `<h1>Crie uma senha nova</h1><p class="muted" style="margin:0">Você entrou com uma senha temporária. Escolha a sua senha definitiva.</p>${errBox()}
   <form id="f-nova" class="a-form"><div class="field"><label for="n-pw">Nova senha</label><div class="pw"><input class="inp" id="n-pw" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-nova')}</div>
   <div class="field"><label for="n-pw2">Repita a senha</label><input class="inp" id="n-pw2" type="password" autocomplete="new-password"></div><button class="btn pri big" type="submit">Salvar e entrar</button></form>`}
 const aExcluida=()=>`<h1>Conta excluída</h1><p class="muted" style="margin:0">Apagamos sua conta e todos os seus dados. Registros de pagamento ficam guardados pelo prazo da lei fiscal e depois também são apagados.</p><button class="btn pri big" data-act="a-go" data-v="intro">Voltar ao início</button>`;
 function renderAuth(){
   document.body.classList.add('auth-on');const el=$('#auth');el.hidden=false;
-  const s=A.scr,F={intro:aIntro,login:aLogin,cadastro:aCadastro,verificar:aVerificar,esqueci:aEsqueci,enviada:aEnviada,'nova-senha':aNovaSenha,excluida:aExcluida};
+  const s=A.scr,F={'del-confirm':aDelConfirm,intro:aIntro,login:aLogin,cadastro:aCadastro,verificar:aVerificar,esqueci:aEsqueci,enviada:aEnviada,'nova-senha':aNovaSenha,excluida:aExcluida};
   const body=LEGAL_SCR.includes(s)?`<button class="lnk" data-act="a-back">← Voltar</button><div class="legal">${legalHtml(s)}</div>`:(F[s]||aLogin)();
   el.innerHTML=`<div class="auth ${LEGAL_SCR.includes(s)?'is-legal':''}">
-    <aside class="auth-side"><div class="brand"><div class="mark">G</div><div><b>Gestor Conex</b><small>Gestão para pequenos negócios</small></div></div>
+    <aside class="auth-side"><div class="brand"><div class="mark" role="img" aria-label="Gestor Conex">G</div><div><b>Gestor <span class="cx">Conex</span></b><small>Gestão para pequenos negócios</small></div></div>
       <h2 class="auth-tag">Saiba quanto entrou, quanto saiu e quanto sobrou.</h2>
       <ul class="auth-pts"><li>Vendas do dia em 1 minuto</li><li>Despesas mensais, semanais e diárias</li><li>Lucro comparado com o mês passado</li></ul>
       <p class="auth-foot">Protótipo · os dados ficam só neste navegador</p></aside>
-    <div class="auth-main"><div class="brand auth-mbrand"><div class="mark">G</div><div><b style="color:var(--ink)">Gestor Conex</b><small style="color:var(--muted)">Gestão para pequenos negócios</small></div></div>
+    <div class="auth-main"><div class="brand auth-mbrand"><div class="mark" role="img" aria-label="Gestor Conex">G</div><div><b style="color:var(--ink)">Gestor <span class="cx">Conex</span></b><small style="color:var(--muted)">Gestão para pequenos negócios</small></div></div>
       <div class="auth-card">${body}</div>
       <nav class="auth-legal" aria-label="Documentos"><button data-act="a-go" data-v="termos">Termos de uso</button><button data-act="a-go" data-v="privacidade">Privacidade</button><button data-act="a-go" data-v="excluir-info">Excluir conta</button></nav></div></div>`;
   mountTurnstile();
@@ -1401,10 +1415,13 @@ function authAct(a,b){
   else if(a==='a-slide'){A.slide=Math.max(0,Math.min(SLIDES.length-1,A.slide+(+b.dataset.n)));render()}
   else if(a==='a-intro-end'){try{localStorage.setItem(INTRO,'1')}catch(e){}A.slide=0;if(A.overlay){A.overlay=false;render();return}A.scr='login';render()}
   else if(a==='a-demo')entrarDemo();
+  else if(a==='a-delconfirm')confirmaExclusao();
+  else if(a==='a-resend'&&REAL){api('/auth/register/resend',{body:{pendingId:A.pend&&A.pend.pendingId}}).then(()=>{A.info='Enviamos um novo código.';render()}).catch(e=>{A.err=e.message;render()})}
   else if(a==='a-resend'){A.code=String(100000+Math.floor(Math.random()*9e5));A.info='Enviamos um novo código.';render()}
 }
 const AUTH_FORMS=['f-login','f-reg','f-ver','f-esq','f-nova','f-chg','f-del'];
 async function onAuthSubmit(id){
+  if(REAL)return onAuthSubmitReal(id);
   const g=k=>{const e=$('#'+k);return e?String(e.value).trim():''},chk=k=>{const e=$('#'+k);return !!(e&&e.checked)},rad=n=>(document.querySelector(`input[name="${n}"]:checked`)||{}).value;
   if(id==='f-login'){const em=g('l-email').toLowerCase(),pw=($('#l-pw')||{}).value||'';A.lastEmail=em;A.info='';
     if(!em||!pw){A.err='Preencha e-mail e senha.';return render()}
@@ -1443,6 +1460,7 @@ async function onAuthSubmit(id){
     if(ui.delErr)return render(true);ui.delStep=2;render();window.scrollTo(0,0)}
 }
 function contaAct(a,b){
+  if(REAL&&C&&C.real){const r=contaActReal(a,b);if(r!==undefined)return r}
   const v=b.dataset.v;
   if(a==='s-plano'){ui.plano=v;ui.payStep=null;ui.pix=null;render(true)}
   else if(a==='s-metodo'){ui.metodo=v;ui.payStep=null;ui.payErr='';render(true)}
@@ -1502,8 +1520,9 @@ function loadDriver(){return new Promise((res,rej)=>{if(window.driver&&window.dr
 async function startTour(){if(tourOn)return;tourOn=true;try{await loadDriver()}catch(e){tourOn=false;toast(e.message);return}runTourAt(0)}
 const maybeTour=()=>{if(C&&!C.tourDone)setTimeout(startTour,600)};
 function finishTour(msg){tourOn=false;if(C){C.tourDone=true;saveC()}ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg)}
-function runTourAt(i){const t=TOURS[i];if(!t)return finishTour('Pronto! Agora é com você.');if(t.prep)t.prep();ui.tab=t.tab;render();window.scrollTo(0,0);
+function runTourAt(i){const t=TOURS[i];if(!t)return finishTour('Pronto! Agora é com você.');if(t.prep)t.prep();ui.tab=t.tab;render();window.scrollTo(0,0);const alvo=t.tab;
   setTimeout(()=>{
+    if(ui.tab!==alvo){ui.tab=alvo;render();window.scrollTo(0,0)} // a pessoa trocou de tela no meio: volta para a tela desta parte
     const steps=t.steps.map(([el,title,description])=>({element:typeof el==='function'?el():document.querySelector(el),popover:{title,description}})).filter(s=>s.element);
     if(!steps.length)return runTourAt(i+1);
     const last=i===TOURS.length-1;let done=false;
@@ -1511,14 +1530,15 @@ function runTourAt(i){const t=TOURS[i];if(!t)return finishTour('Pronto! Agora é
       nextBtnText:'Próximo',prevBtnText:'Voltar',doneBtnText:last?'Concluir':'Continuar',popoverClass:'gc-tour',overlayOpacity:.55,stagePadding:8,stageRadius:12,
       onHighlightStarted:el=>{if(el)el.scrollIntoView({block:'center',behavior:'auto'})},
       // só a última etapa de cada parte encadeia a próxima; fechar (X, Esc ou clique fora) encerra o tutorial
-      onNextClick:(el,step,{driver:dv})=>{if(dv.isLastStep()){done=true;dv.destroy()}else dv.moveNext()},
+      onNextClick:()=>{if(d.isLastStep()){done=true;d.destroy()}else d.moveNext()},
+      onPrevClick:()=>d.movePrevious(),
       onDestroyed:()=>{if(done)runTourAt(i+1);else finishTour('Tutorial fechado. Ele fica em Ajustes → Ajuda.')},
       steps});
     d.drive()},350)}
 
 /* ---------- captcha real (Cloudflare Turnstile) quando o app roda no domínio próprio ---------- */
 const TS_SITEKEY='0x4AAAAAAFdyqka-0SlpHJ-V';
-const TS_REAL=typeof location!=='undefined'&&/(^|\.)gestorconex\.com\.br$|(^|\.)gestorconex\.pages\.dev$/.test(location.hostname);
+const TS_REAL=REAL&&typeof location!=='undefined'&&/(^|\.)gestorconex\.com\.br$|(^|\.)gestorconex\.pages\.dev$/.test(location.hostname);
 let tsLoad=null;A.capTok={};
 function loadTurnstile(){if(tsLoad)return tsLoad;tsLoad=new Promise((res,rej)=>{if(window.turnstile)return res();
   const s=document.createElement('script');s.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';s.async=true;s.onload=()=>res();s.onerror=()=>{tsLoad=null;rej()};document.head.appendChild(s)});return tsLoad}
@@ -1529,6 +1549,115 @@ async function mountTurnstile(){if(!TS_REAL)return;const hosts=[...document.quer
       callback:tok=>{A.cap[id]=true;A.capTok[id]=tok;const i=$('#'+id);if(i)i.checked=true},
       'expired-callback':()=>{A.cap[id]=false;const i=$('#'+id);if(i)i.checked=false},
       'error-callback':()=>{A.cap[id]=false}})}}
+
+/* ================= MODO PRODUÇÃO: conversa com a API (contas, dados, captcha e pagamento reais) =================
+   Ativo quando a página traz <meta name="gc-api">, ou seja, no site gestorconex.com.br. No artifact segue o protótipo local.
+   A conta de demonstração continua local mesmo no site (para revisão das lojas). */
+const TOKKEY='gc.token';
+const getTok=()=>{try{return localStorage.getItem(TOKKEY)||''}catch(e){return ''}};
+const setTok=t=>{try{t?localStorage.setItem(TOKKEY,t):localStorage.removeItem(TOKKEY)}catch(e){}};
+async function api(path,{method,body}={}){
+  let res;
+  try{res=await fetch(API_BASE+path,{method:method||(body?'POST':'GET'),headers:{...(body?{'Content-Type':'application/json'}:{}),...(getTok()?{Authorization:'Bearer '+getTok()}:{})},body:body?JSON.stringify(body):undefined})}
+  catch(e){const er=new Error('Sem conexão com o servidor. Confira a internet e tente de novo.');er.status=0;throw er}
+  const j=await res.json().catch(()=>({}));
+  if(!res.ok){const er=new Error(j.error||'Algo deu errado. Tente de novo.');er.status=res.status;er.body=j;
+    if(res.status===401&&C&&C.real){sairReal('Sua sessão expirou. Entre de novo.')}throw er}
+  return j}
+let stateVer=0;
+const dsIso=s=>s?ds(new Date(s)):null;
+function aplicaAssin(a){C.trialFim=dsIso(a.trialEndsAt);
+  C.assin={status:a.status,plano:'mensal',metodo:a.method,renov:a.autoRenew,prox:dsIso(a.currentPeriodEnd),cardPending:a.cardPending,acessoSrv:a.acesso,
+    hist:(a.payments||[]).map(p=>({d:dsIso(p.d),plano:'Mensal',metodo:p.metodo,valor:p.valor,st:'Pago'}))}}
+function aplicaMe(me){C={real:true,nome:me.nome,email:me.email,tel:me.tel,emp:me.emp,seg:me.seg,dt:me.dt,doc:me.doc,emailOk:me.emailOk,telOk:me.telOk,tourDone:me.tourDone,criado:dsIso(me.criado),termos:{versao:TERMOS_V}};aplicaAssin(me.assinatura)}
+function normalizaS(){S.gastos=S.gastos||{};S.gastosS=S.gastosS||{};S.gastosD=S.gastosD||{};S.vendas=S.vendas||{};S.itens=S.itens||[];S.despesas=S.despesas||[];S.negocio=S.negocio||{nome:C.emp,segmento:C.seg,dias:[1,2,3,4,5,6]};S.despesas.forEach(x=>{x.freq=x.freq||'mensal'})}
+async function carregaSessao(){const [me,st]=await Promise.all([api('/me'),api('/state')]);aplicaMe(me);S=st.data;stateVer=st.version;normalizaS();logged=true}
+function sairReal(msg){setTok('');C=null;logged=false;syncPend=false;S=seedExemplo();Object.assign(A,{scr:'login',err:'',info:msg||'',overlay:false,cap:{}});render();window.scrollTo(0,0)}
+
+/* gravação dos dados no servidor: espera 0,7 s de calma, envia com a versão; conflito traz a versão mais nova */
+let syncT=null,syncPend=false,syncBusy=false,offlineAvisado=false;
+function queueSync(){syncPend=true;clearTimeout(syncT);syncT=setTimeout(enviaEstado,700)}
+async function enviaEstado(){if(syncBusy){syncT=setTimeout(enviaEstado,500);return}if(!syncPend||!C||!C.real)return;syncBusy=true;syncPend=false;
+  try{const r=await api('/state',{method:'PUT',body:{data:S,version:stateVer}});stateVer=r.version;offlineAvisado=false}
+  catch(e){if(e.status===409&&e.body){S=e.body.data;stateVer=e.body.version;normalizaS();render(true);toast('Seus dados foram alterados em outro aparelho. Mostrando a versão mais recente.')}
+    else if(e.status===402){toast(e.message)}
+    else if(e.status!==401){syncPend=true;if(!offlineAvisado){offlineAvisado=true;toast('Sem conexão: suas alterações serão enviadas quando a internet voltar.')}syncT=setTimeout(enviaEstado,5000)}}
+  finally{syncBusy=false}}
+if(typeof window!=='undefined'&&window.addEventListener)window.addEventListener('beforeunload',e=>{if(REAL&&syncPend){e.preventDefault();e.returnValue=''}});
+
+async function onAuthSubmitReal(id){
+  const g=k=>{const e=$('#'+k);return e?String(e.value).trim():''},chk=k=>{const e=$('#'+k);return !!(e&&e.checked)},rad=n=>(document.querySelector(`input[name="${n}"]:checked`)||{}).value;
+  const falha=(e,capId)=>{A.err=e.message;if(capId)A.cap[capId]=false;render();window.scrollTo(0,0)};
+  const entrou=async(msg)=>{await carregaSessao();A.err='';A.info='';A.cap={};ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg);maybeTour()};
+  if(id==='f-login'){const em=g('l-email').toLowerCase(),pw=($('#l-pw')||{}).value||'';A.lastEmail=em;A.info='';
+    if(!em||!pw){A.err='Preencha e-mail e senha.';return render()}
+    if(em==='demo@gestorconex.com.br'&&pw==='Demo@2026'){A.err='';return entrarDemo()}
+    if(!A.capTok['l-robo']){A.err='Complete a verificação de segurança.';return render()}
+    try{const r=await api('/auth/login',{body:{email:em,pw,captcha:A.capTok['l-robo']}});setTok(r.token);
+      if(r.mustChange){A.err='';A.scr='nova-senha';return render()}
+      await entrou('Bem-vindo de volta!')}catch(e){falha(e,'l-robo')}}
+  else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini=rad('r-ini')||'exemplo';
+    A.reg={'r-nome':nome,'r-email':em,'r-tel':tel,'r-emp':emp,'r-seg':seg,'r-dt':dt,'r-doc':doc,'r-ini':ini,'r-ok':chk('r-ok')};
+    let er='';
+    if(nome.length<3)er='Informe seu nome completo.';else if(!emailOk(em))er='Informe um e-mail válido.';else if(onlyD(tel).length<10)er='Informe o celular com DDD.';
+    else if(!emp)er='Informe o nome do negócio.';else if(dt==='CNPJ'?!cnpjOk(doc):!cpfOk(doc))er=`${dt} inválido. Confira os números.`;
+    else if(pwError(pw,em))er=pwError(pw,em);else if(pw!==pw2)er='As duas senhas não são iguais.';
+    else if(!chk('r-ok'))er='Para criar a conta, aceite os Termos de uso e a Política de privacidade.';else if(!A.capTok['r-robo'])er='Complete a verificação de segurança.';
+    if(er){A.err=er;render();window.scrollTo(0,0);return}
+    try{const r=await api('/auth/register/start',{body:{nome,email:em,tel,emp,seg,dt,doc,pw,aceite:true,captcha:A.capTok['r-robo']}});
+      A.pend={pendingId:r.pendingId,via:r.via,destino:r.destino,email:em,tel,emp,seg,ini};A.err='';A.info='';
+      if(r.via==='none')return onAuthSubmitReal('f-ver'); // cadastro sem código (provisório): conclui direto
+      A.scr='verificar';render();window.scrollTo(0,0)}catch(e){falha(e,'r-robo')}}
+  else if(id==='f-ver'){const p=A.pend;if(!p)return;
+    const estado=p.ini==='exemplo'?(()=>{const s=seedExemplo({seed:(Math.random()*1e9)|0});s.negocio.nome=p.emp;return s})():novoNegocio(p.seg,p.emp);
+    try{const r=await api('/auth/register/confirm',{body:{pendingId:p.pendingId,code:g('v-code'),estado}});setTok(r.token);A.pend=null;A.reg=null;
+      await entrou('Conta criada. Seu teste grátis de 14 dias começou.')}catch(e){A.err=e.message;A.info='';render()}}
+  else if(id==='f-esq'){const em=g('e-email').toLowerCase();if(!emailOk(em)){A.err='Informe um e-mail válido.';return render()}
+    if(!A.capTok['e-robo']){A.err='Complete a verificação de segurança.';return render()}
+    try{await api('/auth/forgot',{body:{email:em,captcha:A.capTok['e-robo']}});A.lastEmail=em;A.err='';A.scr='enviada';render()}catch(e){falha(e,'e-robo')}}
+  else if(id==='f-nova'){const pw=($('#n-pw')||{}).value||'',pw2=($('#n-pw2')||{}).value||'';const er=pwError(pw,A.lastEmail)||(pw!==pw2?'As duas senhas não são iguais.':'');
+    if(er){A.err=er;return render()}
+    try{const r=await api('/auth/change-password',{body:{nova:pw}});setTok(r.token);await entrou('Senha trocada. Use a nova no próximo login.')}catch(e){A.err=e.message;render()}}
+  else if(id==='f-chg'){const atual=($('#c-cur')||{}).value||'',pw=($('#c-new')||{}).value||'',pw2=($('#c-new2')||{}).value||'';
+    ui.chgErr=pwError(pw,C.email)||(pw!==pw2?'As duas senhas não são iguais.':'');if(ui.chgErr)return render(true);
+    try{const r=await api('/auth/change-password',{body:{atual,nova:pw}});setTok(r.token);ui.chgPw=false;render(true);toast('Senha trocada. Use a nova no próximo login.')}catch(e){ui.chgErr=e.message;render(true)}}
+  else if(id==='f-del'){if(!chk('d-ok')){ui.delErr='Marque a confirmação para continuar.';return render(true)}
+    try{await api('/account/delete/start',{body:{senha:($('#d-pw')||{}).value||''}});ui.delErr='';ui.delStep=2;render();window.scrollTo(0,0)}catch(e){ui.delErr=e.message;render(true)}}
+}
+
+/* assinatura real: cartão (página segura do Mercado Pago) e Pix (QR code do Mercado Pago) */
+let pixPoll=null;
+async function confereePix(manual){if(!ui.pix)return;try{const r=await api('/subscription/pix/'+ui.pix.id);
+  if(r.status==='APPROVED'){clearInterval(pixPoll);ui.pix=null;aplicaAssin(r.assinatura);render(true);toast('Pagamento confirmado! Sua assinatura está ativa.')}
+  else if(manual)toast(r.status==='PENDING'?'Ainda não recebemos o pagamento. Se já pagou, aguarde alguns segundos.':'O Pix não foi aprovado. Gere um novo código.')}catch(e){if(manual)toast(e.message)}}
+function contaActReal(a,b){
+  if(a==='s-pagar'||a==='s-reativar'){b.disabled=true;b.textContent='Abrindo o Mercado Pago…';
+    api('/subscription/card',{method:'POST'}).then(r=>{if(syncPend)enviaEstado();location.href=r.url}).catch(e=>{ui.payErr=e.message;render(true)});return true}
+  if(a==='s-pix'){b.disabled=true;b.textContent='Gerando o Pix…';
+    api('/subscription/pix',{method:'POST'}).then(r=>{ui.pix={id:r.id,code:r.qrCode,img:r.qrCodeBase64,exp:Date.parse(r.expiresAt)};render(true);clearInterval(pixPoll);pixPoll=setInterval(()=>{if(!ui.pix||ui.tab!=='assinatura'){clearInterval(pixPoll);return}confereePix(false)},5000)})
+      .catch(e=>{ui.payErr=e.message;render(true)});return true}
+  if(a==='s-aprovar'){confereePix(true);return true}
+  if(a==='s-cancel'){arm(b,()=>api('/subscription/cancel',{method:'POST'}).then(r=>{aplicaAssin(r);render(true);toast(`Renovação cancelada.${C.assin.prox?' Vale até '+fmtD(C.assin.prox)+'.':''}`)}).catch(e=>toast(e.message)));return true}
+  if(a==='c-sair'){const go=()=>{A.lastEmail=C.email;sairReal('Você saiu da conta.')};if(syncPend)enviaEstado().finally(go);else go();return true}
+  if(a==='c-confirm-email'){api('/auth/verify-email/send',{method:'POST'}).then(()=>toast('Enviamos o link de confirmação para o seu e-mail.')).catch(e=>toast(e.message));return true}
+  if(a==='d-confirm')return true;
+  return undefined}
+
+/* início no site: links que voltam do e-mail ou do Mercado Pago, e sessão salva */
+async function bootReal(){
+  const q=new URLSearchParams(location.search),del=q.get('excluir'),em=q.get('email'),ret=q.get('assinatura');
+  if(del||em||ret)history.replaceState(null,'',location.pathname);
+  if(del){A.delTok=del;A.scr='del-confirm';logged=false;return renderAuth()}
+  if(getTok()){$('#main').innerHTML='<p class="note" style="padding:40px 0;text-align:center">Carregando seus dados…</p>';
+    try{await carregaSessao();if(ret){ui.tab='assinatura';try{aplicaAssin(await api('/subscription'))}catch(e){}}render();
+      if(em==='confirmado')toast('E-mail confirmado. Obrigado!');if(ret)toast(C.assin.renov?'Cartão cadastrado! A renovação automática está ativa.':'Conferindo seu pagamento. Pode levar alguns segundos.');maybeTour();return}
+    catch(e){if(e.status!==401){A.info=e.message}setTok('')}}
+  if(em==='confirmado')A.info='E-mail confirmado. Entre na sua conta.';
+  if(C&&!C.real&&logged)return render(); // conta de demonstração local
+  logged=false;if(!LEGAL_SCR.includes(A.scr))A.scr=A.scr==='intro'?'intro':'login';render()}
+const aDelConfirm=()=>`<h1>Excluir sua conta</h1><p class="muted" style="margin:0">Ao confirmar, apagamos sua conta e todos os dados do seu negócio. Isso não pode ser desfeito.</p>${errBox()}
+  <button class="btn danger big" data-act="a-delconfirm">Confirmar exclusão</button><button class="lnk" data-act="a-go" data-v="login">Cancelar e voltar</button>`;
+async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:{token:A.delTok}});setTok('');C=null;logged=false;A.delTok=null;Object.assign(A,{scr:'excluida',err:''});render()}catch(e){A.err=e.message;render()}}
 
 /* ---------- render / eventos ---------- */
 const VIEWS={painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
@@ -1570,7 +1699,7 @@ document.addEventListener('click',e=>{
   else if(a==='rm-desp')arm(b,()=>{despById(b.dataset.id).ativo=false;save();render(true);toast('Despesa removida')});
   else if(a==='novo')arm(b,()=>{S=novoNegocio($('#n-seg').value,$('#n-nome').value.trim());save();ui.tab='cadastros';render();window.scrollTo(0,0);toast('Pronto. Confira seus cadastros.')});
   else if(a==='look'){ui.look=b.dataset.v;applyLook();render(true)}
-  else if(a==='go-sim'){ui.tab='ajustes';render();const s=$('#sim');if(s)s.scrollIntoView({block:'start'})}
+  else if(a==='go-sim'){ui.tab='ajustes';render();const s=$(C&&C.real?'#novo':'#sim');if(s)s.scrollIntoView({block:'start'})}
   else if(a==='simular'){const cen=$('#sim-cen').value;
     if(!S.exemplo&&!b.classList.contains('armed')){arm(b,()=>{});toast('Isso apaga seus dados. Toque de novo para confirmar.');return}
     S=seedExemplo({cenario:cen,mov:+$('#sim-mov').value,meses:+$('#sim-mes').value,seed:(Math.random()*1e9)|0});save();ui.tab='painel';ui.view='geral';ui.mode='mes';ui.ref=TODAY;render();window.scrollTo(0,0);toast('Simulação gerada: '+CENARIOS[cen].nome)}
@@ -1609,7 +1738,9 @@ document.addEventListener('submit',e=>{
 });
 let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(ui.tab==='painel')drawCharts()},150)});
 if(location.hash&&VIEWS[location.hash.slice(1)])ui.tab=location.hash.slice(1);
-render();
+// links públicos para as lojas (abrem sem login): /#privacidade, /#termos, /#excluir-conta
+{const lh={privacidade:'privacidade',termos:'termos','excluir-conta':'excluir-info'}[(location.hash||'').slice(1)];if(lh){A.scr=lh;A.legalBack='login';ui.legal=lh;if(logged&&C){ui.tab='legal'}}}
+if(REAL)bootReal();else render();
 </script>
 
 </body>
