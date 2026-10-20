@@ -1195,7 +1195,7 @@ const vConta=()=>`${topbar('Minha conta')}${contaCards()}${contaDanger()}`;
 /* ================= CONTA: tutorial, login, cadastro, senha, assinatura, privacidade, exclusão =================
    Mesmo padrão do Chat Conex. No protótipo tudo fica neste navegador; nada é enviado para servidor. */
 const AKEY='balcao.conta',SESS='balcao.sessao',INTRO='balcao.intro',TERMOS_V='1.0',TRIAL_DIAS=14,SUPORTE='suporte@gestorconex.com.br';
-const PLANOS={mensal:{nome:'Mensal',preco:79.9,per:'mês',meses:1}};
+const PLANOS={mensal:{nome:'Mensal',preco:59.9,per:'mês',meses:1}};
 let C=null;try{C=JSON.parse(localStorage.getItem(AKEY))}catch(e){}
 const saveC=()=>{if(C&&C.real){if(C.tourDone&&!C._tourSent){C._tourSent=true;api('/me',{method:'PATCH',body:{tourDone:true}}).catch(()=>{C._tourSent=false})}return}try{C?localStorage.setItem(AKEY,JSON.stringify(C)):localStorage.removeItem(AKEY)}catch(e){}};
 let logged=false;try{logged=!!C&&localStorage.getItem(SESS)===C.email}catch(e){}
@@ -1232,7 +1232,7 @@ function assinStatusWeb(){const a=C.assin;
     return a.renov?{c:'good',t:'Ativa',x:`Plano ${PLANOS[a.plano].nome} · próxima cobrança em ${fmtD(a.prox)}, no ${a.metodo==='pix'?'Pix':'cartão'}.`}:{c:'warn',t:'Ativa, sem renovação',x:`Vale até ${fmtD(a.prox)}. Depois disso, o acesso fica pausado até você renovar.`}}
   const l=daysBetween(TODAY,C.trialFim);
   if(l<0)return{c:'bad',t:'Teste encerrado',x:`Seu teste grátis terminou em ${fmtD(C.trialFim)}. Seus dados estão guardados.`};
-  if(a.renov)return{c:'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'}. Cartão cadastrado: a primeira cobrança de R$ 79,90 será em ${fmtD(C.trialFim)}.`};
+  if(a.renov)return{c:'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'}. Cartão cadastrado: a primeira cobrança de R$ 59,90 será em ${fmtD(C.trialFim)}.`};
   return{c:l<=3?'warn':'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'} (até ${fmtD(C.trialFim)}). Nenhuma cobrança até você assinar.`}}
 function assinStatus(){const s=assinStatusWeb();if(!NATIVO)return s;const a=C.assin;
   if(s.c==='bad')return{...s,x:s.x.replace(' Renove para voltar a usar.','')};
@@ -1268,7 +1268,7 @@ function vAssinatura(){const st=assinStatus(),a=C.assin;
   return `${topbar('Assinatura')}
   <section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p>
     ${a.status==='ativa'?`<div class="btns">${a.renov?`<button class="btn danger sm" data-act="s-cancel">Cancelar renovação automática</button>`:a.metodo==='cartao'?`<button class="btn sm" data-act="s-reativar">Reativar renovação automática</button>`:''}</div>${a.renov?'<p class="note" style="margin:8px 0 0">Se cancelar, a assinatura continua valendo até o fim do período já pago.</p>':''}`:''}</section>
-  <section class="card"><div class="card-h"><h2>${a.status==='ativa'?'Renovar ou trocar de plano':'Escolha seu plano'}</h2><p>R$ 79,90 por mês, sem fidelidade</p></div>
+  <section class="card"><div class="card-h"><h2>${a.status==='ativa'?'Renovar ou trocar de plano':'Escolha seu plano'}</h2><p>R$ 59,90 por mês, sem fidelidade</p></div>
     <div class="plans">${Object.entries(PLANOS).map(([k,x])=>`<button class="plan" data-act="s-plano" data-v="${k}" aria-pressed="${ui.plano===k}">${x.tag?`<span class="tag">${x.tag}</span>`:''}<b>${x.nome}</b><span class="pr">${brl(x.preco)}</span><span class="muted">por ${x.per}${k==='anual'?` · ${brl(x.preco/12)} por mês`:''}</span></button>`).join('')}</div>
     <p class="a-sec" style="margin-top:18px">Forma de pagamento</p>
     <div class="seg" role="group" aria-label="Forma de pagamento">${[['cartao','Cartão de crédito'],['pix','Pix']].map(([k,l])=>`<button data-act="s-metodo" data-v="${k}" aria-pressed="${ui.metodo===k}">${l}</button>`).join('')}</div>
@@ -1327,7 +1327,7 @@ function legalHtml(k){
   if(k==='termos')return `<h1>Termos de uso</h1><p class="faint">Versão ${TERMOS_V} · Última atualização: ${upd}</p>
     <h2>1. O serviço</h2><p>O Gestor Conex é um aplicativo de gestão para pequenos negócios. Você registra vendas e despesas e o app mostra indicadores como faturamento, custos e lucro. É oferecido por ${emp}, CNPJ ${cnpj}.</p>
     <h2>2. Sua conta</h2><p>Você precisa ter 18 anos ou mais e informar dados verdadeiros. A senha é pessoal: não compartilhe. Avise o suporte se suspeitar de uso indevido.</p>
-    <h2>3. Teste grátis e assinatura</h2><ul><li>Toda conta nova tem ${TRIAL_DIAS} dias de teste grátis, sem cartão.</li><li>Depois do teste, o uso depende de uma assinatura mensal de R$ 79,90, sem fidelidade.</li><li>No cartão, a assinatura renova sozinha até você cancelar. No Pix, você paga cada período.</li><li>Ao cancelar, o acesso continua até o fim do período pago. Não há multa.</li><li>Assinaturas feitas pela App Store ou pelo Google Play seguem as regras e o cancelamento da loja.</li></ul>
+    <h2>3. Teste grátis e assinatura</h2><ul><li>Toda conta nova tem ${TRIAL_DIAS} dias de teste grátis, sem cartão.</li><li>Depois do teste, o uso depende de uma assinatura mensal de R$ 59,90, sem fidelidade.</li><li>No cartão, a assinatura renova sozinha até você cancelar. No Pix, você paga cada período.</li><li>Ao cancelar, o acesso continua até o fim do período pago. Não há multa.</li><li>Assinaturas feitas pela App Store ou pelo Google Play seguem as regras e o cancelamento da loja.</li></ul>
     <h2>4. Seus dados e os indicadores</h2><p>Os dados lançados são seus. Os indicadores são calculados a partir do que você lança e servem para apoiar suas decisões. Eles não substituem a contabilidade nem orientação de um contador.</p>
     <h2>5. Uso não permitido</h2><p>Não é permitido usar o app para fins ilegais, tentar acessar contas de outras pessoas ou atrapalhar o funcionamento do serviço.</p>
     <h2>6. Disponibilidade</h2><p>Trabalhamos para manter o serviço no ar, mas podem ocorrer pausas para manutenção ou falhas fora do nosso controle.</p>
@@ -1359,7 +1359,7 @@ const SLIDES=[
   {ic:'despesas',t:'Registre suas contas',x:'Aluguel, energia, internet: mensais, semanais ou diárias. O app divide pelos dias para comparar certo.'},
   {ic:'painel',t:'Veja quanto sobrou',x:'Na tela inicial: o lucro, se está melhor ou pior que o mês passado e as 3 coisas mais importantes.'},
   {ic:'ajustes',t:'Entenda o que mudou',x:'O que ajudou e o que atrapalhou o lucro, item por item, e quanto precisa vender para pagar as contas.'},
-  {ic:'conta',t:`${TRIAL_DIAS} dias grátis`,x:NATIVO?'Teste tudo sem cartão e sem compromisso.':'Teste tudo sem cartão. Depois, assine por R$ 79,90 por mês. Cancele quando quiser.'}];
+  {ic:'conta',t:`${TRIAL_DIAS} dias grátis`,x:NATIVO?'Teste tudo sem cartão e sem compromisso.':'Teste tudo sem cartão. Depois, assine por R$ 59,90 por mês. Cancele quando quiser.'}];
 const errBox=()=>A.err?`<div class="a-err" role="alert">${esc(A.err)}</div>`:'';
 const infoBox=()=>A.info?`<div class="a-info" role="status">${A.info}</div>`:'';
 const LEGAL_SCR=['termos','privacidade','excluir-info'];
@@ -1536,7 +1536,7 @@ const TOURS=[
     ['[aria-label="Frequência"]','Mensais, semanais ou diárias','Escolha o tipo da conta: aluguel é mensal, a feira pode ser semanal, o café é diário.'],
     ['#f-desp-q','Conta nova','Cadastre uma conta aqui mesmo e já lance o valor.']]},
   {tab:'conta',steps:[
-    ['[data-tour="assin"]','Sua assinatura',NATIVO?'Aqui você acompanha a situação da sua conta.':`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 79,90 por mês, no cartão ou no Pix.`],
+    ['[data-tour="assin"]','Sua assinatura',NATIVO?'Aqui você acompanha a situação da sua conta.':`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 59,90 por mês, no cartão ou no Pix.`],
     ['[data-tour="ajuda"]','Quer rever?','Este tutorial fica aqui, em <b>Ajuda</b>, sempre que precisar.']]}
 ];
 let tourOn=false;
