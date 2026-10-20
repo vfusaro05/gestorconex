@@ -608,7 +608,7 @@ ui.look='clean';
 try{const u=JSON.parse(localStorage.getItem(UKEY));if(u){if(u.tab)ui.tab=u.tab;if(u.mode)ui.mode=u.mode;if(u.view)ui.view=u.view;if(u.look)ui.look=u.look}}catch(e){}
 const applyLook=()=>{if(ui.look==='escuro')document.documentElement.setAttribute('data-look','escuro');else document.documentElement.removeAttribute('data-look')};
 applyLook();
-const save=()=>{if(REAL&&C&&C.real)return queueSync();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const save=()=>{agendaLembretes();if(REAL&&C&&C.real)return queueSync();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const saveUi=()=>{try{localStorage.setItem(UKEY,JSON.stringify({tab:ui.tab,mode:ui.mode,view:ui.view,look:ui.look}))}catch(e){}};
 const itemById=id=>S.itens.find(i=>i.id===id);
 const despById=id=>S.despesas.find(i=>i.id===id);
@@ -1166,6 +1166,12 @@ function vAjustes(){
   return `${topbar('Ajustes')}
   <section class="card"><div class="card-h"><h2>Aparência</h2><p>Só muda neste aparelho.</p></div>
     <div class="seg" role="group" aria-label="Aparência">${[['clean','Clean (claro)'],['escuro','Escuro']].map(([k,l])=>`<button data-act="look" data-v="${k}" aria-pressed="${ui.look===k}">${l}</button>`).join('')}</div></section>
+  <section class="card"><div class="card-h"><h2>Lembretes</h2><p>Avisos no celular para não esquecer de lançar.</p></div>
+    ${NATIVO?`<div class="a-form" style="max-width:520px"><label class="chk"><input type="checkbox" id="lb-vendas" ${LEMB.vendas?'checked':''}><span>Lembrar de lançar as vendas, nos dias de funcionamento</span></label>
+      <label class="chk"><input type="checkbox" id="lb-desp" ${LEMB.desp?'checked':''}><span>Lembrar de lançar as despesas: variáveis no dia 5 de cada mês, semanais na segunda-feira</span></label>
+      <div class="field" style="max-width:200px"><label for="lb-hora">Horário dos avisos</label><select class="inp" id="lb-hora">${[8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map(h=>`<option value="${h}" ${LEMB.hora===h?'selected':''}>${h}h</option>`).join('')}</select></div>
+      <p class="note" style="margin:0">Se as vendas do dia já foram lançadas, o aviso daquele dia não aparece.</p></div>`
+    :'<p class="note" style="margin:0">Os lembretes chegam pelo app do Gestor Conex no celular (Google Play e App Store).</p>'}</section>
   <section class="card"><div class="card-h"><h2>Seu negócio</h2></div>
     <div class="form-row" style="max-width:520px">
       <div class="field"><label for="a-nome">Nome do negócio</label><input class="inp" id="a-nome" value="${esc(S.negocio.nome)}"></div>
@@ -1546,8 +1552,38 @@ function loadDriver(){return new Promise((res,rej)=>{if(window.driver&&window.dr
 async function startTour(){if(tourOn)return;tourOn=true;try{await loadDriver()}catch(e){tourOn=false;toast(e.message);return}runTourAt(0)}
 // "Como funciona" só depois de entrar: na primeira vez neste aparelho abre por cima do app; ao fechar, segue para o tour
 const introVisto=()=>{try{return !!localStorage.getItem(INTRO)}catch(e){return true}};
-const maybeTour=()=>{if(!C||!logged)return;if(!introVisto()){Object.assign(A,{overlay:true,scr:'intro',slide:0});render();window.scrollTo(0,0);return}if(!C.tourDone)setTimeout(startTour,600)};
-function finishTour(msg){tourOn=false;if(C){C.tourDone=true;saveC()}ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg)}
+/* ---------- lembretes no celular (só no app das lojas): notificações agendadas no próprio aparelho, sem servidor.
+   Vendas: nos dias de funcionamento, no horário escolhido (some no dia em que as vendas já foram lançadas).
+   Despesas: dia 5 de cada mês para as variáveis; segunda-feira para as semanais; as diárias entram no aviso das vendas.
+   Reagendado a cada alteração dos dados (save) e ao entrar. */
+var LKEY='gc.lembretes',LEMB={vendas:true,desp:true,hora:19},lembT=null;
+try{Object.assign(LEMB,JSON.parse(localStorage.getItem(LKEY))||{})}catch(e){}
+const LN=()=>NATIVO?((window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications)||(window.Capacitor.registerPlugin&&window.Capacitor.registerPlugin('LocalNotifications'))):null;
+function agendaLembretes(){if(!NATIVO)return;clearTimeout(lembT);lembT=setTimeout(agendaAgora,1500)}
+async function agendaAgora(){const P=LN();if(!P)return;
+  try{const pend=await P.getPending();if(pend.notifications.length)await P.cancel({notifications:pend.notifications.map(n=>({id:n.id}))});
+    if(!logged||!C||(!LEMB.vendas&&!LEMB.desp))return;
+    if((await P.checkPermissions()).display!=='granted')return;
+    const dias=S.negocio.dias||[1,2,3,4,5,6],now=Date.now(),list=[],at=d=>{const x=pd(d);x.setHours(LEMB.hora,0,0,0);return x};
+    const ativas=fr=>S.despesas.filter(x=>x.ativo&&x.freq===fr&&(fr!=='mensal'||x.cat!=='fixa'));
+    const diarias=LEMB.desp&&ativas('diaria').length;
+    if(LEMB.vendas)for(let i=0;i<21;i++){const d=addDays(TODAY,i),t=at(d);if(!dias.includes(pd(d).getDay())||t<=now||(d===TODAY&&S.vendas[TODAY]))continue;
+      list.push({id:1000+i,title:diarias?'Lance as vendas e as despesas de hoje':'Lance as vendas de hoje',body:'Leva menos de 1 minuto. Toque para abrir o Gestor Conex.',schedule:{at:t,allowWhileIdle:true},extra:{tab:'vendas'}})}
+    if(LEMB.desp&&ativas('mensal').length)for(let m=0;m<3;m++){const ym=addYm(ymOf(TODAY),m),t=at(ym+'-05');if(t<=now)continue;
+      if(m===0){const g=S.gastos[ym]||{};if(ativas('mensal').every(x=>g[x.id]>0))continue}
+      list.push({id:1100+m,title:'Lance as despesas do mês',body:'Energia, água e outras contas variáveis mudam todo mês. Lance para o lucro ficar certo.',schedule:{at:t,allowWhileIdle:true},extra:{tab:'despesas',freq:'mensal'}})}
+    if(LEMB.desp&&ativas('semanal').length)for(let w=0;w<3;w++){const d=addDays(weekStart(TODAY),7*w),t=at(d);if(t<=now)continue;
+      list.push({id:1200+w,title:'Lance as despesas da semana',body:'Toque para lançar as contas semanais no Gestor Conex.',schedule:{at:t,allowWhileIdle:true},extra:{tab:'despesas',freq:'semanal'}})}
+    if(list.length)await P.schedule({notifications:list})}catch(e){}}
+// pede a permissão de notificação (uma vez, depois do tutorial, ou ao ligar um lembrete em Ajustes)
+async function pedeLembretes(forcar){const P=LN();if(!P)return;
+  try{if(!forcar&&localStorage.getItem('gc.lembPerg'))return agendaAgora();localStorage.setItem('gc.lembPerg','1')}catch(e){}
+  try{let p=await P.checkPermissions();if(p.display!=='granted'&&p.display!=='denied')p=await P.requestPermissions();
+    if(forcar&&p.display==='denied')toast('Notificações bloqueadas. Libere nas configurações do celular.');agendaAgora()}catch(e){}}
+if(NATIVO){const P=LN();if(P&&P.addListener)P.addListener('localNotificationActionPerformed',a=>{const x=(a.notification||{}).extra||{};
+  if(!x.tab||!logged||!C)return;ui.tab=x.tab;if(x.tab==='vendas')ui.vDate=TODAY;if(x.freq)ui.gFreq=x.freq;render();window.scrollTo(0,0)})}
+const maybeTour=()=>{if(!C||!logged)return;agendaLembretes();if(!introVisto()){Object.assign(A,{overlay:true,scr:'intro',slide:0});render();window.scrollTo(0,0);return}if(!C.tourDone)setTimeout(startTour,600)};
+function finishTour(msg){tourOn=false;if(C){C.tourDone=true;saveC()}pedeLembretes();ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg)}
 function runTourAt(i){const t=TOURS[i];if(!t)return finishTour('Pronto! Agora é com você.');if(t.prep)t.prep();ui.tab=t.tab;render();window.scrollTo(0,0);const alvo=t.tab;
   setTimeout(()=>{
     if(ui.tab!==alvo){ui.tab=alvo;render();window.scrollTo(0,0)} // a pessoa trocou de tela no meio: volta para a tela desta parte
@@ -1694,7 +1730,7 @@ async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:
 const VIEWS={painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,conta:vConta,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
 function render(keepScroll){
   // sem sessão (ou tutorial aberto): telas de entrada no lugar do app
-  if(!logged||!C||A.overlay){renderAuth();return}
+  if(!logged||!C||A.overlay){if(!logged)agendaLembretes();renderAuth();return} // sem sessão: cancela os lembretes do aparelho
   if(!(S.fixasRep&&S.fixasRep[ymOf(TODAY)]))repeteFixas();
   document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#auth').innerHTML='';
   if(!VIEWS[ui.tab])ui.tab='painel';
@@ -1750,6 +1786,8 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
   const el=e.target;
+  if(el.id==='lb-vendas'||el.id==='lb-desp'||el.id==='lb-hora'){LEMB={vendas:!!($('#lb-vendas')||{}).checked,desp:!!($('#lb-desp')||{}).checked,hora:+(($('#lb-hora')||{}).value)||19};
+    try{localStorage.setItem(LKEY,JSON.stringify(LEMB))}catch(x){}if(LEMB.vendas||LEMB.desp)pedeLembretes(true);else agendaAgora();toast('Lembretes atualizados');return}
   if(el.name==='r-dt'){A.reg=A.reg||{};A.reg['r-dt']=el.value;A.reg['r-doc']='';render();return}
   if(el.name==='r-ini'){A.reg=A.reg||{};A.reg['r-ini']=el.value;return}
   if(el.id&&el.id.startsWith('r-')&&!el.id.includes('pw')){A.reg=A.reg||{};A.reg[el.id]=el.type==='checkbox'?el.checked:el.value;return}
