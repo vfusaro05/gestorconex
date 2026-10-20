@@ -825,13 +825,19 @@ function eqCard(){const eq=equilibrio();
     <div class="eq-leg"><span>${ok?'<i class="sq c"></i>':''}Meta para pagar as contas: <b>${brl0(eq.pe)}</b></span><span>${ok?'<i class="sq l"></i>Vendido':'<i class="sq c prog"></i>Vendido até agora'}: <b>${brl0(eq.feito)}</b></span></div>
     <p class="note" style="margin:10px 0 0">Como calculamos: contas fixas do mês (${brl0(eq.fixoMes)}) divididas pelo que sobra de cada venda depois de produtos, comissões e taxas (${Math.round(eq.mc*100)}%). É o ponto de equilíbrio.</p></section>`}
 // Só a pendência mais importante, numa linha
+// contas fixas mensais: no mês novo repetem sozinhas o último valor lançado. Roda uma vez por mês
+// (S.fixasRep), então dá para editar ou apagar o valor repetido sem ele voltar.
+function repeteFixas(){const ym=ymOf(TODAY);S.fixasRep=S.fixasRep||{};if(S.fixasRep[ym])return;
+  const g=S.gastos[ym]||{},meses=Object.keys(S.gastos).filter(k=>k<ym).sort().reverse();
+  for(const x of S.despesas)if(x.ativo&&x.freq==='mensal'&&x.cat==='fixa'&&!(g[x.id]>0)){const m=meses.find(k=>S.gastos[k][x.id]>0);if(m)g[x.id]=S.gastos[m][x.id]}
+  if(Object.keys(g).length)S.gastos[ym]=g;S.fixasRep[ym]=1;save()}
 function pendencia(){
   const dias=S.negocio.dias||[1,2,3,4,5,6],open=d=>dias.includes(pd(d).getDay());
   if(open(TODAY)&&!S.vendas[TODAY])return `<div class="pend"><span><b>Vendas de hoje ainda não lançadas.</b> Leva menos de 1 minuto.</span><button class="btn pri sm" data-act="lancar">Lançar agora</button></div>`;
   let first=null,n=0;for(let d=ymOf(TODAY)+'-01';d<TODAY;d=addDays(d,1))if(open(d)&&!S.vendas[d]){n++;first=first||d}
   if(n)return `<div class="pend"><span><b>${n} ${n>1?'dias':'dia'} deste mês sem vendas lançadas.</b> Eles contam como zero.</span><button class="btn sm" data-act="lancar" data-d="${first}">Lançar</button></div>`;
   const g=S.gastos[ymOf(TODAY)]||{},fM=S.despesas.filter(x=>x.ativo&&x.freq==='mensal'&&!(g[x.id]>0)).length;
-  if(fM)return `<div class="pend"><span><b>${fM} ${fM>1?'contas':'conta'} de ${MESES[+ymOf(TODAY).slice(5)-1]} sem valor.</b> Sem elas o lucro fica maior do que é.</span><button class="btn sm" data-tab="despesas">Lançar</button></div>`;
+  if(fM)return `<div class="pend"><span><b>${fM} ${fM>1?'contas':'conta'} de ${MESES[+ymOf(TODAY).slice(5)-1]} para lançar.</b> As variáveis mudam todo mês. Sem elas o lucro fica maior do que é.</span><button class="btn sm" data-tab="despesas">Lançar</button></div>`;
   return '';
 }
 function delta(a,b,opt={}){
@@ -1100,8 +1106,8 @@ function vDespesas(){
     <button class="icon-btn" data-act="gstep" data-n="1" aria-label="Próximo" ${gCanNext(f,k)?'':'disabled'}>›</button></div>
     ${list.length?`<button class="btn" data-act="copyprev">${{mensal:'Copiar do mês passado',semanal:'Copiar da semana passada',diaria:'Copiar do último dia'}[f]}</button>`:''}</div>
   <section class="card"><div class="vlist">${list.map(x=>{const v=g[x.id],p=pg[x.id];const dif=v>0&&p>0?pct(v,p):null;
-    return `<div class="grow"><div><b>${esc(x.nome)}</b> <span class="chip">${x.cat==='fixa'?'fixa':'variável'}</span>
-      <div class="hint">${p>0?`${PREV_N[f]}: ${brl(p)}`:`sem valor no ${PREV_N[f]}`}${dif!=null&&Math.abs(dif)>=.01?` · <span class="${dif>0?'up':'dn'}">${fmtPct(dif)}</span>`:''}</div></div>
+    return `<div class="grow"><div><b>${esc(x.nome)}</b> <span class="chip">${x.cat==='fixa'?'fixa':'variável'}</span>${x.cat!=='fixa'&&f==='mensal'&&k===ymOf(TODAY)&&!(v>0)?' <span class="chip" style="background:var(--warn-soft);color:var(--warn)">falta lançar</span>':''}
+      <div class="hint">${x.cat==='fixa'&&f==='mensal'?'Repete sozinha todo mês · ':''}${p>0?`${PREV_N[f]}: ${brl(p)}`:`sem valor no ${PREV_N[f]}`}${dif!=null&&Math.abs(dif)>=.01?` · <span class="${dif>0?'up':'dn'}">${fmtPct(dif)}</span>`:''}</div></div>
       <label class="money"><span>R$</span><input data-gid="${x.id}" id="g-${x.id}" inputmode="decimal" value="${fmtIn(v)}" placeholder="0,00" aria-label="Valor de ${esc(x.nome)}"></label></div>`}).join('')||`<p class="note">Nenhuma despesa ${FREQ[f].toLowerCase()} cadastrada ainda. Adicione abaixo.</p>`}</div>
     <form class="form-row dq" id="f-desp-q" style="border-top:1px solid var(--line);padding-top:14px;margin-top:4px">
       <div class="field"><label for="nq-nome">Nova despesa ${FREQ[f].toLowerCase()}</label><input class="inp" id="nq-nome" required placeholder="${{mensal:'Ex.: Seguro',semanal:'Ex.: Feira',diaria:'Ex.: Lanche da equipe'}[f]}"></div>
@@ -1139,7 +1145,7 @@ function vCadastros(){
       <div class="field"><label for="i-p-${i.id}">Preço R$</label><input class="inp" id="i-p-${i.id}" data-item="${i.id}" data-f="preco" inputmode="decimal" value="${fmtIn(i.preco)}"></div>
       <div class="field"><label for="i-c-${i.id}">Custo R$</label><input class="inp" id="i-c-${i.id}" data-item="${i.id}" data-f="custo" inputmode="decimal" value="${fmtIn(i.custo)}"></div>
       <button class="btn danger sm" data-act="rm-item" data-id="${i.id}">Remover</button></div>`).join('')}</div></section>
-  <section class="card"><div class="card-h"><h2>Despesas</h2><p>Fixa: quase não muda (aluguel). Variável: muda (energia). Frequência: de quanto em quanto tempo você lança.</p></div>
+  <section class="card"><div class="card-h"><h2>Despesas</h2><p>Fixa: o valor repete sozinho todo mês (aluguel). Variável: muda e você lança a cada mês (energia). Frequência: de quanto em quanto tempo você lança.</p></div>
     <div class="cta" style="margin-bottom:14px"><div><b>Aqui você só cria a lista de contas.</b><span class="note">Os valores de cada conta você lança na aba Despesas.</span></div><button class="btn pri sm" data-tab="despesas">Lançar valores</button></div>
     <form class="form-row desp" id="f-desp" style="padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:4px">
       <div class="field"><label for="nd-nome">Nome</label><input class="inp" id="nd-nome" required placeholder="Ex.: Seguro"></div>
@@ -1689,6 +1695,7 @@ const VIEWS={painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastr
 function render(keepScroll){
   // sem sessão (ou tutorial aberto): telas de entrada no lugar do app
   if(!logged||!C||A.overlay){renderAuth();return}
+  if(!(S.fixasRep&&S.fixasRep[ymOf(TODAY)]))repeteFixas();
   document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#auth').innerHTML='';
   if(!VIEWS[ui.tab])ui.tab='painel';
   document.querySelectorAll('nav [data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===ui.tab?'page':'false'));
