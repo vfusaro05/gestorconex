@@ -84,7 +84,7 @@ main{min-width:0;padding-block:18px 112px;display:flex;flex-direction:column;gap
 .side-foot{margin-top:auto;font-size:.75rem;color:var(--side-ink);opacity:.7}
 .nav svg,.bottom svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--nav-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(5,1fr);
+  display:grid;grid-template-columns:repeat(6,1fr);
   padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
 .bottom button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;color:var(--faint);font-size:.7rem;font-weight:700;border-radius:12px}
 .bottom button[aria-current="page"]{color:var(--acc)}
@@ -706,11 +706,14 @@ const IC={
   vendas:'<svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
   despesas:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M15 15h3"/></svg>',
   cadastros:'<svg viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
-  ajustes:'<svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>'
+  ajustes:'<svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>',
+  perfil:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>',
+  sair:'<svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>'
 };
-const TABS=[['painel','Início'],['vendas','Vendas'],['despesas','Despesas'],['cadastros','Cadastros'],['ajustes','Ajustes']];
-$('#nav-side').innerHTML=TABS.map(([k,l])=>`<button data-tab="${k}">${IC[k]}${l}</button>`).join('');
-$('#nav-bottom').innerHTML=TABS.map(([k,l])=>`<button data-tab="${k}">${IC[k]}<span>${l}</span></button>`).join('');
+// [aba, nome no menu lateral, nome curto na barra do celular, ícone]
+const TABS=[['painel','Início'],['vendas','Vendas'],['despesas','Despesas'],['cadastros','Cadastros'],['conta','Minha conta','Conta','perfil'],['ajustes','Ajustes']];
+$('#nav-side').innerHTML=TABS.map(([k,l,,ic])=>`<button data-tab="${k}">${IC[ic||k]}${l}</button>`).join('')+`<button data-act="c-sair">${IC.sair}Sair</button>`;
+$('#nav-bottom').innerHTML=TABS.map(([k,l,c,ic])=>`<button data-tab="${k}">${IC[ic||k]}<span>${c||l}</span></button>`).join('');
 
 function topbar(title,sub){
   // dados simulados: só um selo discreto (trocar cenário fica em Ajustes)
@@ -1147,7 +1150,6 @@ function vCadastros(){
 function vAjustes(){
   const dias=S.negocio.dias||[];
   return `${topbar('Ajustes')}
-  ${contaCards()}
   <section class="card"><div class="card-h"><h2>Aparência</h2><p>Só muda neste aparelho.</p></div>
     <div class="seg" role="group" aria-label="Aparência">${[['clean','Clean (claro)'],['escuro','Escuro']].map(([k,l])=>`<button data-act="look" data-v="${k}" aria-pressed="${ui.look===k}">${l}</button>`).join('')}</div></section>
   <section class="card"><div class="card-h"><h2>Seu negócio</h2></div>
@@ -1172,8 +1174,9 @@ function vAjustes(){
     </div></section>
   <section class="card" ${REAL?'hidden':''}><div class="card-h"><h2>Sobre este protótipo</h2></div>
     <p class="note" style="max-width:62ch;margin:0">Os dados e a conta ficam salvos só neste navegador. Na versão final eles vão para um servidor, e o mesmo negócio aparece no celular e no computador.</p></section>
-  ${contaDanger()}`;
+`;
 }
+const vConta=()=>`${topbar('Minha conta')}${contaCards()}${contaDanger()}`;
 
 /* ================= CONTA: tutorial, login, cadastro, senha, assinatura, privacidade, exclusão =================
    Mesmo padrão do Chat Conex. No protótipo tudo fica neste navegador; nada é enviado para servidor. */
@@ -1269,7 +1272,10 @@ function exportJson(){const {pw,tempPw,tempExp,...conta}=C;return JSON.stringify
 function contaCards(){const st=assinStatus();
   return `<section class="card"><div class="card-h"><h2>Minha conta</h2>${C.demo?'<span class="chip">demonstração</span>':''}</div>
     <dl class="kv"><dt>Nome</dt><dd>${esc(C.nome)}</dd><dt>E-mail</dt><dd>${esc(C.email)} ${C.emailOk?'<span class="chip">confirmado</span>':'<button class="lnk" data-act="c-confirm-email">confirmar e-mail</button>'}</dd><dt>Celular</dt><dd>${esc(C.tel)}</dd><dt>Negócio</dt><dd>${esc(C.emp)} · ${C.dt} ${esc(C.doc)}</dd></dl>
-    <div class="btns"><button class="btn sm" data-act="c-chgpw">Trocar senha</button><button class="btn sm" data-act="c-sair">Sair da conta</button></div>
+    ${ui.editNome?`<div class="a-form" style="margin-top:14px;max-width:420px"><div class="field"><label for="c-nome">Seu nome</label><input class="inp" id="c-nome" value="${esc(C.nome)}" autocomplete="name"></div>
+      ${ui.nomeErr?`<div class="a-err" role="alert">${esc(ui.nomeErr)}</div>`:''}<div class="btns" style="margin:0"><button class="btn pri sm" data-act="c-nome-ok">Salvar</button><button class="btn sm" data-act="c-nome">Cancelar</button></div></div>`:''}
+    <p class="note" style="margin:12px 0 0">Para trocar e-mail, celular ou documento, fale com o suporte: <b class="sel">${SUPORTE}</b>. O nome do negócio muda em <button class="lnk" data-tab="ajustes">Ajustes</button>.</p>
+    <div class="btns"><button class="btn sm" data-act="c-nome">Editar nome</button><button class="btn sm" data-act="c-chgpw">Trocar senha</button><button class="btn sm" data-act="c-tutorial">Ver o tutorial</button><button class="btn sm" data-act="c-sair">Sair da conta</button></div>
     ${ui.chgPw?`<form id="f-chg" class="a-form" style="margin-top:14px;max-width:420px">
       <div class="field"><label for="c-cur">Senha atual</label><input class="inp" id="c-cur" type="password" autocomplete="current-password"></div>
       <div class="field"><label for="c-new">Nova senha</label><div class="pw"><input class="inp" id="c-new" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-chg')}</div>
@@ -1287,19 +1293,19 @@ const PERDAS=['Todas as vendas lançadas, dia a dia.','Todas as despesas mensais
 function vExcluir(){const st=ui.delStep||0;
   if(st===2)return `${topbar('Excluir conta')}<section class="card" style="max-width:640px"><div class="card-h"><h2>Confira seu e-mail</h2></div><p class="muted" style="margin:0 0 12px">Enviamos um link de confirmação para <b>${esc(maskEmail(C.email))}</b>. O link vale por 24 horas. A conta só é excluída depois que você abrir o link.</p>
     ${REAL&&C.real?'<p class="note" style="margin:0">Abra o e-mail e toque em <b>Confirmar exclusão</b>. Se não chegar em alguns minutos, confira a caixa de spam.</p>':'<div class="proto"><b>Protótipo:</b> como não há e-mail de verdade, use o botão para simular a abertura do link.<div class="btns"><button class="btn danger" data-act="d-confirm">Abrir o link e excluir a conta</button></div></div>'}
-    <div class="btns"><button class="btn" data-tab="ajustes">Desistir e voltar</button></div></section>`;
+    <div class="btns"><button class="btn" data-tab="conta">Desistir e voltar</button></div></section>`;
   if(st===1)return `${topbar('Excluir conta')}<section class="card" style="max-width:640px"><div class="card-h"><h2>Confirme que é você</h2></div><form id="f-del" class="a-form">
     <div class="field"><label for="d-pw">Sua senha</label><div class="pw"><input class="inp" id="d-pw" type="password" autocomplete="current-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
     <label class="chk"><input type="checkbox" id="d-ok"><span>Entendo que a exclusão apaga todos os meus dados e não pode ser desfeita.</span></label>
     ${ui.delErr?`<div class="a-err" role="alert">${esc(ui.delErr)}</div>`:''}<button class="btn danger big" type="submit">Enviar e-mail de confirmação</button></form>
-    <div class="btns"><button class="btn" data-tab="ajustes">Cancelar</button></div></section>`;
+    <div class="btns"><button class="btn" data-tab="conta">Cancelar</button></div></section>`;
   return `${topbar('Excluir minha conta','Antes de continuar, veja o que muda para você.')}
   <section class="card" style="max-width:720px"><h2>O que você vai perder</h2><ul class="lst">${PERDAS.map(x=>`<li>${x}</li>`).join('')}</ul></section>
   <section class="card" style="max-width:720px"><h2>Antes de decidir</h2><ul class="lst">${NATIVO?'':'<li>Quer só parar de pagar? <button class="lnk" data-tab="assinatura">Cancele a renovação</button> e mantenha seus dados.</li>'}<li>Quer guardar seus números? <button class="lnk" data-act="c-export-go">Exporte seus dados</button> antes.</li><li>Algo não funcionou? Fale com a gente: <b class="sel">${SUPORTE}</b></li></ul></section>
-  <div class="btns" style="max-width:720px;margin:0"><button class="btn danger" data-act="d-next">Continuar com a exclusão</button><button class="btn" data-tab="ajustes">Cancelar</button></div>`}
+  <div class="btns" style="max-width:720px;margin:0"><button class="btn danger" data-act="d-next">Continuar com a exclusão</button><button class="btn" data-tab="conta">Cancelar</button></div>`}
 function excluirTudo(){try{[KEY,AKEY,SESS,UKEY,INTRO].forEach(k=>localStorage.removeItem(k))}catch(e){}
   C=null;logged=false;S=seedExemplo();Object.assign(A,{scr:'excluida',err:'',info:'',overlay:false});ui.tab='painel';ui.delStep=0;render();window.scrollTo(0,0)}
-function vLegal(){return `<div><button class="lnk" data-tab="ajustes">← Voltar para Ajustes</button></div><section class="card legal">${legalHtml(ui.legal)}</section>`}
+function vLegal(){return `<div><button class="lnk" data-tab="conta">← Voltar para Minha conta</button></div><section class="card legal">${legalHtml(ui.legal)}</section>`}
 
 /* ---------- textos legais ---------- */
 function legalHtml(k){
@@ -1311,12 +1317,12 @@ function legalHtml(k){
     <h2>4. Seus dados e os indicadores</h2><p>Os dados lançados são seus. Os indicadores são calculados a partir do que você lança e servem para apoiar suas decisões. Eles não substituem a contabilidade nem orientação de um contador.</p>
     <h2>5. Uso não permitido</h2><p>Não é permitido usar o app para fins ilegais, tentar acessar contas de outras pessoas ou atrapalhar o funcionamento do serviço.</p>
     <h2>6. Disponibilidade</h2><p>Trabalhamos para manter o serviço no ar, mas podem ocorrer pausas para manutenção ou falhas fora do nosso controle.</p>
-    <h2>7. Encerramento</h2><p>Você pode excluir sua conta a qualquer momento em Ajustes. Podemos suspender contas que violem estes termos, com aviso prévio sempre que possível.</p>
+    <h2>7. Encerramento</h2><p>Você pode excluir sua conta a qualquer momento em Minha conta. Podemos suspender contas que violem estes termos, com aviso prévio sempre que possível.</p>
     <h2>8. Mudanças nos termos</h2><p>Se estes termos mudarem, avisaremos no app e pediremos um novo aceite antes de você continuar.</p>
     <h2>9. Lei e foro</h2><p>Valem as leis do Brasil, incluindo o Código de Defesa do Consumidor e a LGPD. Contato: ${SUPORTE}.</p>`;
   if(k==='excluir-info')return `<h1>Como excluir sua conta do Gestor Conex</h1><p class="faint">Última atualização: ${upd}</p>
-    <h2>1. Pelo app</h2><p>Abra o Gestor Conex, entre na sua conta e vá em <b>Ajustes → Excluir conta</b>. Confirme sua senha e abra o link que enviamos para o seu e-mail.</p>
-    <h2>2. Pelo site</h2><p>Entre pelo navegador e siga o mesmo caminho: <b>Ajustes → Excluir conta</b>.</p>
+    <h2>1. Pelo app</h2><p>Abra o Gestor Conex, entre na sua conta e vá em <b>Minha conta → Excluir conta</b>. Confirme sua senha e abra o link que enviamos para o seu e-mail.</p>
+    <h2>2. Pelo site</h2><p>Entre pelo navegador e siga o mesmo caminho: <b>Minha conta → Excluir conta</b>.</p>
     <h2>3. Sem acesso à conta</h2><p>Envie um e-mail para <b class="sel">${SUPORTE}</b> a partir do e-mail cadastrado, com o assunto "Excluir minha conta". Respondemos em até 15 dias.</p>
     <h2>4. O que é excluído</h2><p>Conta, dados de cadastro, vendas, despesas, serviços, produtos e todo o histórico. A exclusão é definitiva e acontece em até 30 dias nos nossos servidores e cópias de segurança.</p>
     <h2>5. O que fica guardado e por quanto tempo</h2><ul><li>Registros de pagamento e notas fiscais: 5 anos, por obrigação fiscal.</li><li>Registros de acesso (data, hora e IP): 6 meses, como exige o Marco Civil da Internet.</li></ul><p>Depois desses prazos, também são apagados.</p>
@@ -1327,7 +1333,7 @@ function legalHtml(k){
     <h2>3. Para que usamos</h2><ul><li>Prestar o serviço e calcular seus indicadores (execução de contrato).</li><li>Cobrar a assinatura e emitir nota fiscal (obrigação legal).</li><li>Proteger sua conta e evitar fraudes (legítimo interesse).</li><li>Enviar novidades, só se você autorizar (consentimento, que pode ser retirado a qualquer momento).</li></ul>
     <h2>4. Com quem compartilhamos</h2><p>Só com quem ajuda a prestar o serviço: hospedagem em nuvem, processador de pagamento (Mercado Pago, Apple ou Google), envio de e-mail e SMS, e autoridades quando a lei exigir. <b>Não vendemos seus dados e não usamos para publicidade.</b></p>
     <h2>5. Por quanto tempo guardamos</h2><p>Enquanto sua conta existir. Depois da exclusão, apagamos em até 30 dias, exceto registros de pagamento e fiscais (5 anos) e registros de acesso (6 meses), que a lei manda guardar.</p>
-    <h2>6. Seus direitos (LGPD, art. 18)</h2><p>Você pode confirmar se tratamos seus dados, acessar, corrigir, levar para outro serviço (exportar), pedir a exclusão, saber com quem compartilhamos e retirar consentimentos. Faça isso em <b>Ajustes → Privacidade e dados</b> ou pelo e-mail ${dpo}. Respondemos em até 15 dias.</p>
+    <h2>6. Seus direitos (LGPD, art. 18)</h2><p>Você pode confirmar se tratamos seus dados, acessar, corrigir, levar para outro serviço (exportar), pedir a exclusão, saber com quem compartilhamos e retirar consentimentos. Faça isso em <b>Minha conta → Privacidade e dados</b> ou pelo e-mail ${dpo}. Respondemos em até 15 dias.</p>
     <h2>7. Segurança</h2><p>Os dados trafegam criptografados (HTTPS) e as senhas são guardadas de forma irreversível (hash). O acesso interno é restrito.</p>
     <h2>8. Armazenamento no aparelho</h2><p>Usamos só armazenamento essencial, para manter você conectado e lembrar suas preferências. Não há rastreamento de terceiros.</p>
     <h2>9. Menores de idade</h2><p>O Gestor Conex é destinado a maiores de 18 anos.</p>
@@ -1478,10 +1484,14 @@ function contaAct(a,b){
   else if(a==='s-sim-trial'){C.assin={status:'trial',hist:C.assin.hist||[]};C.trialFim=addDays(TODAY,TRIAL_DIAS);saveC();render(true);toast('Teste grátis reiniciado')}
   else if(a==='s-sim-venc'){C.assin.renov=false;C.assin.prox=addDays(TODAY,-1);saveC();render(true);toast('Assinatura vencida (simulação)')}
   else if(a==='aa-all'){ui.aaAll=!ui.aaAll;render(true)}
+  else if(a==='c-nome'){ui.editNome=!ui.editNome;ui.nomeErr='';render(true)}
+  else if(a==='c-nome-ok'){const n=(($('#c-nome')||{}).value||'').trim();if(n.length<3){ui.nomeErr='Informe seu nome completo.';return render(true)}
+    const ok=()=>{ui.editNome=false;ui.nomeErr='';render(true);toast('Nome atualizado')};
+    if(C.real)api('/me',{method:'PATCH',body:{nome:n}}).then(me=>{aplicaMeSemPerder(me);ok()}).catch(e=>{ui.nomeErr=e.message;render(true)});else{C.nome=n;saveC();ok()}}
   else if(a==='c-chgpw'){ui.chgPw=!ui.chgPw;ui.chgErr='';render(true)}
   else if(a==='c-sair'){A.lastEmail=C.email;setSess(false);A.scr='login';A.err='';A.info='Você saiu da conta.';render();window.scrollTo(0,0)}
   else if(a==='c-export'){ui.export=!ui.export;render(true)}
-  else if(a==='c-export-go'){ui.tab='ajustes';ui.export=true;render();const p=$('#priv');if(p)p.scrollIntoView({block:'start'})}
+  else if(a==='c-export-go'){ui.tab='conta';ui.export=true;render();const p=$('#priv');if(p)p.scrollIntoView({block:'start'})}
   else if(a==='c-copy'){const t=$('#exp-txt');if(t){t.select();copyTxt(t.value,'Dados copiados')}}
   else if(a==='c-copysup')copyTxt(SUPORTE,'E-mail do suporte copiado');
   else if(a==='c-tutorial')startTour();
@@ -1511,14 +1521,14 @@ const TOURS=[
   {tab:'despesas',steps:[
     ['[aria-label="Frequência"]','Mensais, semanais ou diárias','Escolha o tipo da conta: aluguel é mensal, a feira pode ser semanal, o café é diário.'],
     ['#f-desp-q','Conta nova','Cadastre uma conta aqui mesmo e já lance o valor.']]},
-  {tab:'ajustes',steps:[
+  {tab:'conta',steps:[
     ['[data-tour="assin"]','Sua assinatura',NATIVO?'Aqui você acompanha a situação da sua conta.':`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 79,90 por mês, no cartão ou no Pix.`],
     ['[data-tour="ajuda"]','Quer rever?','Este tutorial fica aqui, em <b>Ajuda</b>, sempre que precisar.']]}
 ];
 let tourOn=false;
 function loadDriver(){return new Promise((res,rej)=>{if(window.driver&&window.driver.js)return res();
   const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js';
-  s.onload=()=>res();s.onerror=()=>rej(new Error('Não foi possível abrir o tutorial agora. Tente de novo em Ajustes → Ajuda.'));document.head.appendChild(s)})}
+  s.onload=()=>res();s.onerror=()=>rej(new Error('Não foi possível abrir o tutorial agora. Tente de novo em Minha conta → Ver o tutorial.'));document.head.appendChild(s)})}
 async function startTour(){if(tourOn)return;tourOn=true;try{await loadDriver()}catch(e){tourOn=false;toast(e.message);return}runTourAt(0)}
 // "Como funciona" só depois de entrar: na primeira vez neste aparelho abre por cima do app; ao fechar, segue para o tour
 const introVisto=()=>{try{return !!localStorage.getItem(INTRO)}catch(e){return true}};
@@ -1536,7 +1546,7 @@ function runTourAt(i){const t=TOURS[i];if(!t)return finishTour('Pronto! Agora é
       // só a última etapa de cada parte encadeia a próxima; fechar (X, Esc ou clique fora) encerra o tutorial
       onNextClick:()=>{if(d.isLastStep()){done=true;d.destroy()}else d.moveNext()},
       onPrevClick:()=>d.movePrevious(),
-      onDestroyed:()=>{if(done)runTourAt(i+1);else finishTour('Tutorial fechado. Ele fica em Ajustes → Ajuda.')},
+      onDestroyed:()=>{if(done)runTourAt(i+1);else finishTour('Tutorial fechado. Ele fica em Minha conta → Ver o tutorial.')},
       steps});
     d.drive()},350)}
 
@@ -1589,7 +1599,7 @@ async function enviaEstado(){if(syncBusy){syncT=setTimeout(enviaEstado,500);retu
   finally{syncBusy=false}}
 // sessão única: ao voltar para o app/aba, confere se a conta não entrou em outro aparelho
 if(typeof document!=='undefined'&&document.addEventListener)document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&REAL&&C&&C.real&&logged)api('/me').then(aplicaMeSemPerder).catch(()=>{})});
-function aplicaMeSemPerder(me){if(!C||!C.real)return;const tour=C.tourDone;aplicaMe(me);C.tourDone=tour||me.tourDone;if(['painel','assinatura','ajustes'].includes(ui.tab))render(true)}
+function aplicaMeSemPerder(me){if(!C||!C.real)return;const tour=C.tourDone;aplicaMe(me);C.tourDone=tour||me.tourDone;if(['painel','assinatura','conta'].includes(ui.tab))render(true)}
 if(typeof window!=='undefined'&&window.addEventListener)window.addEventListener('beforeunload',e=>{if(REAL&&syncPend){e.preventDefault();e.returnValue=''}});
 
 async function onAuthSubmitReal(id){
@@ -1667,7 +1677,7 @@ const aDelConfirm=()=>`<h1>Excluir sua conta</h1><p class="muted" style="margin:
 async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:{token:A.delTok}});setTok('');C=null;logged=false;A.delTok=null;Object.assign(A,{scr:'excluida',err:''});render()}catch(e){A.err=e.message;render()}}
 
 /* ---------- render / eventos ---------- */
-const VIEWS={painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
+const VIEWS={painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,conta:vConta,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
 function render(keepScroll){
   // sem sessão (ou tutorial aberto): telas de entrada no lugar do app
   if(!logged||!C||A.overlay){renderAuth();return}
