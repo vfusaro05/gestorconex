@@ -490,6 +490,9 @@ textarea.inp{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;resize
 // modo produção (site): a página traz <meta name="gc-api" content="https://…">; sem ela é o protótipo local
 const API_BASE=(typeof document!=='undefined'&&document.querySelector&&(document.querySelector('meta[name="gc-api"]')||{}).content)||'';
 const REAL=!!API_BASE;
+// app instalado pelas lojas (Capacitor): sem preço, plano nem pagamento dentro do app (regra 3.1.1 da Apple e de pagamentos da
+// Google Play); a assinatura é feita só pelo site, como no Chat Conex. O app só mostra a situação da conta.
+const NATIVO=typeof window!=='undefined'&&!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 /* ---------- utilidades ---------- */
 const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
@@ -1167,7 +1170,7 @@ function vAjustes(){
       <div class="field"><label for="n-seg">Segmento</label><select class="inp" id="n-seg">${Object.keys(MODELOS).map(k=>`<option ${k==='Barbearia'?'selected':''}>${k}</option>`).join('')}</select></div>
       <div><button class="btn pri" data-act="novo">Apagar e começar</button></div>
     </div></section>
-  <section class="card"><div class="card-h"><h2>Sobre este protótipo</h2></div>
+  <section class="card" ${REAL?'hidden':''}><div class="card-h"><h2>Sobre este protótipo</h2></div>
     <p class="note" style="max-width:62ch;margin:0">Os dados e a conta ficam salvos só neste navegador. Na versão final eles vão para um servidor, e o mesmo negócio aparece no celular e no computador.</p></section>
   ${contaDanger()}`;
 }
@@ -1180,10 +1183,9 @@ let C=null;try{C=JSON.parse(localStorage.getItem(AKEY))}catch(e){}
 const saveC=()=>{if(C&&C.real){if(C.tourDone&&!C._tourSent){C._tourSent=true;api('/me',{method:'PATCH',body:{tourDone:true}}).catch(()=>{C._tourSent=false})}return}try{C?localStorage.setItem(AKEY,JSON.stringify(C)):localStorage.removeItem(AKEY)}catch(e){}};
 let logged=false;try{logged=!!C&&localStorage.getItem(SESS)===C.email}catch(e){}
 const setSess=v=>{logged=v;try{v?localStorage.setItem(SESS,C.email):localStorage.removeItem(SESS)}catch(e){}};
-let A={scr:'intro',slide:0,err:'',info:'',reg:null,pend:null,code:null,overlay:false,legalBack:'login',lastEmail:'',proto:'',cap:{}};
+let A={scr:'login',slide:0,err:'',info:'',reg:null,pend:null,code:null,overlay:false,legalBack:'login',lastEmail:'',proto:'',cap:{}};
 // Widget de verificação: imita o fluxo do Cloudflare Turnstile usado no Chat Conex (o real não carrega dentro do artifact)
 const capW=id=>{if(TS_REAL)return `<div class="ts-host" data-id="${id}"></div><input type="checkbox" id="${id}" hidden>`;const ok=!!A.cap[id];return `<div class="cap ${ok?'ok':''}" id="cap-${id}"><button type="button" class="cap-box" data-act="a-cap" data-id="${id}" aria-label="Verificação de segurança: não sou um robô"><span class="cap-chk" aria-hidden="true"></span><span class="cap-t">${ok?'Verificado':'Não sou um robô'}</span></button><div class="cap-brand" aria-hidden="true">${IC.conta}<small>Verificação<br>de segurança</small></div><input type="checkbox" id="${id}" ${ok?'checked':''} hidden></div>`};
-try{if(localStorage.getItem(INTRO))A.scr='login'}catch(e){}
 Object.assign(ui,{plano:'mensal',metodo:'cartao',renov:true,payStep:null,payErr:'',pix:null,chgPw:false,export:false,delStep:0,delErr:'',legal:'privacidade'});
 IC.conta='<svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>';
 
@@ -1208,17 +1210,21 @@ const maskEmail=e=>{const[a,b]=String(e).split('@');return a.slice(0,2)+'••�
 function copyTxt(t,ok){try{navigator.clipboard.writeText(t).then(()=>toast(ok||'Copiado'),()=>toast('Selecione o texto e copie'))}catch(e){toast('Selecione o texto e copie')}}
 
 /* ---------- assinatura ---------- */
-function assinStatus(){const a=C.assin;
+function assinStatusWeb(){const a=C.assin;
   if(a.status==='ativa'){if(!a.renov&&TODAY>a.prox)return{c:'bad',t:'Vencida',x:`Venceu em ${fmtD(a.prox)}. Renove para voltar a usar. Seus dados estão guardados.`};
     return a.renov?{c:'good',t:'Ativa',x:`Plano ${PLANOS[a.plano].nome} · próxima cobrança em ${fmtD(a.prox)}, no ${a.metodo==='pix'?'Pix':'cartão'}.`}:{c:'warn',t:'Ativa, sem renovação',x:`Vale até ${fmtD(a.prox)}. Depois disso, o acesso fica pausado até você renovar.`}}
   const l=daysBetween(TODAY,C.trialFim);
   if(l<0)return{c:'bad',t:'Teste encerrado',x:`Seu teste grátis terminou em ${fmtD(C.trialFim)}. Seus dados estão guardados.`};
   if(a.renov)return{c:'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'}. Cartão cadastrado: a primeira cobrança de R$ 79,90 será em ${fmtD(C.trialFim)}.`};
   return{c:l<=3?'warn':'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'} (até ${fmtD(C.trialFim)}). Nenhuma cobrança até você assinar.`}}
+function assinStatus(){const s=assinStatusWeb();if(!NATIVO)return s;const a=C.assin;
+  if(s.c==='bad')return{...s,x:s.x.replace(' Renove para voltar a usar.','')};
+  if(a.status==='ativa')return{c:'good',t:'Ativa',x:'Sua conta está ativa.'};
+  const l=daysBetween(TODAY,C.trialFim);return{...s,x:`Faltam ${l} ${l===1?'dia':'dias'} (até ${fmtD(C.trialFim)}).`}}
 function acessoOk(){const a=C.assin;if(C.real)return !!a.acessoSrv;if(a.status==='ativa')return a.renov||TODAY<=a.prox;return daysBetween(TODAY,C.trialFim)>=0}
 function trialBanner(){if(!C)return'';const a=C.assin;
-  if(a.status==='trial'){const l=daysBetween(TODAY,C.trialFim);if(l<0)return'';return `<div class="banner"><span><b>Teste grátis:</b> faltam ${l} ${l===1?'dia':'dias'}.</span><button class="btn sm pri" data-tab="assinatura">Assinar</button></div>`}
-  if(a.status==='ativa'&&!a.renov){const l=daysBetween(TODAY,a.prox);if(l>=0&&l<=7)return `<div class="banner"><span><b>Sua assinatura vence em ${l} ${l===1?'dia':'dias'}.</b></span><button class="btn sm pri" data-tab="assinatura">Renovar</button></div>`}
+  if(a.status==='trial'){const l=daysBetween(TODAY,C.trialFim);if(l<0)return'';return `<div class="banner"><span><b>Teste grátis:</b> faltam ${l} ${l===1?'dia':'dias'}.</span>${NATIVO?'':'<button class="btn sm pri" data-tab="assinatura">Assinar</button>'}</div>`}
+  if(a.status==='ativa'&&!a.renov&&!NATIVO){const l=daysBetween(TODAY,a.prox);if(l>=0&&l<=7)return `<div class="banner"><span><b>Sua assinatura vence em ${l} ${l===1?'dia':'dias'}.</b></span><button class="btn sm pri" data-tab="assinatura">Renovar</button></div>`}
   return''}
 function aprovar(metodo){const p=PLANOS[ui.plano],a=C.assin,base=a.status==='ativa'&&a.prox>TODAY?a.prox:TODAY;
   C.assin={status:'ativa',plano:ui.plano,metodo,renov:metodo==='cartao'?ui.renov:false,inicio:TODAY,prox:addMonths(base,p.meses),hist:[{d:TODAY,plano:p.nome,metodo,valor:p.preco,st:'Pago'},...(a.hist||[])]};
@@ -1241,6 +1247,7 @@ function pixPane(){const p=PLANOS[ui.plano];
     <div class="codebox">${ui.pix.code}</div><div class="btns" style="margin:0"><button class="btn sm" data-act="s-pixcopy">Copiar código</button><button class="btn pri sm" data-act="s-aprovar" data-v="pix">Já paguei, verificar</button></div>
     <p class="note" style="margin:0">Expira em <b id="pix-timer">${mmss(Math.max(0,ui.pix.exp-Date.now()))}</b>.${REAL&&C.real?' Assim que o pagamento cair, a tela atualiza sozinha.':' <span class="faint">Protótipo: este código não é um Pix real.</span>'}</p></div></div>`}
 function vAssinatura(){const st=assinStatus(),a=C.assin;
+  if(NATIVO)return `${topbar('Assinatura')}<section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p></section>`;
   return `${topbar('Assinatura')}
   <section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p>
     ${a.status==='ativa'?`<div class="btns">${a.renov?`<button class="btn danger sm" data-act="s-cancel">Cancelar renovação automática</button>`:a.metodo==='cartao'?`<button class="btn sm" data-act="s-reativar">Reativar renovação automática</button>`:''}</div>${a.renov?'<p class="note" style="margin:8px 0 0">Se cancelar, a assinatura continua valendo até o fim do período já pago.</p>':''}`:''}</section>
@@ -1251,12 +1258,11 @@ function vAssinatura(){const st=assinStatus(),a=C.assin;
     ${ui.metodo==='cartao'?cardPane():pixPane()}
     <p class="note" style="margin:14px 0 0">Pagamento processado pelo Mercado Pago. Você recebe o comprovante por e-mail.</p></section>
   ${a.hist&&a.hist.length?`<section class="card"><div class="card-h"><h2>Pagamentos</h2></div><div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Plano</th><th>Forma</th><th class="r">Valor</th><th>Situação</th></tr></thead><tbody>${a.hist.map(h=>`<tr><td>${fmtD(h.d)}</td><td>${h.plano}</td><td>${h.metodo==='pix'?'Pix':'Cartão'}</td><td class="r">${brl(h.valor)}</td><td><span class="chip">${h.st}</span></td></tr>`).join('')}</tbody></table></div></section>`:''}
-  <section class="card"><div class="card-h"><h2>No app de iPhone e Android</h2></div><p class="note" style="margin:0">Nos apps das lojas, a assinatura é feita pela App Store ou pelo Google Play, com os mesmos planos. Cobrança, renovação e cancelamento ficam na conta da loja.</p></section>
-  ${REAL&&C.real?'':`<section class="card proto"><b>Testes do protótipo</b><div class="btns"><button class="btn sm" data-act="s-sim-fim">Simular fim do teste grátis</button><button class="btn sm" data-act="s-sim-trial">Voltar para o teste grátis</button>${a.status==='ativa'?'<button class="btn sm" data-act="s-sim-venc">Simular assinatura vencida</button>':''}</div></section>`}`}
+  ${REAL?'':`<section class="card proto"><b>Testes do protótipo</b><div class="btns"><button class="btn sm" data-act="s-sim-fim">Simular fim do teste grátis</button><button class="btn sm" data-act="s-sim-trial">Voltar para o teste grátis</button>${a.status==='ativa'?'<button class="btn sm" data-act="s-sim-venc">Simular assinatura vencida</button>':''}</div></section>`}`}
 function vBloqueado(){const st=assinStatus();
   return `${topbar('Acesso pausado')}<section class="card" style="max-width:600px"><div class="card-h"><h2>${st.t}</h2></div><p class="muted" style="margin:0 0 8px">${st.x}</p>
-    <p class="muted" style="margin:0">Nada foi apagado: vendas, despesas e cadastros continuam guardados. Assine para voltar a usar.</p>
-    <div class="btns"><button class="btn pri" data-tab="assinatura">Ver planos</button><button class="btn" data-act="c-export-go">Exportar meus dados</button></div></section>`}
+    <p class="muted" style="margin:0">Nada foi apagado: vendas, despesas e cadastros continuam guardados.${NATIVO?'':' Assine para voltar a usar.'}</p>
+    <div class="btns">${NATIVO?'':'<button class="btn pri" data-tab="assinatura">Ver planos</button>'}<button class="btn" data-act="c-export-go">Exportar meus dados</button></div></section>`}
 
 /* ---------- conta dentro do app (Ajustes) ---------- */
 function exportJson(){const {pw,tempPw,tempExp,...conta}=C;return JSON.stringify({exportadoEm:new Date().toISOString(),conta,negocio:S.negocio,itens:S.itens,despesas:S.despesas,vendas:S.vendas,despesasMensais:S.gastos,despesasSemanais:S.gastosS,despesasDiarias:S.gastosD},null,1)}
@@ -1269,7 +1275,7 @@ function contaCards(){const st=assinStatus();
       <div class="field"><label for="c-new">Nova senha</label><div class="pw"><input class="inp" id="c-new" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-chg')}</div>
       <div class="field"><label for="c-new2">Repita a nova senha</label><input class="inp" id="c-new2" type="password" autocomplete="new-password"></div>
       ${ui.chgErr?`<div class="a-err" role="alert">${esc(ui.chgErr)}</div>`:''}<button class="btn pri" type="submit">Salvar nova senha</button></form>`:''}</section>
-  <section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:0 0 12px">${st.x}</p><button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button></section>
+  <section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:${NATIVO?'0':'0 0 12px'}">${st.x}</p>${NATIVO?'':`<button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button>`}</section>
   <section class="card" id="priv"><div class="card-h"><h2>Privacidade e dados</h2><p>seus direitos pela LGPD</p></div>
     <div class="link-list"><button data-act="c-export">Exportar meus dados<span>›</span></button><button data-act="legal" data-v="privacidade">Política de privacidade<span>›</span></button><button data-act="legal" data-v="termos">Termos de uso<span>›</span></button><button data-act="legal" data-v="excluir-info">Como funciona a exclusão de conta<span>›</span></button></div>
     ${ui.export?`<div style="margin-top:12px"><p class="note">Copie o texto abaixo e guarde. Ele tem todos os seus dados (formato JSON, abre em qualquer planilha ou sistema).</p><textarea id="exp-txt" class="inp" rows="6" readonly>${esc(exportJson())}</textarea><button class="btn sm" data-act="c-copy" style="margin-top:8px">Copiar dados</button></div>`:''}
@@ -1289,8 +1295,7 @@ function vExcluir(){const st=ui.delStep||0;
     <div class="btns"><button class="btn" data-tab="ajustes">Cancelar</button></div></section>`;
   return `${topbar('Excluir minha conta','Antes de continuar, veja o que muda para você.')}
   <section class="card" style="max-width:720px"><h2>O que você vai perder</h2><ul class="lst">${PERDAS.map(x=>`<li>${x}</li>`).join('')}</ul></section>
-  <section class="card" style="max-width:720px"><h2>Antes de decidir</h2><ul class="lst"><li>Quer só parar de pagar? <button class="lnk" data-tab="assinatura">Cancele a renovação</button> e mantenha seus dados.</li><li>Quer guardar seus números? <button class="lnk" data-act="c-export-go">Exporte seus dados</button> antes.</li><li>Algo não funcionou? Fale com a gente: <b class="sel">${SUPORTE}</b></li></ul>
-    <p class="note" style="margin:12px 0 0">Se você assinou pela App Store ou pelo Google Play, excluir a conta não cancela a cobrança da loja. Cancele também na loja.</p></section>
+  <section class="card" style="max-width:720px"><h2>Antes de decidir</h2><ul class="lst">${NATIVO?'':'<li>Quer só parar de pagar? <button class="lnk" data-tab="assinatura">Cancele a renovação</button> e mantenha seus dados.</li>'}<li>Quer guardar seus números? <button class="lnk" data-act="c-export-go">Exporte seus dados</button> antes.</li><li>Algo não funcionou? Fale com a gente: <b class="sel">${SUPORTE}</b></li></ul></section>
   <div class="btns" style="max-width:720px;margin:0"><button class="btn danger" data-act="d-next">Continuar com a exclusão</button><button class="btn" data-tab="ajustes">Cancelar</button></div>`}
 function excluirTudo(){try{[KEY,AKEY,SESS,UKEY,INTRO].forEach(k=>localStorage.removeItem(k))}catch(e){}
   C=null;logged=false;S=seedExemplo();Object.assign(A,{scr:'excluida',err:'',info:'',overlay:false});ui.tab='painel';ui.delStep=0;render();window.scrollTo(0,0)}
@@ -1298,7 +1303,7 @@ function vLegal(){return `<div><button class="lnk" data-tab="ajustes">← Voltar
 
 /* ---------- textos legais ---------- */
 function legalHtml(k){
-  const emp='[Razão social da empresa]',cnpj='[CNPJ]',dpo='[e-mail do encarregado de dados]',upd='16 de outubro de 2026';
+  const emp='FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA',cnpj='56.911.022/0001-68',dpo=SUPORTE,upd='20 de outubro de 2026';
   if(k==='termos')return `<h1>Termos de uso</h1><p class="faint">Versão ${TERMOS_V} · Última atualização: ${upd}</p>
     <h2>1. O serviço</h2><p>O Gestor Conex é um aplicativo de gestão para pequenos negócios. Você registra vendas e despesas e o app mostra indicadores como faturamento, custos e lucro. É oferecido por ${emp}, CNPJ ${cnpj}.</p>
     <h2>2. Sua conta</h2><p>Você precisa ter 18 anos ou mais e informar dados verdadeiros. A senha é pessoal: não compartilhe. Avise o suporte se suspeitar de uso indevido.</p>
@@ -1334,25 +1339,24 @@ const SLIDES=[
   {ic:'despesas',t:'Registre suas contas',x:'Aluguel, energia, internet: mensais, semanais ou diárias. O app divide pelos dias para comparar certo.'},
   {ic:'painel',t:'Veja quanto sobrou',x:'Na tela inicial: o lucro, se está melhor ou pior que o mês passado e as 3 coisas mais importantes.'},
   {ic:'ajustes',t:'Entenda o que mudou',x:'O que ajudou e o que atrapalhou o lucro, item por item, e quanto precisa vender para pagar as contas.'},
-  {ic:'conta',t:`${TRIAL_DIAS} dias grátis`,x:'Teste tudo sem cartão. Depois, assine por R$ 79,90 por mês. Cancele quando quiser.'}];
+  {ic:'conta',t:`${TRIAL_DIAS} dias grátis`,x:NATIVO?'Teste tudo sem cartão e sem compromisso.':'Teste tudo sem cartão. Depois, assine por R$ 79,90 por mês. Cancele quando quiser.'}];
 const errBox=()=>A.err?`<div class="a-err" role="alert">${esc(A.err)}</div>`:'';
 const infoBox=()=>A.info?`<div class="a-info" role="status">${A.info}</div>`:'';
 const LEGAL_SCR=['termos','privacidade','excluir-info'];
 function aIntro(){const sl=SLIDES[A.slide],last=A.slide===SLIDES.length-1;
   return `<div class="intro"><div class="intro-ic">${IC[sl.ic]}</div><div class="eyebrow">Como funciona · ${A.slide+1} de ${SLIDES.length}</div><h1>${sl.t}</h1><p class="muted" style="margin:0">${sl.x}</p>
     <div class="dots" aria-hidden="true">${SLIDES.map((_,i)=>`<i class="${i===A.slide?'on':''}"></i>`).join('')}</div>
-    <div class="a-row">${A.slide?'<button class="btn" data-act="a-slide" data-n="-1">Voltar</button>':'<button class="btn" data-act="a-intro-end">Pular</button>'}<button class="btn pri" data-act="${last?'a-intro-end':'a-slide'}" data-n="1">${last?(A.overlay?'Voltar para o app':'Começar'):'Próximo'}</button></div></div>`}
+    <div class="a-row">${A.slide?'<button class="btn" data-act="a-slide" data-n="-1">Voltar</button>':'<button class="btn" data-act="a-intro-end">Pular</button>'}<button class="btn pri" data-act="${last?'a-intro-end':'a-slide'}" data-n="1">${last?'Começar':'Próximo'}</button></div></div>`}
 function aLogin(){return `<h1>Entrar</h1><p class="muted" style="margin:0">Use o e-mail e a senha da sua conta.</p>${errBox()}${infoBox()}
   <form id="f-login" class="a-form" novalidate>
     <div class="field"><label for="l-email">E-mail</label><input class="inp" id="l-email" type="email" autocomplete="email" placeholder="voce@empresa.com" value="${esc(A.lastEmail)}"></div>
     <div class="field"><label for="l-pw">Senha</label><div class="pw"><input class="inp" id="l-pw" type="password" autocomplete="current-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
     ${capW('l-robo')}
     <button class="btn pri big" type="submit">Entrar</button></form>
-  <div class="a-links"><button class="lnk" data-act="a-go" data-v="esqueci">Esqueceu a senha?</button><button class="lnk" data-act="a-go" data-v="intro">Como funciona</button></div>
+  <div class="a-links"><button class="lnk" data-act="a-go" data-v="esqueci">Esqueceu a senha?</button></div>
   <div class="a-sep"><span>Ainda não tem conta?</span></div>
-  <button class="btn big" data-act="a-go" data-v="cadastro">Criar conta · ${TRIAL_DIAS} dias grátis</button>
-  <div class="demo"><button class="lnk" data-act="a-demo">Entrar na conta de demonstração</button><small class="faint">demo@gestorconex.com.br · Demo@2026</small></div>`}
-function aCadastro(){const r=A.reg||{},dt=r['r-dt']||'CNPJ',ini=r['r-ini']||'exemplo',v=k=>esc(r[k]||'');
+  <button class="btn big" data-act="a-go" data-v="cadastro">Criar conta · ${TRIAL_DIAS} dias grátis</button>`}
+function aCadastro(){const r=A.reg||{},dt=r['r-dt']||'CNPJ',v=k=>esc(r[k]||'');
   return `<button class="lnk" data-act="a-go" data-v="login">← Já tenho conta</button><h1>Criar conta</h1><p class="muted" style="margin:0">Etapa 1 de 2 · ${TRIAL_DIAS} dias grátis, sem cartão.</p>${errBox()}
   <form id="f-reg" class="a-form" novalidate>
     <p class="a-sec">Seus dados</p>
@@ -1367,8 +1371,6 @@ function aCadastro(){const r=A.reg||{},dt=r['r-dt']||'CNPJ',ini=r['r-ini']||'exe
     <p class="a-sec">Senha</p>
     <div class="field"><label for="r-pw">Crie uma senha</label><div class="pw"><input class="inp" id="r-pw" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-reg')}</div>
     <div class="field"><label for="r-pw2">Repita a senha</label><input class="inp" id="r-pw2" type="password" autocomplete="new-password"></div>
-    <p class="a-sec">Como quer começar?</p>
-    ${[['exemplo','Com dados de exemplo','Uma barbearia fictícia com meses de lançamentos, para testar.'],['zero','Do zero','Com a lista de serviços e despesas do seu segmento.']].map(([k,l,s])=>`<label class="chk"><input type="radio" name="r-ini" value="${k}" ${ini===k?'checked':''}><span><b>${l}</b><br><span class="faint">${s}</span></span></label>`).join('')}
     <label class="chk"><input type="checkbox" id="r-ok" ${r['r-ok']?'checked':''}><span>Li e aceito os <button type="button" class="lnk" data-act="a-go" data-v="termos">Termos de uso</button> e a <button type="button" class="lnk" data-act="a-go" data-v="privacidade">Política de privacidade</button>.</span></label>
     ${capW('r-robo')}
     <button class="btn pri big" type="submit">Continuar</button></form>`}
@@ -1385,7 +1387,7 @@ function aEnviada(){return `<h1>Confira seu e-mail</h1><p class="muted" style="m
 function aNovaSenha(){return `<h1>Crie uma senha nova</h1><p class="muted" style="margin:0">Você entrou com uma senha temporária. Escolha a sua senha definitiva.</p>${errBox()}
   <form id="f-nova" class="a-form"><div class="field"><label for="n-pw">Nova senha</label><div class="pw"><input class="inp" id="n-pw" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-nova')}</div>
   <div class="field"><label for="n-pw2">Repita a senha</label><input class="inp" id="n-pw2" type="password" autocomplete="new-password"></div><button class="btn pri big" type="submit">Salvar e entrar</button></form>`}
-const aExcluida=()=>`<h1>Conta excluída</h1><p class="muted" style="margin:0">Apagamos sua conta e todos os seus dados. Registros de pagamento ficam guardados pelo prazo da lei fiscal e depois também são apagados.</p><button class="btn pri big" data-act="a-go" data-v="intro">Voltar ao início</button>`;
+const aExcluida=()=>`<h1>Conta excluída</h1><p class="muted" style="margin:0">Apagamos sua conta e todos os seus dados. Registros de pagamento ficam guardados pelo prazo da lei fiscal e depois também são apagados.</p><button class="btn pri big" data-act="a-go" data-v="login">Voltar ao início</button>`;
 function renderAuth(){
   document.body.classList.add('auth-on');const el=$('#auth');el.hidden=false;
   const s=A.scr,F={'del-confirm':aDelConfirm,intro:aIntro,login:aLogin,cadastro:aCadastro,verificar:aVerificar,esqueci:aEsqueci,enviada:aEnviada,'nova-senha':aNovaSenha,excluida:aExcluida};
@@ -1394,7 +1396,7 @@ function renderAuth(){
     <aside class="auth-side"><div class="brand"><div class="mark" role="img" aria-label="Gestor Conex">G</div><div><b>Gestor <span class="cx">Conex</span></b><small>Gestão para pequenos negócios</small></div></div>
       <h2 class="auth-tag">Saiba quanto entrou, quanto saiu e quanto sobrou.</h2>
       <ul class="auth-pts"><li>Vendas do dia em 1 minuto</li><li>Despesas mensais, semanais e diárias</li><li>Lucro comparado com o mês passado</li></ul>
-      <p class="auth-foot">Protótipo · os dados ficam só neste navegador</p></aside>
+      <p class="auth-foot">${REAL?'gestorconex.com.br':'Protótipo · os dados ficam só neste navegador'}</p></aside>
     <div class="auth-main"><div class="brand auth-mbrand"><div class="mark" role="img" aria-label="Gestor Conex">G</div><div><b style="color:var(--ink)">Gestor <span class="cx">Conex</span></b><small style="color:var(--muted)">Gestão para pequenos negócios</small></div></div>
       <div class="auth-card">${body}</div>
       <nav class="auth-legal" aria-label="Documentos"><button data-act="a-go" data-v="termos">Termos de uso</button><button data-act="a-go" data-v="privacidade">Privacidade</button><button data-act="a-go" data-v="excluir-info">Excluir conta</button></nav></div></div>`;
@@ -1413,7 +1415,7 @@ function authAct(a,b){
   if(a==='a-go'){const v=b.dataset.v;if(LEGAL_SCR.includes(v)&&!LEGAL_SCR.includes(A.scr))A.legalBack=A.scr;if(v==='intro')A.slide=0;if(v==='login'||v==='cadastro')A.info='';A.scr=v;render();window.scrollTo(0,0)}
   else if(a==='a-back'){A.scr=A.legalBack||'login';render();window.scrollTo(0,0)}
   else if(a==='a-slide'){A.slide=Math.max(0,Math.min(SLIDES.length-1,A.slide+(+b.dataset.n)));render()}
-  else if(a==='a-intro-end'){try{localStorage.setItem(INTRO,'1')}catch(e){}A.slide=0;if(A.overlay){A.overlay=false;render();return}A.scr='login';render()}
+  else if(a==='a-intro-end'){try{localStorage.setItem(INTRO,'1')}catch(e){}A.slide=0;A.overlay=false;A.scr='login';render();maybeTour()}
   else if(a==='a-demo')entrarDemo();
   else if(a==='a-delconfirm')confirmaExclusao();
   else if(a==='a-resend'&&REAL){api('/auth/register/resend',{body:{pendingId:A.pend&&A.pend.pendingId}}).then(()=>{A.info='Enviamos um novo código.';render()}).catch(e=>{A.err=e.message;render()})}
@@ -1433,7 +1435,7 @@ async function onAuthSubmit(id){
     // como no Chat Conex: login recusado reseta a verificação
     if(!C||C.email!==em||h!==C.pw){A.err='E-mail ou senha incorretos.';A.cap['l-robo']=false;return render()}
     A.err='';A.cap={};setSess(true);ui.tab='painel';render();window.scrollTo(0,0);toast(`Bem-vindo de volta, ${C.nome.split(' ')[0]}!`);maybeTour()}
-  else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini=rad('r-ini')||'exemplo';
+  else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini='zero';
     A.reg={'r-nome':nome,'r-email':em,'r-tel':tel,'r-emp':emp,'r-seg':seg,'r-dt':dt,'r-doc':doc,'r-ini':ini,'r-ok':chk('r-ok'),'r-robo':chk('r-robo')};
     let er='';
     if(nome.length<3)er='Informe seu nome completo.';else if(!emailOk(em))er='Informe um e-mail válido.';else if(onlyD(tel).length<10)er='Informe o celular com DDD.';
@@ -1510,7 +1512,7 @@ const TOURS=[
     ['[aria-label="Frequência"]','Mensais, semanais ou diárias','Escolha o tipo da conta: aluguel é mensal, a feira pode ser semanal, o café é diário.'],
     ['#f-desp-q','Conta nova','Cadastre uma conta aqui mesmo e já lance o valor.']]},
   {tab:'ajustes',steps:[
-    ['[data-tour="assin"]','Sua assinatura',`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 79,90 por mês, no cartão ou no Pix.`],
+    ['[data-tour="assin"]','Sua assinatura',NATIVO?'Aqui você acompanha a situação da sua conta.':`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 79,90 por mês, no cartão ou no Pix.`],
     ['[data-tour="ajuda"]','Quer rever?','Este tutorial fica aqui, em <b>Ajuda</b>, sempre que precisar.']]}
 ];
 let tourOn=false;
@@ -1518,7 +1520,9 @@ function loadDriver(){return new Promise((res,rej)=>{if(window.driver&&window.dr
   const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js';
   s.onload=()=>res();s.onerror=()=>rej(new Error('Não foi possível abrir o tutorial agora. Tente de novo em Ajustes → Ajuda.'));document.head.appendChild(s)})}
 async function startTour(){if(tourOn)return;tourOn=true;try{await loadDriver()}catch(e){tourOn=false;toast(e.message);return}runTourAt(0)}
-const maybeTour=()=>{if(C&&!C.tourDone)setTimeout(startTour,600)};
+// "Como funciona" só depois de entrar: na primeira vez neste aparelho abre por cima do app; ao fechar, segue para o tour
+const introVisto=()=>{try{return !!localStorage.getItem(INTRO)}catch(e){return true}};
+const maybeTour=()=>{if(!C||!logged)return;if(!introVisto()){Object.assign(A,{overlay:true,scr:'intro',slide:0});render();window.scrollTo(0,0);return}if(!C.tourDone)setTimeout(startTour,600)};
 function finishTour(msg){tourOn=false;if(C){C.tourDone=true;saveC()}ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg)}
 function runTourAt(i){const t=TOURS[i];if(!t)return finishTour('Pronto! Agora é com você.');if(t.prep)t.prep();ui.tab=t.tab;render();window.scrollTo(0,0);const alvo=t.tab;
   setTimeout(()=>{
@@ -1599,7 +1603,7 @@ async function onAuthSubmitReal(id){
     try{const r=await api('/auth/login',{body:{email:em,pw,captcha:A.capTok['l-robo']}});setTok(r.token);
       if(r.mustChange){A.err='';A.scr='nova-senha';return render()}
       await entrou('Bem-vindo de volta!')}catch(e){falha(e,'l-robo')}}
-  else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini=rad('r-ini')||'exemplo';
+  else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini='zero';
     A.reg={'r-nome':nome,'r-email':em,'r-tel':tel,'r-emp':emp,'r-seg':seg,'r-dt':dt,'r-doc':doc,'r-ini':ini,'r-ok':chk('r-ok')};
     let er='';
     if(nome.length<3)er='Informe seu nome completo.';else if(!emailOk(em))er='Informe um e-mail válido.';else if(onlyD(tel).length<10)er='Informe o celular com DDD.';
@@ -1657,7 +1661,7 @@ async function bootReal(){
     catch(e){if(e.status!==401){A.info=e.message}setTok('')}}
   if(em==='confirmado')A.info='E-mail confirmado. Entre na sua conta.';
   if(C&&!C.real&&logged)return render(); // conta de demonstração local
-  logged=false;if(!LEGAL_SCR.includes(A.scr)&&A.scr!=='cadastro')A.scr=A.scr==='intro'?'intro':'login';render()}
+  logged=false;if(!LEGAL_SCR.includes(A.scr)&&A.scr!=='cadastro')A.scr='login';render()}
 const aDelConfirm=()=>`<h1>Excluir sua conta</h1><p class="muted" style="margin:0">Ao confirmar, apagamos sua conta e todos os dados do seu negócio. Isso não pode ser desfeito.</p>${errBox()}
   <button class="btn danger big" data-act="a-delconfirm">Confirmar exclusão</button><button class="lnk" data-act="a-go" data-v="login">Cancelar e voltar</button>`;
 async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:{token:A.delTok}});setTok('');C=null;logged=false;A.delTok=null;Object.assign(A,{scr:'excluida',err:''});render()}catch(e){A.err=e.message;render()}}
@@ -1743,7 +1747,14 @@ let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>
 if(location.hash&&VIEWS[location.hash.slice(1)])ui.tab=location.hash.slice(1);
 // links públicos para as lojas (abrem sem login): /#privacidade, /#termos, /#excluir-conta
 {const lh={privacidade:'privacidade',termos:'termos','excluir-conta':'excluir-info'}[(location.hash||'').slice(1)];if(lh){A.scr=lh;A.legalBack='login';ui.legal=lh;if(logged&&C){ui.tab='legal'}}
- if(location.hash==='#cadastro'&&!(logged&&C)){A.scr='cadastro';try{localStorage.setItem(INTRO,'1')}catch(e){}}} // botões "Testar grátis" da página inicial
+ if(location.hash==='#cadastro'&&!(logged&&C)){A.scr='cadastro'}} // botões "Testar grátis" da página inicial
+if(REAL){const f=$('.side-foot');if(f)f.textContent='gestorconex.com.br'}
+// Android: o voltar do aparelho volta para o Painel (ou para o login) antes de fechar o app
+if(NATIVO){const AppP=(window.Capacitor.Plugins&&window.Capacitor.Plugins.App)||(window.Capacitor.registerPlugin&&window.Capacitor.registerPlugin('App'));
+  if(AppP&&AppP.addListener)AppP.addListener('backButton',()=>{
+    if(tourOn||A.overlay)return;
+    if(!logged||!C){if(A.scr==='login'||A.scr==='excluida')return AppP.exitApp();A.scr=LEGAL_SCR.includes(A.scr)?(A.legalBack||'login'):'login';A.err='';render();window.scrollTo(0,0);return}
+    if(ui.tab!=='painel'){ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0)}else AppP.exitApp()})}
 if(REAL)bootReal();else render();
 </script>
 
