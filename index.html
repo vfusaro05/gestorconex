@@ -1305,6 +1305,10 @@ function contaCards(){const st=assinStatus();
   <section class="card" id="priv"><div class="card-h"><h2>Privacidade e dados</h2><p>seus direitos pela LGPD</p></div>
     <div class="link-list"><button data-act="c-export">Exportar meus dados<span>›</span></button><button data-act="legal" data-v="privacidade">Política de privacidade<span>›</span></button><button data-act="legal" data-v="termos">Termos de uso<span>›</span></button><button data-act="legal" data-v="excluir-info">Como funciona a exclusão de conta<span>›</span></button></div>
     ${ui.export?`<div style="margin-top:12px"><p class="note">Copie o texto abaixo e guarde. Ele tem todos os seus dados (formato JSON, abre em qualquer planilha ou sistema).</p><textarea id="exp-txt" class="inp" rows="6" readonly>${esc(exportJson())}</textarea><button class="btn sm" data-act="c-copy" style="margin-top:8px">Copiar dados</button></div>`:''}
+    <div class="cta" style="margin-top:14px;display:block"><b>Seus números são só seus</b>
+      <p class="note" style="margin:6px 0 0">Vendas, despesas, serviços e resultados são criptografados neste aparelho antes de ir para os nossos servidores, com uma chave que só a sua senha abre. <b>Nem a equipe do Gestor Conex consegue ver.</b></p>
+      <p class="note" style="margin:6px 0 0">Se você esquecer a senha, dá para recuperar: guardamos uma cópia lacrada da sua chave, fora dos servidores, usada só quando você pede a recuperação ao suporte pelo e-mail da conta.</p>
+      <p class="note" style="margin:6px 0 0">Ficam visíveis para nós apenas os dados da conta (nome, e-mail, celular, CPF ou CNPJ) e da assinatura, necessários para o login, a cobrança e a nota fiscal.</p></div>
     <p class="note" style="margin:12px 0 0">O Gestor Conex usa só armazenamento essencial, para manter você conectado. Não usamos rastreamento de terceiros nem publicidade.</p></section>
   <section class="card" data-tour="ajuda"><div class="card-h"><h2>Ajuda</h2></div><div class="link-list"><button data-act="c-tutorial">Ver o tutorial de novo<span>›</span></button></div>
     <p class="note" style="margin:10px 0 0">Suporte: <b class="sel">${SUPORTE}</b> <button class="lnk" data-act="c-copysup">copiar</button></p></section>`}
@@ -1329,7 +1333,7 @@ function vLegal(){return `<div><button class="lnk" data-tab="conta">← Voltar p
 
 /* ---------- textos legais ---------- */
 function legalHtml(k){
-  const emp='FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA',cnpj='56.911.022/0001-68',dpo=SUPORTE,upd='20 de outubro de 2026';
+  const emp='FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA',cnpj='56.911.022/0001-68',dpo=SUPORTE,upd='21 de outubro de 2026';
   if(k==='termos')return `<h1>Termos de uso</h1><p class="faint">Versão ${TERMOS_V} · Última atualização: ${upd}</p>
     <h2>1. O serviço</h2><p>O Gestor Conex é um aplicativo de gestão para pequenos negócios. Você registra vendas e despesas e o app mostra indicadores como faturamento, custos e lucro. É oferecido por ${emp}, CNPJ ${cnpj}.</p>
     <h2>2. Sua conta</h2><p>Você precisa ter 18 anos ou mais e informar dados verdadeiros. A senha é pessoal: não compartilhe. Avise o suporte se suspeitar de uso indevido.</p>
@@ -1349,12 +1353,14 @@ function legalHtml(k){
     <h2>6. Assinatura</h2><p>A exclusão encerra a assinatura feita pelo site. Se você assinou pela App Store ou pelo Google Play, cancele também na loja para não ser cobrado.</p>`;
   return `<h1>Política de privacidade</h1><p class="faint">Última atualização: ${upd}</p>
     <h2>1. Quem cuida dos seus dados</h2><p>${emp}, CNPJ ${cnpj}, é a controladora dos dados tratados no Gestor Conex. Encarregado de dados (DPO): ${dpo}.</p>
-    <h2>2. Quais dados coletamos</h2><ul><li><b>Cadastro:</b> nome, e-mail, celular, nome do negócio, CPF ou CNPJ.</li><li><b>Dados do negócio:</b> vendas, despesas, serviços e produtos que você lança.</li><li><b>Pagamento:</b> plano, valor, data e situação. Os dados do cartão são digitados direto no Mercado Pago, na App Store ou no Google Play. Nós não vemos nem guardamos o número do cartão.</li><li><b>Técnicos:</b> modelo do aparelho, versão do app, data, hora e IP de acesso, para segurança.</li><li><b>Suporte:</b> o que você nos escrever.</li></ul>
+    <h2>2. Quais dados coletamos</h2><ul><li><b>Cadastro:</b> nome, e-mail, celular, nome do negócio, CPF ou CNPJ.</li><li><b>Dados do negócio:</b> vendas, despesas, serviços e produtos que você lança. Eles são criptografados no seu aparelho e não conseguimos ler (veja o item 7).</li><li><b>Pagamento:</b> plano, valor, data e situação. Os dados do cartão são digitados direto no Mercado Pago, na App Store ou no Google Play. Nós não vemos nem guardamos o número do cartão.</li><li><b>Técnicos:</b> modelo do aparelho, versão do app, data, hora e IP de acesso, para segurança.</li><li><b>Suporte:</b> o que você nos escrever.</li></ul>
     <h2>3. Para que usamos</h2><ul><li>Prestar o serviço e calcular seus indicadores (execução de contrato).</li><li>Cobrar a assinatura e emitir nota fiscal (obrigação legal).</li><li>Proteger sua conta e evitar fraudes (legítimo interesse).</li><li>Enviar novidades, só se você autorizar (consentimento, que pode ser retirado a qualquer momento).</li></ul>
     <h2>4. Com quem compartilhamos</h2><p>Só com quem ajuda a prestar o serviço: hospedagem em nuvem, processador de pagamento (Mercado Pago, Apple ou Google), envio de e-mail e SMS, e autoridades quando a lei exigir. <b>Não vendemos seus dados e não usamos para publicidade.</b></p>
     <h2>5. Por quanto tempo guardamos</h2><p>Enquanto sua conta existir. Depois da exclusão, apagamos em até 30 dias, exceto registros de pagamento e fiscais (5 anos) e registros de acesso (6 meses), que a lei manda guardar.</p>
     <h2>6. Seus direitos (LGPD, art. 18)</h2><p>Você pode confirmar se tratamos seus dados, acessar, corrigir, levar para outro serviço (exportar), pedir a exclusão, saber com quem compartilhamos e retirar consentimentos. Faça isso em <b>Minha conta → Privacidade e dados</b> ou pelo e-mail ${dpo}. Respondemos em até 15 dias.</p>
-    <h2>7. Segurança</h2><p>Os dados trafegam criptografados (HTTPS) e as senhas são guardadas de forma irreversível (hash). O acesso interno é restrito.</p>
+    <h2>7. Segurança e criptografia de ponta a ponta</h2><p>Os dados do seu negócio (vendas, despesas, serviços, produtos e resultados) são criptografados no seu aparelho, com AES de 256 bits, antes de serem enviados. A chave é protegida pela sua senha e nunca chega aos nossos servidores sem estar lacrada. Por isso, <b>nem a equipe do Gestor Conex nem quem tenha acesso aos servidores consegue ler esses dados</b>.</p>
+    <p>Para que você não perca tudo se esquecer a senha, guardamos também uma cópia da sua chave lacrada com uma chave de recuperação da empresa, que fica guardada fora dos servidores. Ela só é usada quando você pede a recuperação ao suporte, a partir do e-mail da conta, e gera um código de uso único enviado a você.</p>
+    <p>Os dados da conta (nome, e-mail, celular, CPF ou CNPJ, nome do negócio) e da assinatura não são criptografados dessa forma, porque são necessários para o login, a cobrança e a nota fiscal. Todo o tráfego usa HTTPS e as senhas são guardadas de forma irreversível (hash).</p>
     <h2>8. Armazenamento no aparelho</h2><p>Usamos só armazenamento essencial, para manter você conectado e lembrar suas preferências. Não há rastreamento de terceiros.</p>
     <h2>9. Menores de idade</h2><p>O Gestor Conex é destinado a maiores de 18 anos.</p>
     <h2>10. Mudanças</h2><p>Avisaremos no app quando esta política mudar. Dúvidas: ${SUPORTE}.</p>`}
@@ -1630,20 +1636,63 @@ async function api(path,{method,body}={}){
   return j}
 let stateVer=0;
 const dsIso=s=>s?ds(new Date(s)):null;
+
+/* ---------- criptografia de ponta a ponta dos dados do negócio ----------
+   A chave do negócio (AES-256-GCM) nasce no aparelho e só sai dele lacrada: pela senha (PBKDF2-SHA256) e pela
+   chave-mestra de recuperação da empresa (RSA-OAEP), cuja parte privada fica fora do servidor. O servidor guarda
+   só os dados cifrados: nem a administração nem quem tiver acesso ao banco consegue ler vendas e despesas. */
+const ESC_PUB='MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAnCCzxgsQoThl7B6OMYU4TLn4aLQogEEl1obXwM7Bz8gJNae0h4ifwuHaoNUKUGhYwzW28DdFaijZ6UqzTH0jizZb7CeYk3yzsWkbv93DQEI2rJ4mOvmta7bSqO8q2wbdqOlYD3yt7Ify8o4YYpxZfZQGb30hW+d71tx4xZu9K3DvRDswJl965/g0xv2r2sy4QYZFqDyGBECWzSi4J1otsxGaD5swjVupc00iiFdww/kcedwon/QKdRiK8nhH7jShTD8MTdNLertwSlaRg+WTTydhRMRieIcJaqweIa6lcHYFj0slGKIMC0VDD5BSZmLSVt+0EUsN8Q9qe24n6twhsm1WtaQejoT1TQuudXmD7pBrcdhTu5Ag2PUSrckm/rn3vCz3r+xOOs0wxY2yKp4UglGccPCWl2eujMvXiSOh/bvyaJaC7pzXpUDcyGDYmWHthl3THX6M1vJXCoiAOMWrMvntuVsp7/EIjVWN4agUKIfQ6ypkedvnNP7LbipXlHfNAgMBAAE=';
+const CKEY='gc.dk',te=new TextEncoder(),td=new TextDecoder();
+let DK=null;
+const b64=u=>{u=new Uint8Array(u);let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)};
+const ub64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const rnd=n=>crypto.getRandomValues(new Uint8Array(n));
+const importaDK=raw=>crypto.subtle.importKey('raw',raw,'AES-GCM',true,['encrypt','decrypt']);
+const novaChave=()=>crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+async function kek(segredo,salt,iter){const k=await crypto.subtle.importKey('raw',te.encode(segredo),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function lacra(segredo,dk){const salt=rnd(16),iv=rnd(12),iter=210000;
+  const wk=await crypto.subtle.encrypt({name:'AES-GCM',iv},await kek(segredo,salt,iter),await crypto.subtle.exportKey('raw',dk));
+  return {v:1,salt:b64(salt),iter,iv:b64(iv),wk:b64(wk)}}
+async function abre(segredo,w){if(!w)return null;try{return await importaDK(await crypto.subtle.decrypt({name:'AES-GCM',iv:ub64(w.iv)},await kek(segredo,ub64(w.salt),w.iter),ub64(w.wk)))}catch(e){return null}}
+async function lacraEmpresa(dk){const pub=await crypto.subtle.importKey('spki',ub64(ESC_PUB),{name:'RSA-OAEP',hash:'SHA-256'},false,['encrypt']);
+  return b64(await crypto.subtle.encrypt({name:'RSA-OAEP'},pub,await crypto.subtle.exportKey('raw',dk)))}
+const cifrado=d=>!!(d&&d.enc===1&&d.ct);
+async function cifra(obj,dk=DK){const iv=rnd(12);return {enc:1,iv:b64(iv),ct:b64(await crypto.subtle.encrypt({name:'AES-GCM',iv},dk,te.encode(JSON.stringify(obj))))}}
+async function decifra(d,dk=DK){return JSON.parse(td.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:ub64(d.iv)},dk,ub64(d.ct))))}
+// cópia da chave neste aparelho, para não pedir a senha cada vez que o app abre (apagada ao sair da conta)
+async function guardaDK(email){try{localStorage.setItem(CKEY,JSON.stringify({e:email,k:b64(await crypto.subtle.exportKey('raw',DK))}))}catch(e){}}
+async function dkLocal(email){try{const o=JSON.parse(localStorage.getItem(CKEY));if(o&&o.e===email)return await importaDK(ub64(o.k))}catch(e){}return null}
+const apagaDK=()=>{DK=null;try{localStorage.removeItem(CKEY)}catch(e){}};
+const chavesNovas=async pw=>({pw:await lacra(pw,DK),esc:await lacraEmpresa(DK)});
 function aplicaAssin(a){C.trialFim=dsIso(a.trialEndsAt);
   C.assin={status:a.status,plano:'mensal',metodo:a.method,renov:a.autoRenew,prox:dsIso(a.currentPeriodEnd),cardPending:a.cardPending,acessoSrv:a.acesso,
     hist:(a.payments||[]).map(p=>({d:dsIso(p.d),plano:'Mensal',metodo:p.metodo,valor:p.valor,st:'Pago'}))}}
 function aplicaMe(me){C={real:true,nome:me.nome,email:me.email,tel:me.tel,emp:me.emp,seg:me.seg,dt:me.dt,doc:me.doc,emailOk:me.emailOk,telOk:me.telOk,tourDone:me.tourDone,criado:dsIso(me.criado),termos:{versao:TERMOS_V}};aplicaAssin(me.assinatura)}
 function normalizaS(){S.gastos=S.gastos||{};S.gastosS=S.gastosS||{};S.gastosD=S.gastosD||{};S.vendas=S.vendas||{};S.itens=S.itens||[];S.despesas=S.despesas||[];S.negocio=S.negocio||{nome:C.emp,segmento:C.seg,dias:[1,2,3,4,5,6]};S.despesas.forEach(x=>{x.freq=x.freq||'mensal'})}
-async function carregaSessao(){const [me,st]=await Promise.all([api('/me'),api('/state')]);aplicaMe(me);S=st.data;stateVer=st.version;normalizaS();logged=true}
-function sairReal(msg){setTok('');C=null;logged=false;syncPend=false;S=seedExemplo();Object.assign(A,{scr:'login',err:'',info:msg||'',overlay:false,cap:{}});render();window.scrollTo(0,0)}
+async function carregaSessao(pw){const [me,st]=await Promise.all([api('/me'),api('/state')]);aplicaMe(me);stateVer=st.version;logged=true;A.chave=null;
+  const cr=me.cripto||{};DK=await dkLocal(me.email);if(!DK&&pw)DK=await abre(pw,cr.pw);
+  if(cifrado(st.data)){
+    if(DK){try{S=await decifra(st.data)}catch(e){DK=null}}
+    // sem a chave (senha trocada pelo "Esqueci a senha", ou aparelho sem a cópia): tela para abrir ou recuperar os dados
+    if(!DK){A.chave={pw:pw||'',rec:!!cr.rec,temPw:!!cr.pw};S=novoNegocio(C.seg,C.emp);normalizaS();return}
+  }else{
+    S=st.data;normalizaS();
+    // conta criada antes da criptografia: cifra agora (precisa da senha; sem ela fica para o próximo login)
+    if(pw){DK=DK||await novaChave();await api('/me/cripto',{method:'PUT',body:await chavesNovas(pw)});syncPend=true;await enviaEstado()}
+  }
+  normalizaS();if(DK)await guardaDK(me.email)}
+// abre os dados com a chave recuperada (senha digitada ou código do suporte) e lacra de novo com a senha atual
+async function abreComChave(dk,pw,extra){DK=dk;const st=await api('/state');S=cifrado(st.data)?await decifra(st.data):st.data;stateVer=st.version;
+  await api('/me/cripto',{method:'PUT',body:{pw:await lacra(pw,DK),...(extra||{})}});A.chave=null;normalizaS();await guardaDK(C.email)}
+function sairReal(msg){setTok('');apagaDK();A.chave=null;C=null;logged=false;syncPend=false;S=seedExemplo();Object.assign(A,{scr:'login',err:'',info:msg||'',overlay:false,cap:{}});render();window.scrollTo(0,0)}
 
 /* gravação dos dados no servidor: espera 0,7 s de calma, envia com a versão; conflito traz a versão mais nova */
 let syncT=null,syncPend=false,syncBusy=false,offlineAvisado=false;
 function queueSync(){syncPend=true;clearTimeout(syncT);syncT=setTimeout(enviaEstado,700)}
-async function enviaEstado(){if(syncBusy){syncT=setTimeout(enviaEstado,500);return}if(!syncPend||!C||!C.real)return;syncBusy=true;syncPend=false;
-  try{const r=await api('/state',{method:'PUT',body:{data:S,version:stateVer}});stateVer=r.version;offlineAvisado=false}
-  catch(e){if(e.status===409&&e.body){S=e.body.data;stateVer=e.body.version;normalizaS();render(true);toast('Seus dados foram alterados em outro aparelho. Mostrando a versão mais recente.')}
+async function enviaEstado(){if(syncBusy){syncT=setTimeout(enviaEstado,500);return}if(!syncPend||!C||!C.real||A.chave)return;syncBusy=true;syncPend=false;
+  try{const r=await api('/state',{method:'PUT',body:{data:DK?await cifra(S):S,version:stateVer}});stateVer=r.version;offlineAvisado=false}
+  catch(e){if(e.status===409&&e.body){S=cifrado(e.body.data)&&DK?await decifra(e.body.data):e.body.data;stateVer=e.body.version;normalizaS();render(true);toast('Seus dados foram alterados em outro aparelho. Mostrando a versão mais recente.')}
     else if(e.status===402){toast(e.message)}
     else if(e.status!==401){syncPend=true;if(!offlineAvisado){offlineAvisado=true;toast('Sem conexão: suas alterações serão enviadas quando a internet voltar.')}syncT=setTimeout(enviaEstado,5000)}}
   finally{syncBusy=false}}
@@ -1652,17 +1701,45 @@ if(typeof document!=='undefined'&&document.addEventListener)document.addEventLis
 function aplicaMeSemPerder(me){if(!C||!C.real)return;const tour=C.tourDone;aplicaMe(me);C.tourDone=tour||me.tourDone;if(['painel','assinatura','conta'].includes(ui.tab))render(true)}
 if(typeof window!=='undefined'&&window.addEventListener)window.addEventListener('beforeunload',e=>{if(REAL&&syncPend){e.preventDefault();e.returnValue=''}});
 
+/* tela de abrir/recuperar os dados cifrados */
+function vChave(){const k=A.chave,campoPw=id=>k.pw?'':`<div class="field"><label for="${id}">Sua senha</label><input class="inp" id="${id}" type="password" autocomplete="current-password"></div>`;
+  return `${topbar('Seus dados estão protegidos')}<section class="card" style="max-width:640px"><p class="muted" style="margin:0 0 12px">Suas vendas e despesas ficam criptografadas e só abrem com a chave da sua conta. Nem a equipe do Gestor Conex consegue ver.</p>
+    ${k.err?`<div class="a-err" role="alert">${esc(k.err)}</div>`:''}
+    ${!k.pw&&k.temPw?`<div class="a-form" style="max-width:420px">${campoPw('k-pw')}<button class="btn pri" data-act="k-senha">Abrir meus dados</button></div>`:''}
+    ${k.pw?'<p style="margin:0">Como a senha foi trocada pelo "Esqueci a senha", a chave antiga não abre com a senha nova. Use o código de recuperação enviado pelo suporte.</p>':''}</section>
+  <section class="card" style="max-width:640px"><div class="card-h"><h2>Recuperar com o suporte</h2></div>
+    <p class="note" style="margin:0 0 12px">Peça a recuperação por e-mail para <b class="sel">${SUPORTE}</b>, a partir do e-mail da sua conta, com o assunto "Recuperar meus dados". Você recebe um código de uso único.</p>
+    <div class="a-form" style="max-width:420px"><div class="field"><label for="k-cod">Código de recuperação</label><input class="inp" id="k-cod" autocomplete="one-time-code" placeholder="XXXX-XXXX-XXXX-XXXX"></div>${campoPw('k-pw2')}
+      <div class="btns" style="margin:0"><button class="btn pri" data-act="k-rec">Recuperar meus dados</button><a class="btn" href="mailto:${SUPORTE}?subject=Recuperar%20meus%20dados">Pedir ao suporte</a></div></div></section>
+  <section class="card danger-card" style="max-width:640px"><div class="card-h"><h2>Começar do zero</h2></div><p class="note" style="margin:0 0 12px">Cria um negócio novo, vazio. Os dados antigos ficam inacessíveis para sempre.</p>
+    ${campoPw('k-pw3')}<button class="btn danger" data-act="k-zero">Começar do zero</button></section>
+  <div class="btns" style="max-width:640px;margin:0"><button class="btn" data-act="c-sair">Sair da conta</button></div>`}
+async function chaveAct(a,b){const k=A.chave;if(!k)return;const v=id=>(($('#'+id)||{}).value||'').trim();
+  const falhou=m=>{k.err=m;render()};
+  const senha=async id=>{if(k.pw)return k.pw;const p=($('#'+id)||{}).value||'';if(!p){falhou('Digite sua senha.');return null}
+    try{await api('/me/check-password',{body:{senha:p}});return p}catch(e){falhou(e.message);return null}};
+  try{
+    if(a==='k-senha'){const p=await senha('k-pw');if(!p)return;const me=await api('/me');const dk=await abre(p,(me.cripto||{}).pw);
+      if(!dk)return falhou('Essa senha não abre os dados desta conta. Use o código de recuperação.');await abreComChave(dk,p);render();toast('Dados abertos')}
+    else if(a==='k-rec'){const cod=v('k-cod').toUpperCase().replace(/[^A-Z0-9]/g,'');if(cod.length<16)return falhou('Digite o código de recuperação completo.');
+      const p=await senha('k-pw2');if(!p)return;const me=await api('/me');const rec=(me.cripto||{}).rec;
+      if(!rec)return falhou('O suporte ainda não liberou a recuperação desta conta. Aguarde o e-mail com o código.');
+      const dk=await abre(cod,rec);if(!dk)return falhou('Código incorreto. Confira e tente de novo.');await abreComChave(dk,p,{clearRec:true});render();toast('Dados recuperados')}
+    else if(a==='k-zero')arm(b,async()=>{const p=await senha('k-pw3');if(!p)return;
+      DK=await novaChave();await api('/me/cripto',{method:'PUT',body:{...(await chavesNovas(p)),clearRec:true}});A.chave=null;S=novoNegocio(C.seg,C.emp);normalizaS();
+      syncPend=true;await enviaEstado();await guardaDK(C.email);ui.tab='painel';render();toast('Negócio novo criado')})
+  }catch(e){falhou(e.message)}}
 async function onAuthSubmitReal(id){
   const g=k=>{const e=$('#'+k);return e?String(e.value).trim():''},chk=k=>{const e=$('#'+k);return !!(e&&e.checked)},rad=n=>(document.querySelector(`input[name="${n}"]:checked`)||{}).value;
   const falha=(e,capId)=>{A.err=e.message;if(capId)A.cap[capId]=false;render();window.scrollTo(0,0)};
-  const entrou=async(msg)=>{await carregaSessao();A.err='';A.info='';A.cap={};ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg);maybeTour()};
+  const entrou=async(msg,pw)=>{await carregaSessao(pw);A.err='';A.info='';A.cap={};ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg);maybeTour()};
   if(id==='f-login'){const em=g('l-email').toLowerCase(),pw=($('#l-pw')||{}).value||'';A.lastEmail=em;A.info='';
     if(!em||!pw){A.err='Preencha e-mail e senha.';return render()}
     if(em==='demo@gestorconex.com.br'&&pw==='Demo@2026'){A.err='';return entrarDemo()}
     if(!A.capTok['l-robo']){A.err='Complete a verificação de segurança.';return render()}
     try{const r=await api('/auth/login',{body:{email:em,pw,captcha:A.capTok['l-robo']}});setTok(r.token);
       if(r.mustChange){A.err='';A.scr='nova-senha';return render()}
-      await entrou('Bem-vindo de volta!')}catch(e){falha(e,'l-robo')}}
+      await entrou('Bem-vindo de volta!',pw)}catch(e){falha(e,'l-robo')}}
   else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini='zero';
     A.reg={'r-nome':nome,'r-email':em,'r-tel':tel,'r-emp':emp,'r-seg':seg,'r-dt':dt,'r-doc':doc,'r-ini':ini,'r-ok':chk('r-ok')};
     let er='';
@@ -1672,22 +1749,23 @@ async function onAuthSubmitReal(id){
     else if(!chk('r-ok'))er='Para criar a conta, aceite os Termos de uso e a Política de privacidade.';else if(!A.capTok['r-robo'])er='Complete a verificação de segurança.';
     if(er){A.err=er;render();window.scrollTo(0,0);return}
     try{const r=await api('/auth/register/start',{body:{nome,email:em,tel,emp,seg,dt,doc,pw,aceite:true,captcha:A.capTok['r-robo']}});
-      A.pend={pendingId:r.pendingId,via:r.via,destino:r.destino,email:em,tel,emp,seg,ini};A.err='';A.info='';
+      A.pend={pendingId:r.pendingId,via:r.via,destino:r.destino,email:em,tel,emp,seg,ini,pw};A.err='';A.info='';
       if(r.via==='none')return onAuthSubmitReal('f-ver'); // cadastro sem código (provisório): conclui direto
       A.scr='verificar';render();window.scrollTo(0,0)}catch(e){falha(e,'r-robo')}}
   else if(id==='f-ver'){const p=A.pend;if(!p)return;
     const estado=p.ini==='exemplo'?(()=>{const s=seedExemplo({seed:(Math.random()*1e9)|0});s.negocio.nome=p.emp;return s})():novoNegocio(p.seg,p.emp);
-    try{const r=await api('/auth/register/confirm',{body:{pendingId:p.pendingId,code:g('v-code'),estado}});setTok(r.token);A.pend=null;A.reg=null;
-      await entrou('Conta criada. Seu teste grátis de 14 dias começou.')}catch(e){A.err=e.message;A.info='';render()}}
+    // a chave do negócio nasce aqui: o servidor recebe os dados iniciais já cifrados e as chaves lacradas
+    try{DK=await novaChave();const r=await api('/auth/register/confirm',{body:{pendingId:p.pendingId,code:g('v-code'),estado:await cifra(estado),cripto:await chavesNovas(p.pw)}});setTok(r.token);A.pend=null;A.reg=null;
+      await entrou('Conta criada. Seu teste grátis de 14 dias começou.',p.pw)}catch(e){A.err=e.message;A.info='';render()}}
   else if(id==='f-esq'){const em=g('e-email').toLowerCase();if(!emailOk(em)){A.err='Informe um e-mail válido.';return render()}
     if(!A.capTok['e-robo']){A.err='Complete a verificação de segurança.';return render()}
     try{await api('/auth/forgot',{body:{email:em,captcha:A.capTok['e-robo']}});A.lastEmail=em;A.err='';A.scr='enviada';render()}catch(e){falha(e,'e-robo')}}
   else if(id==='f-nova'){const pw=($('#n-pw')||{}).value||'',pw2=($('#n-pw2')||{}).value||'';const er=pwError(pw,A.lastEmail)||(pw!==pw2?'As duas senhas não são iguais.':'');
     if(er){A.err=er;return render()}
-    try{const r=await api('/auth/change-password',{body:{nova:pw}});setTok(r.token);await entrou('Senha trocada. Use a nova no próximo login.')}catch(e){A.err=e.message;render()}}
+    try{const r=await api('/auth/change-password',{body:{nova:pw}});setTok(r.token);await entrou('Senha trocada. Use a nova no próximo login.',pw)}catch(e){A.err=e.message;render()}}
   else if(id==='f-chg'){const atual=($('#c-cur')||{}).value||'',pw=($('#c-new')||{}).value||'',pw2=($('#c-new2')||{}).value||'';
     ui.chgErr=pwError(pw,C.email)||(pw!==pw2?'As duas senhas não são iguais.':'');if(ui.chgErr)return render(true);
-    try{const r=await api('/auth/change-password',{body:{atual,nova:pw}});setTok(r.token);ui.chgPw=false;render(true);toast('Senha trocada. Use a nova no próximo login.')}catch(e){ui.chgErr=e.message;render(true)}}
+    try{const r=await api('/auth/change-password',{body:{atual,nova:pw}});setTok(r.token);if(DK)await api('/me/cripto',{method:'PUT',body:{pw:await lacra(pw,DK)}});ui.chgPw=false;render(true);toast('Senha trocada. Use a nova no próximo login.')}catch(e){ui.chgErr=e.message;render(true)}}
   else if(id==='f-del'){if(!chk('d-ok')){ui.delErr='Marque a confirmação para continuar.';return render(true)}
     try{await api('/account/delete/start',{body:{senha:($('#d-pw')||{}).value||''}});ui.delErr='';ui.delStep=2;render();window.scrollTo(0,0)}catch(e){ui.delErr=e.message;render(true)}}
 }
@@ -1724,13 +1802,14 @@ async function bootReal(){
   logged=false;if(!LEGAL_SCR.includes(A.scr)&&A.scr!=='cadastro')A.scr='login';render()}
 const aDelConfirm=()=>`<h1>Excluir sua conta</h1><p class="muted" style="margin:0">Ao confirmar, apagamos sua conta e todos os dados do seu negócio. Isso não pode ser desfeito.</p>${errBox()}
   <button class="btn danger big" data-act="a-delconfirm">Confirmar exclusão</button><button class="lnk" data-act="a-go" data-v="login">Cancelar e voltar</button>`;
-async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:{token:A.delTok}});setTok('');C=null;logged=false;A.delTok=null;Object.assign(A,{scr:'excluida',err:''});render()}catch(e){A.err=e.message;render()}}
+async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:{token:A.delTok}});setTok('');apagaDK();C=null;logged=false;A.delTok=null;Object.assign(A,{scr:'excluida',err:''});render()}catch(e){A.err=e.message;render()}}
 
 /* ---------- render / eventos ---------- */
 const VIEWS={painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,conta:vConta,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
 function render(keepScroll){
   // sem sessão (ou tutorial aberto): telas de entrada no lugar do app
   if(!logged||!C||A.overlay){if(!logged)agendaLembretes();renderAuth();return} // sem sessão: cancela os lembretes do aparelho
+  if(A.chave){document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#main').innerHTML=vChave();return}
   if(!(S.fixasRep&&S.fixasRep[ymOf(TODAY)]))repeteFixas();
   document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#auth').innerHTML='';
   if(!VIEWS[ui.tab])ui.tab='painel';
@@ -1751,6 +1830,7 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('[data-tab]');if(t){ui.tab=t.dataset.tab;if(ui.tab==='excluir'){ui.delStep=0;ui.delErr=''}render();window.scrollTo(0,0);return}
   const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,n=+b.dataset.n||0;
   if(a.startsWith('a-')){authAct(a,b);return}
+  if(a.startsWith('k-')){chaveAct(a,b);return}
   if(contaAct(a,b))return;
   // no modo Dia, abre no último dia com vendas lançadas (hoje só se já lançou)
   if(a==='mode'){ui.mode=b.dataset.v;ui.ref=ui.mode==='dia'?lastDataDay():TODAY;render(true)}
