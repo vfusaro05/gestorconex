@@ -116,6 +116,10 @@ section.blk{padding:84px 0}
 .price ul{list-style:none;padding:0;margin:22px 0;text-align:left;display:flex;flex-direction:column;gap:10px}
 .price li{display:flex;gap:10px;align-items:flex-start}
 .price li:before{content:"✓";color:var(--good);font-weight:800}
+.ciclos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 0}
+.ciclos div{border:1px solid var(--line);border-radius:14px;padding:12px 10px;display:flex;flex-direction:column;gap:3px}
+.ciclos b{font-family:var(--f-display)}.ciclos span{font-size:.9rem}.ciclos em{font-style:normal;font-size:.78rem;color:var(--good);font-weight:700}
+@media (max-width:600px){.ciclos{grid-template-columns:1fr}}
 .offer{position:relative;background:linear-gradient(135deg,#16223a,#0e1726);color:#fff;border-radius:26px;padding:48px 32px;text-align:center;overflow:hidden;border:1px solid rgba(195,154,62,.35)}
 .offer .rib{display:inline-block;background:var(--gold);color:var(--navy);font-weight:800;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:99px;margin-bottom:16px}
 .offer p{color:#c3cbda;margin:12px auto 24px;max-width:36em}
@@ -239,11 +243,16 @@ footer .sel{user-select:all;color:#fff}
 
 <section class="blk" id="preco">
   <div class="wrap">
-    <div class="center"><p class="eyebrow">Preço</p><h2 style="margin-top:10px">Um plano, tudo incluso</h2></div>
+    <div class="center"><p class="eyebrow">Preço</p><h2 style="margin-top:10px">Tudo incluso, no plano que preferir</h2></div>
     <div class="price">
       <h3>Gestor Conex</h3>
       <div class="v">R$ 59,90 <small>por mês</small></div>
       <p style="color:var(--muted)">Sem fidelidade. Cancele quando quiser.</p>
+      <div class="ciclos">
+        <div><b>Mensal</b><span>R$ 59,90 por mês</span></div>
+        <div><b>Semestral</b><span>R$ 341,43 a cada 6 meses</span><em>5% de desconto · R$ 56,90 por mês</em></div>
+        <div><b>Anual</b><span>R$ 646,92 por ano</span><em>10% de desconto · R$ 53,91 por mês</em></div>
+      </div>
       <ul>
         <li>Vendas, despesas e cadastros ilimitados</li>
         <li>Resumo, detalhes, indicadores e histórico mês a mês</li>
@@ -273,7 +282,7 @@ footer .sel{user-select:all;color:#fff}
     <div class="faq">
       <details><summary>Preciso de cartão de crédito para testar?</summary><p>Não. O teste de 14 dias é grátis e sem cartão. Você só escolhe a forma de pagamento se decidir assinar.</p></details>
       <details><summary>A equipe do Gestor Conex consegue ver os meus números?</summary><p>Não. Vendas, despesas, serviços e resultados são criptografados no seu aparelho antes de chegar aos nossos servidores, e só a sua senha abre. Vemos apenas os dados da conta (nome, e-mail, celular, CPF ou CNPJ) e da assinatura, necessários para o login, a cobrança e a nota fiscal.</p></details>
-      <details><summary>O que acontece depois dos 14 dias?</summary><p>Se quiser continuar, assine por R$ 59,90 por mês no Pix ou no cartão. Se não assinar, o acesso fica pausado, mas seus dados continuam guardados para quando você voltar.</p></details>
+      <details><summary>O que acontece depois dos 14 dias?</summary><p>Se quiser continuar, assine por R$ 59,90 por mês, ou pague 6 ou 12 meses de uma vez com desconto, no Pix ou no cartão. Se não assinar, o acesso fica pausado, mas seus dados continuam guardados para quando você voltar.</p></details>
       <details><summary>Funciona no celular?</summary><p>Sim. Tem aplicativo para Android e iPhone, e você também pode usar pelo navegador do celular ou do computador. Os dados são os mesmos em todos.</p></details>
       <details><summary>Serve para o meu tipo de negócio?</summary><p>Serve para qualquer negócio que vende serviços ou produtos: barbearia, salão, lanchonete, pet shop, oficina e muitos outros. Você cadastra o que vende e as suas contas.</p></details>
       <details><summary>Preciso entender de finanças?</summary><p>Não. O Gestor Conex foi feito para quem não é da área: mostra o resultado em frases simples, como "sobraram R$ 54 de cada R$ 100 vendidos".</p></details>
