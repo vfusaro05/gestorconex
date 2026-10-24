@@ -710,12 +710,17 @@ const IC={
   cadastros:'<svg viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
   ajustes:'<svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>',
   perfil:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>',
+  admin:'<svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V6z"/><path d="M9.5 11.5h5M12 9v5"/></svg>',
   sair:'<svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>'
 };
 // [aba, nome no menu lateral, nome curto na barra do celular, ícone]
 const TABS=[['painel','Início'],['vendas','Vendas'],['despesas','Despesas'],['cadastros','Cadastros'],['conta','Minha conta','Conta','perfil'],['ajustes','Ajustes']];
-$('#nav-side').innerHTML=TABS.map(([k,l,,ic])=>`<button data-tab="${k}">${IC[ic||k]}${l}</button>`).join('')+`<button data-act="c-sair">${IC.sair}Sair</button>`;
-$('#nav-bottom').innerHTML=TABS.map(([k,l,c,ic])=>`<button data-tab="${k}">${IC[ic||k]}<span>${c||l}</span></button>`).join('');
+let navKey='';
+function montaNav(adm){const t=TABS.concat(adm?[['admin','Administração','Admin']]:[]),k=t.map(x=>x[0]).join();if(k===navKey)return;navKey=k;
+  $('#nav-side').innerHTML=t.map(([k,l,,ic])=>`<button data-tab="${k}">${IC[ic||k]}${l}</button>`).join('')+`<button data-act="c-sair">${IC.sair}Sair</button>`;
+  $('#nav-bottom').innerHTML=t.map(([k,l,c,ic])=>`<button data-tab="${k}">${IC[ic||k]}<span>${c||l}</span></button>`).join('');
+  $('#nav-bottom').style.gridTemplateColumns=`repeat(${t.length},1fr)`}
+montaNav(false);
 
 function topbar(title,sub){
   // dados simulados: só um selo discreto (trocar cenário fica em Ajustes)
@@ -1201,7 +1206,11 @@ const vConta=()=>`${topbar('Minha conta')}${contaCards()}${contaDanger()}`;
 /* ================= CONTA: tutorial, login, cadastro, senha, assinatura, privacidade, exclusão =================
    Mesmo padrão do Chat Conex. No protótipo tudo fica neste navegador; nada é enviado para servidor. */
 const AKEY='balcao.conta',SESS='balcao.sessao',INTRO='balcao.intro',TERMOS_V='1.0',TRIAL_DIAS=14,SUPORTE='suporte@gestorconex.com.br';
-const PLANOS={mensal:{nome:'Mensal',preco:59.9,per:'mês',meses:1}};
+// ciclos de pagamento (mesma regra do Chat Conex: 6 meses com 5% e 12 com 10% de desconto). No modo produção a tabela vem do servidor.
+const PLANOS={mensal:{nome:'Mensal',preco:59.9,per:'mês',meses:1,desc:0},semestral:{nome:'Semestral',preco:341.43,per:'6 meses',meses:6,desc:5},anual:{nome:'Anual',preco:646.92,per:'ano',meses:12,desc:10,tag:'Mais econômico'}};
+const CICLO={1:'mensal',6:'semestral',12:'anual'},planoDe=m=>CICLO[m]&&PLANOS[CICLO[m]]?CICLO[m]:'mensal';
+function aplicaPlanos(l){if(!l||!l.length)return;for(const k of Object.keys(PLANOS))if(!l.some(x=>CICLO[x.meses]===k))delete PLANOS[k];
+  l.forEach(x=>{const k=CICLO[x.meses];if(k)PLANOS[k]=Object.assign(PLANOS[k]||{nome:k,per:x.meses+' meses',meses:x.meses},{preco:x.total,desc:x.desconto})});if(!PLANOS[ui.plano])ui.plano='mensal'}
 let C=null;try{C=JSON.parse(localStorage.getItem(AKEY))}catch(e){}
 const saveC=()=>{if(C&&C.real){if(C.tourDone&&!C._tourSent){C._tourSent=true;api('/me',{method:'PATCH',body:{tourDone:true}}).catch(()=>{C._tourSent=false})}return}try{C?localStorage.setItem(AKEY,JSON.stringify(C)):localStorage.removeItem(AKEY)}catch(e){}};
 let logged=false;try{logged=!!C&&localStorage.getItem(SESS)===C.email}catch(e){}
@@ -1234,20 +1243,36 @@ function copyTxt(t,ok){try{navigator.clipboard.writeText(t).then(()=>toast(ok||'
 
 /* ---------- assinatura ---------- */
 function assinStatusWeb(){const a=C.assin;
+  if(a.admin)return{c:'good',t:'Administrador',x:'Conta de administrador: sem assinatura e sem vencimento.'};
+  if(a.contrato&&a.contrato.forma&&a.status==='ativa'&&!a.falhou&&(a.renov||TODAY<=a.prox)){const k=a.contrato;
+    return{c:'good',t:'Ativa',x:`Contrato negociado de ${mesesTxt(k.prazo)}${k.forma==='cartao'?`, cobrança ${k.parcelas} de ${k.prazo} no cartão`:', pago no Pix'}. Vale até ${fmtD(a.prox)}.`}}
+  if(a.falhou)return{c:'bad',t:'Cobrança não aprovada',x:'A cobrança no cartão não foi aprovada. O Mercado Pago tenta de novo nos próximos dias. Confira o cartão ou pague com Pix para não perder o acesso.'};
   if(a.status==='ativa'){if(!a.renov&&TODAY>a.prox)return{c:'bad',t:'Vencida',x:`Venceu em ${fmtD(a.prox)}. Renove para voltar a usar. Seus dados estão guardados.`};
-    return a.renov?{c:'good',t:'Ativa',x:`Plano ${PLANOS[a.plano].nome} · próxima cobrança em ${fmtD(a.prox)}, no ${a.metodo==='pix'?'Pix':'cartão'}.`}:{c:'warn',t:'Ativa, sem renovação',x:`Vale até ${fmtD(a.prox)}. Depois disso, o acesso fica pausado até você renovar.`}}
+    return a.renov?{c:'good',t:'Ativa',x:`Plano ${(PLANOS[a.plano]||PLANOS.mensal).nome} · próxima cobrança em ${fmtD(a.prox)}, no ${a.metodo==='pix'?'Pix':'cartão'}.`}:{c:'warn',t:'Ativa, sem renovação',x:`Vale até ${fmtD(a.prox)}. Depois disso, o acesso fica pausado até você renovar.`}}
   const l=daysBetween(TODAY,C.trialFim);
   if(l<0)return{c:'bad',t:'Teste encerrado',x:`Seu teste grátis terminou em ${fmtD(C.trialFim)}. Seus dados estão guardados.`};
-  if(a.renov)return{c:'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'}. Cartão cadastrado: a primeira cobrança de R$ 59,90 será em ${fmtD(C.trialFim)}.`};
+  if(a.renov)return{c:'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'}. Cartão cadastrado: a primeira cobrança, de ${brl((PLANOS[a.plano]||PLANOS.mensal).preco)}, será em ${fmtD(C.trialFim)}.`};
   return{c:l<=3?'warn':'good',t:'Teste grátis',x:`Faltam ${l} ${l===1?'dia':'dias'} (até ${fmtD(C.trialFim)}). Nenhuma cobrança até você assinar.`}}
-function assinStatus(){const s=assinStatusWeb();if(!NATIVO)return s;const a=C.assin;
+// app das lojas: só a situação, sem preço nem chamada de pagamento; o caminho para pagar vai por e-mail
+function assinStatus(){const s=assinStatusWeb();if(!NATIVO||C.assin.admin)return s;const a=C.assin;
+  if(a.falhou)return{...s,x:'A cobrança da assinatura não foi aprovada. Os detalhes estão no seu e-mail.'};
   if(s.c==='bad')return{...s,x:s.x.replace(' Renove para voltar a usar.','')};
   if(a.status==='ativa')return{c:'good',t:'Ativa',x:'Sua conta está ativa.'};
   const l=daysBetween(TODAY,C.trialFim);return{...s,x:`Faltam ${l} ${l===1?'dia':'dias'} (até ${fmtD(C.trialFim)}).`}}
-function acessoOk(){const a=C.assin;if(C.real)return !!a.acessoSrv;if(a.status==='ativa')return a.renov||TODAY<=a.prox;return daysBetween(TODAY,C.trialFim)>=0}
-function trialBanner(){if(!C)return'';const a=C.assin;
-  if(a.status==='trial'){const l=daysBetween(TODAY,C.trialFim);if(l<0)return'';return `<div class="banner"><span><b>Teste grátis:</b> faltam ${l} ${l===1?'dia':'dias'}.</span>${NATIVO?'':'<button class="btn sm pri" data-tab="assinatura">Assinar</button>'}</div>`}
-  if(a.status==='ativa'&&!a.renov&&!NATIVO){const l=daysBetween(TODAY,a.prox);if(l>=0&&l<=7)return `<div class="banner"><span><b>Sua assinatura vence em ${l} ${l===1?'dia':'dias'}.</b></span><button class="btn sm pri" data-tab="assinatura">Renovar</button></div>`}
+function acessoOk(){const a=C.assin;if(a.admin)return true;if(C.real)return !!a.acessoSrv;if(a.status==='ativa')return a.renov||TODAY<=a.prox;return daysBetween(TODAY,C.trialFim)>=0}
+/* faixa de aviso no topo de todas as telas (teste grátis, vencimento, cobrança recusada). No app das lojas: texto neutro, sem botão de pagar. */
+function trialBanner(){if(!C||ui.tab==='assinatura'||C.assin.admin)return'';const a=C.assin,mail=' Os detalhes estão no seu e-mail.';
+  // proposta ou aditivo esperando o aceite: aparece também no app das lojas (não é pagamento)
+  const pd=ctPendente();if(pd)return `<div class="banner"><span><b>${pd==='proposta'?'Você tem uma proposta do Gestor Conex para aprovar.':'Há um aditivo do seu contrato para aprovar.'}</b></span><button class="btn sm pri" data-tab="assinatura">${pd==='proposta'?'Ver proposta':'Ver aditivo'}</button></div>`;
+  const fx=(txt,btn)=>`<div class="banner"><span>${txt}${NATIVO&&btn?mail:''}</span>${NATIVO||!btn?'':`<button class="btn sm pri" data-tab="assinatura">${btn}</button>`}</div>`;
+  const quando=l=>l===0?'hoje':l===1?'amanhã':`em ${l} dias`;
+  if(a.falhou)return fx('<b>A cobrança no cartão não foi aprovada.</b>','Resolver');
+  if(a.status==='trial'){if(a.renov)return'';const l=daysBetween(TODAY,C.trialFim);
+    if(l<0)return fx('<b>Seu teste grátis terminou.</b> Seus dados continuam guardados.','Assinar');
+    return l<=3?fx(`<b>Seu teste grátis termina ${quando(l)}.</b>`,'Assinar'):fx(`<b>Teste grátis:</b> faltam ${l} dias.`,NATIVO?'':'Assinar')}
+  if(a.status==='ativa'&&!a.renov){const l=daysBetween(TODAY,a.prox);
+    if(l>=0&&l<=5)return fx(`<b>Sua assinatura vence ${quando(l)}.</b>`,'Renovar');
+    if(l<0)return fx(`<b>Sua assinatura venceu em ${fmtD(a.prox)}.</b>`,'Renovar')}
   return''}
 function aprovar(metodo){const p=PLANOS[ui.plano],a=C.assin,base=a.status==='ativa'&&a.prox>TODAY?a.prox:TODAY;
   C.assin={status:'ativa',plano:ui.plano,metodo,renov:metodo==='cartao'?ui.renov:false,inicio:TODAY,prox:addMonths(base,p.meses),hist:[{d:TODAY,plano:p.nome,metodo,valor:p.preco,st:'Pago'},...(a.hist||[])]};
@@ -1262,30 +1287,85 @@ function cardPane(){const p=PLANOS[ui.plano];
   return `<div class="pane"><p class="note" style="margin:0">Você vai para o ambiente seguro do Mercado Pago para digitar os dados do cartão. O Gestor Conex não vê nem guarda o número do seu cartão.</p>
     <label class="chk"><input type="checkbox" id="s-renov" ${ui.renov?'checked':''}><span>Renovar automaticamente a cada ${p.per}. Dá para cancelar quando quiser.</span></label>
     ${ui.payErr?`<div class="a-err" role="alert">${ui.payErr}</div>`:''}
-    ${C.assin.status==='trial'&&daysBetween(TODAY,C.trialFim)>0?`<p class="note" style="margin:0">Você continua no teste grátis: a primeira cobrança só acontece em ${fmtD(C.trialFim)}.</p>`:''}
+    ${C.assin.status==='trial'&&daysBetween(TODAY,C.trialFim)>0?`<p class="note" style="margin:0">Você não perde os dias de teste: o período pago começa em ${fmtD(C.trialFim)}. Com a renovação automática, a primeira cobrança também fica para essa data.</p>`:''}
     <button class="btn pri big" data-act="s-pagar">Continuar para o pagamento · ${brl(p.preco)}</button></div>`}
 function pixPane(){const p=PLANOS[ui.plano];
   if(!ui.pix)return `<div class="pane"><p class="note" style="margin:0">O código Pix vale por 30 minutos. O Pix não renova sozinho: avisamos antes de vencer para você pagar o próximo período.</p><button class="btn pri big" data-act="s-pix">Gerar código Pix · ${brl(p.preco)}</button></div>`;
   return `<div class="pix">${ui.pix.img?`<img class="qr" src="data:image/png;base64,${ui.pix.img}" alt="QR code do Pix">`:fakeQr(ui.pix.code)}<div class="pane" style="margin:0;min-width:0"><p style="margin:0;font-weight:600">Escaneie o QR code no app do seu banco ou copie o código Pix.</p>
     <div class="codebox">${ui.pix.code}</div><div class="btns" style="margin:0"><button class="btn sm" data-act="s-pixcopy">Copiar código</button><button class="btn pri sm" data-act="s-aprovar" data-v="pix">Já paguei, verificar</button></div>
     <p class="note" style="margin:0">Expira em <b id="pix-timer">${mmss(Math.max(0,ui.pix.exp-Date.now()))}</b>.${REAL&&C.real?' Assim que o pagamento cair, a tela atualiza sozinha.':' <span class="faint">Protótipo: este código não é um Pix real.</span>'}</p></div></div>`}
+/* ---------- contrato negociado (mesmo modelo do Chat Conex, sem vagas): proposta com aceite, aditivo e pagamento ----------
+   No app das lojas: aparece e pode ser aceito, mas sem valores nem pagamento (os valores e o link vão por e-mail). */
+const CT_FASE={aguardando_aceite:['Aguardando aceite','warn'],aguardando_pagamento:['Aguardando pagamento','warn'],pago_pix:['Pago no Pix','good'],cartao:['Cartão mensal','good'],concluido:['Concluído','good'],cancelado:['Cancelado','bad']};
+const mesesTxt=n=>`${n} ${n===1?'mês':'meses'}`;
+const ctVia=()=>NATIVO?'app':/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)?'mobile-web':'web';
+function ctPendente(){const c=C&&C.assin&&C.assin.contrato;if(!c)return null;if(c.fase==='aguardando_aceite'&&!c.vencida)return'proposta';if(c.aceitarAditivo)return'aditivo';return null}
+const kvRows=r=>`<dl class="kv">${r.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+// cláusula de rescisão (mesma do Chat Conex): vai no aceite, na proposta impressa e no e-mail
+const RESCISAO=()=>`Rescisão antecipada: aviso prévio de 30 dias. No cartão, multa de 20% sobre as parcelas restantes. No Pix, reembolso dos meses não utilizados pelo valor de tabela (${brl(C&&C.assin&&C.assin.contrato?C.assin.contrato.tabelaMensal:59.9)} por mês), descontada multa de 20% sobre esse saldo.`;
+function ctAceite(modo){
+  return `<label class="chk" style="margin-top:10px"><input type="checkbox" id="ct-ok-${modo}"><span>Li e concordo com as condições ${modo==='proposta'?'desta proposta':'deste aditivo'}.</span></label>
+  ${ui.ctErr?`<div class="a-err" role="alert">${esc(ui.ctErr)}</div>`:''}<div class="btns"><button class="btn pri" data-act="ct-aceitar" data-v="${modo}">${modo==='proposta'?'Aceitar proposta':'Aceitar aditivo'}</button></div>`}
+function ctLinhasAditivo(c){const a=c.aditivo,r=[];if(!a)return r;if(a.prazo!=null)r.push(['Prazo',`de ${mesesTxt(c.prazo)} para ${mesesTxt(a.prazo)}`]);if(a.mensal!=null)r.push(['Novo valor no cartão',`${brl(a.mensal)} por mês, a partir da próxima cobrança`]);if(a.pix!=null)r.push(['Aditivo no Pix',brl(a.pix)]);return r}
+/* Mesmo modelo do Chat Conex (MobileProposal): o app das lojas mostra os valores do contrato e o aceite, mas nunca
+   botão, link ou chamada de pagamento; o pagamento vai por e-mail ou pelo site. Os planos de tabela não aparecem no app. */
+function ctCard(){const c=C.assin.contrato;if(!c)return'';const [ft,fc]=CT_FASE[c.fase]||[c.fase,'warn'];
+  const h=`<div class="card-h"><h2>Seu contrato</h2><span class="status ${fc}"><i></i>${ft}</span></div>`,adPix=c.aditivo&&c.aditivo.aceitoEm&&c.aditivo.pix!=null;
+  const porEmail=o=>`<p class="muted" style="margin:10px 0 0">${o} Enviamos para <b class="sel">${esc(C.email)}</b> as instruções para o pagamento.</p>`;
+  const linhas=[['Prazo',`${mesesTxt(c.prazo)}, valor fixo`],['Cartão de crédito',`${c.prazo} × ${brl(c.mensal)} (cobrança mensal automática)`],['Pix à vista',`${brl(c.pixTotal)}${c.pixPct?` (${c.pixPct}% de desconto)`:''}`]];
+  const pdf=NATIVO?'':'<p style="margin:10px 0 0"><button class="lnk" data-act="ct-pdf">Ver a proposta completa (imprimir ou salvar em PDF)</button></p>',err=ui.payErr?`<div class="a-err" role="alert">${esc(ui.payErr)}</div>`:'';
+  if(c.fase==='aguardando_aceite')return `<section class="card" id="contrato">${h}<p class="muted" style="margin:0 0 10px">Condição negociada para <b>${esc(c.razao)}</b>. Confira e aceite para seguir para o pagamento.</p>${kvRows([...linhas,['Válida até',dBR(c.validade)]])}
+    <ul class="lst"><li>Sem o seu aceite não há cobrança. Depois do aceite, você escolhe Pix à vista ou cartão mensal.</li><li>${RESCISAO()}</li><li>Prorrogação ou mudança de valor durante o contrato entram por aditivo, também com o seu aceite.</li></ul>${pdf}
+    ${c.vencida?`<div class="a-err" role="alert">Esta proposta venceu em ${dBR(c.validade)}. Fale com o Gestor Conex para receber uma nova.</div>`:ctAceite('proposta')}</section>`;
+  if(c.fase==='aguardando_pagamento'){
+    if(NATIVO)return `<section class="card" id="contrato">${h}${kvRows(linhas)}${porEmail('Proposta aceita.')}</section>`;
+    const m=ui.metodo==='cartao'?'cartao':'pix';
+    return `<section class="card" id="contrato">${h}<p class="muted" style="margin:0 0 10px">Proposta aceita em ${dBR(c.aceitoEm)}. Escolha a forma de pagamento.</p>${kvRows(linhas)}${pdf}
+    <p class="a-sec" style="margin-top:16px">Forma de pagamento</p><div class="seg" role="group" aria-label="Forma de pagamento">${[['pix','Pix à vista'],['cartao','Cartão mensal']].map(([k,l])=>`<button data-act="s-metodo" data-v="${k}" aria-pressed="${m===k}">${l}</button>`).join('')}</div>${err}
+    ${m==='pix'?(ui.pix?pixPane():`<div class="pane"><p class="note" style="margin:0">Pagamento único do contrato inteiro. O código vale por 30 minutos e o contrato é liberado assim que o Pix cair.</p><button class="btn pri big" data-act="ct-pix">Pagar com Pix · ${brl(c.pixTotal)}</button></div>`)
+      :`<div class="pane"><p class="note" style="margin:0">Você vai para o ambiente seguro do Mercado Pago para cadastrar o cartão. São ${c.prazo} cobranças mensais de ${brl(c.mensal)}; depois da última, a cobrança para sozinha.${C.assin.status==='trial'&&daysBetween(TODAY,C.trialFim)>0?` A primeira fica para ${fmtD(C.trialFim)}, quando termina o seu teste grátis.`:''}</p><button class="btn pri big" data-act="ct-cartao">Cadastrar cartão · ${c.prazo} × ${brl(c.mensal)}</button></div>`}</section>`}
+  let corpo=kvRows([c.forma==='pix'?['Pago no Pix',brl(c.pixTotal)]:['Cartão',`${c.parcelas} de ${c.prazo} cobranças de ${brl(c.mensal)}`],['Prazo',mesesTxt(c.prazo)],['Válido até',c.fim?dBR(c.fim):'—']]);
+  if(c.aceitarAditivo)corpo+=`<div class="pane"><b>Aditivo do contrato para aprovar</b><p class="note" style="margin:0">Alteração combinada com o Gestor Conex. Ela só vale depois do seu aceite${c.aditivo.pix!=null?' e do pagamento do aditivo':''}.</p>${kvRows(ctLinhasAditivo(c))}${ctAceite('aditivo')}</div>`;
+  else if(adPix)corpo+=`<div class="pane"><b>Aditivo aceito: falta o Pix</b>${kvRows(ctLinhasAditivo(c))}${NATIVO?porEmail(''):`${err}${ui.pix?pixPane():`<div><button class="btn pri" data-act="ct-ad-pix">Pagar o aditivo com Pix · ${brl(c.aditivo.pix)}</button></div>`}`}</div>`;
+  return `<section class="card" id="contrato">${h}${corpo}${pdf}</section>`}
+/* proposta para imprimir ou salvar em PDF, montada do mesmo cadastro (os números nunca divergem da cobrança) */
+function imprimeProposta(c){if(!c)return;const w=window.open('','_blank');if(!w){toast('Libere as janelas do navegador para ver a proposta.');return}
+  const d=x=>x?new Date(x).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}):'—',e=esc;
+  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Proposta Gestor Conex - ${e(c.razao)}</title><style>body{font:14px/1.5 Arial,sans-serif;color:#0e1726;max-width:720px;margin:32px auto;padding:0 20px}h1{font-size:22px;margin:0}h2{font-size:15px;margin:22px 0 8px;color:#0e1726;border-bottom:1px solid #e1e5eb;padding-bottom:4px}.top{background:#0e1726;color:#fff;padding:18px 22px;border-radius:10px;display:flex;justify-content:space-between;align-items:center}.top b{color:#e2be63}table{width:100%;border-collapse:collapse}td{padding:7px 0;border-bottom:1px solid #eef0f3;vertical-align:top}td:first-child{color:#5b6576;width:42%}.nota{color:#5b6576;font-size:12px;margin-top:28px}@media print{.top{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
+  <div class="top"><div style="font-size:20px;font-weight:bold">Gestor <b>Conex</b></div><div>Proposta comercial</div></div>
+  <h1 style="margin-top:22px">${e(c.razao)}</h1><p style="margin:4px 0 0;color:#5b6576">${c.doc?e(c.doc)+' · ':''}${c.contato?'A/C '+e(c.contato)+' · ':''}Proposta de ${d(c.data)}, válida até ${d(c.validade)}</p>
+  <h2>Condições</h2><table><tr><td>Prazo do contrato</td><td>${mesesTxt(c.prazo)}, valor fixo</td></tr><tr><td>Cartão de crédito</td><td>${c.prazo} × ${brl(c.mensal)} por mês (cobrança mensal automática), total de ${brl(c.cartaoTotal)}</td></tr>
+  <tr><td>Pix à vista</td><td>${brl(c.pixTotal)}${c.pixPct?` (${c.pixPct}% de desconto sobre o cartão)`:''}</td></tr><tr><td>Preço de tabela no mesmo prazo</td><td>${brl(c.tabelaPrazo)} (${brl(c.tabelaMensal)} por mês)</td></tr></table>
+  <h2>O que está incluído</h2><ul><li>Uso completo do Gestor Conex no site e nos apps (vendas, despesas, painel e indicadores).</li><li>Dados do negócio criptografados de ponta a ponta: só você vê.</li><li>Suporte por e-mail: suporte@gestorconex.com.br.</li></ul>
+  <h2>Regras</h2><ul><li>O contrato começa a valer com o aceite e o pagamento. Com Pix, o prazo todo é liberado de uma vez; no cartão, cada cobrança mensal libera um mês e, depois da última, a cobrança para sozinha.</li><li>Prorrogação ou mudança de valor durante o contrato entram por aditivo, também com o seu aceite.</li><li>Rescisão antecipada: aviso prévio de 30 dias. No cartão, multa de 20% sobre as parcelas restantes. No Pix, reembolso dos meses não utilizados pelo valor de tabela (${brl(c.tabelaMensal)} por mês), descontada multa de 20% sobre esse saldo.</li></ul>
+  ${c.obs?`<h2>Observações</h2><p style="white-space:pre-wrap">${e(c.obs)}</p>`:''}
+  <p class="nota">Proposta gerada pelo Gestor Conex em ${d(new Date())}. Os valores desta proposta são os mesmos cobrados na assinatura.</p><script>setTimeout(()=>print(),300)<\/script></body></html>`);w.document.close()}
+const FB_CAT=[['SUGESTAO','Sugestão'],['PEDIDO','Pedido de função'],['BUG','Problema ou erro'],['DUVIDA','Dúvida'],['OUTRO','Outro']],FB_LBL=Object.fromEntries(FB_CAT);
+async function enviaFeedback(){const cat=($('#fb-cat')||{}).value||'OUTRO',msg=(($('#fb-msg')||{}).value||'').trim();
+  if(msg.length<3){ui.fbErr='Escreva pelo menos 3 caracteres.';return render(true)}
+  const ok=()=>{ui.fb=false;ui.fbErr='';render(true);toast('Recebemos sua mensagem. Obrigado!')};
+  if(!(REAL&&C.real))return ok();
+  try{await api('/feedback',{body:{categoria:cat,mensagem:msg,tela:ui.tab}});ok()}catch(e){ui.fbErr=e.message;render(true)}}
 function vAssinatura(){const st=assinStatus(),a=C.assin;
-  if(NATIVO)return `${topbar('Assinatura')}<section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p></section>`;
+  const sit=`<section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p></section>`;
+  if(a.admin)return `${topbar('Assinatura')}${sit}`; // administrador do sistema: sem planos nem pagamento
+  if(NATIVO)return `${topbar('Assinatura')}${sit}${ctCard()}`;
   return `${topbar('Assinatura')}
   <section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p>
-    ${a.status==='ativa'?`<div class="btns">${a.renov?`<button class="btn danger sm" data-act="s-cancel">Cancelar renovação automática</button>`:a.metodo==='cartao'?`<button class="btn sm" data-act="s-reativar">Reativar renovação automática</button>`:''}</div>${a.renov?'<p class="note" style="margin:8px 0 0">Se cancelar, a assinatura continua valendo até o fim do período já pago.</p>':''}`:''}</section>
-  <section class="card"><div class="card-h"><h2>${a.status==='ativa'?'Renovar ou trocar de plano':'Escolha seu plano'}</h2><p>R$ 59,90 por mês, sem fidelidade</p></div>
-    <div class="plans">${Object.entries(PLANOS).map(([k,x])=>`<button class="plan" data-act="s-plano" data-v="${k}" aria-pressed="${ui.plano===k}">${x.tag?`<span class="tag">${x.tag}</span>`:''}<b>${x.nome}</b><span class="pr">${brl(x.preco)}</span><span class="muted">por ${x.per}${k==='anual'?` · ${brl(x.preco/12)} por mês`:''}</span></button>`).join('')}</div>
+    ${!a.contrato&&(a.status==='ativa'||a.renov)?`<div class="btns">${a.renov?`<button class="btn danger sm" data-act="s-cancel">Cancelar renovação automática</button>`:a.metodo==='cartao'?`<button class="btn sm" data-act="s-reativar">Reativar renovação automática</button>`:''}</div>${a.renov?`<p class="note" style="margin:8px 0 0">Se cancelar, a assinatura continua valendo até o fim do período já pago. Para trocar de plano, cancele a renovação e assine de novo no plano novo.</p>`:''}`:''}</section>
+  ${ctCard()}
+  ${a.contrato||(a.renov&&!a.falhou)?'':`<section class="card"><div class="card-h"><h2>${a.status==='ativa'?'Renovar ou trocar de plano':'Escolha seu plano'}</h2><p>${Object.keys(PLANOS).length>1?'Mensal ou por período, com desconto. Sem fidelidade.':'Sem fidelidade.'}</p></div>
+    <div class="plans">${Object.entries(PLANOS).map(([k,x])=>`<button class="plan" data-act="s-plano" data-v="${k}" aria-pressed="${ui.plano===k}">${x.tag?`<span class="tag">${x.tag}</span>`:''}<b>${x.nome}</b><span class="pr">${brl(x.preco)}</span><span class="muted">por ${x.per}${x.meses>1?` · ${brl(x.preco/x.meses)} por mês${x.desc?` (${x.desc}% de desconto)`:''}`:''}</span></button>`).join('')}</div>
     <p class="a-sec" style="margin-top:18px">Forma de pagamento</p>
     <div class="seg" role="group" aria-label="Forma de pagamento">${[['cartao','Cartão de crédito'],['pix','Pix']].map(([k,l])=>`<button data-act="s-metodo" data-v="${k}" aria-pressed="${ui.metodo===k}">${l}</button>`).join('')}</div>
     ${ui.metodo==='cartao'?cardPane():pixPane()}
-    <p class="note" style="margin:14px 0 0">Pagamento processado pelo Mercado Pago. Você recebe o comprovante por e-mail.</p></section>
+    <p class="note" style="margin:14px 0 0">Pagamento processado pelo Mercado Pago. Você recebe o comprovante por e-mail.</p></section>`}
   ${a.hist&&a.hist.length?`<section class="card"><div class="card-h"><h2>Pagamentos</h2></div><div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Plano</th><th>Forma</th><th class="r">Valor</th><th>Situação</th></tr></thead><tbody>${a.hist.map(h=>`<tr><td>${fmtD(h.d)}</td><td>${h.plano}</td><td>${h.metodo==='pix'?'Pix':'Cartão'}</td><td class="r">${brl(h.valor)}</td><td><span class="chip">${h.st}</span></td></tr>`).join('')}</tbody></table></div></section>`:''}
   ${REAL?'':`<section class="card proto"><b>Testes do protótipo</b><div class="btns"><button class="btn sm" data-act="s-sim-fim">Simular fim do teste grátis</button><button class="btn sm" data-act="s-sim-trial">Voltar para o teste grátis</button>${a.status==='ativa'?'<button class="btn sm" data-act="s-sim-venc">Simular assinatura vencida</button>':''}</div></section>`}`}
-function vBloqueado(){const st=assinStatus();
+function vBloqueado(){const st=assinStatus(),pd=ctPendente(),ct=C.assin.contrato;
   return `${topbar('Acesso pausado')}<section class="card" style="max-width:600px"><div class="card-h"><h2>${st.t}</h2></div><p class="muted" style="margin:0 0 8px">${st.x}</p>
-    <p class="muted" style="margin:0">Nada foi apagado: vendas, despesas e cadastros continuam guardados.${NATIVO?'':' Assine para voltar a usar.'}</p>
-    <div class="btns">${NATIVO?'':'<button class="btn pri" data-tab="assinatura">Ver planos</button>'}<button class="btn" data-act="c-export-go">Exportar meus dados</button></div></section>`}
+    <p class="muted" style="margin:0">Nada foi apagado: vendas, despesas e cadastros continuam guardados.${NATIVO?` Enviamos para <b class="sel">${esc(C.email)}</b> as instruções para voltar a usar.`:' Assine para voltar a usar.'}</p>
+    <div class="btns">${pd?`<button class="btn pri" data-tab="assinatura">${pd==='proposta'?'Ver proposta':'Ver aditivo'}</button>`:''}${NATIVO||pd?'':`<button class="btn pri" data-tab="assinatura">${ct?'Ver contrato':'Ver planos'}</button>`}<button class="btn" data-act="c-export-go">Exportar meus dados</button></div></section>`}
 
 /* ---------- conta dentro do app (Ajustes) ---------- */
 function exportJson(){const {pw,tempPw,tempExp,...conta}=C;return JSON.stringify({exportadoEm:new Date().toISOString(),conta,negocio:S.negocio,itens:S.itens,despesas:S.despesas,vendas:S.vendas,despesasMensais:S.gastos,despesasSemanais:S.gastosS,despesasDiarias:S.gastosD},null,1)}
@@ -1301,7 +1381,7 @@ function contaCards(){const st=assinStatus();
       <div class="field"><label for="c-new">Nova senha</label><div class="pw"><input class="inp" id="c-new" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-chg')}</div>
       <div class="field"><label for="c-new2">Repita a nova senha</label><input class="inp" id="c-new2" type="password" autocomplete="new-password"></div>
       ${ui.chgErr?`<div class="a-err" role="alert">${esc(ui.chgErr)}</div>`:''}<button class="btn pri" type="submit">Salvar nova senha</button></form>`:''}</section>
-  <section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:${NATIVO?'0':'0 0 12px'}">${st.x}</p>${NATIVO?'':`<button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button>`}</section>
+  <section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:${NATIVO||C.assin.admin?'0':'0 0 12px'}">${st.x}</p>${NATIVO||C.assin.admin?'':`<button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button>`}</section>
   <section class="card" id="priv"><div class="card-h"><h2>Privacidade e dados</h2><p>seus direitos pela LGPD</p></div>
     <div class="link-list"><button data-act="c-export">Exportar meus dados<span>›</span></button><button data-act="legal" data-v="privacidade">Política de privacidade<span>›</span></button><button data-act="legal" data-v="termos">Termos de uso<span>›</span></button><button data-act="legal" data-v="excluir-info">Como funciona a exclusão de conta<span>›</span></button></div>
     ${ui.export?`<div style="margin-top:12px"><p class="note">Copie o texto abaixo e guarde. Ele tem todos os seus dados (formato JSON, abre em qualquer planilha ou sistema).</p><textarea id="exp-txt" class="inp" rows="6" readonly>${esc(exportJson())}</textarea><button class="btn sm" data-act="c-copy" style="margin-top:8px">Copiar dados</button></div>`:''}
@@ -1310,7 +1390,11 @@ function contaCards(){const st=assinStatus();
       <p class="note" style="margin:6px 0 0">Se você esquecer a senha, dá para recuperar: guardamos uma cópia lacrada da sua chave, fora dos servidores, usada só quando você pede a recuperação ao suporte pelo e-mail da conta.</p>
       <p class="note" style="margin:6px 0 0">Ficam visíveis para nós apenas os dados da conta (nome, e-mail, celular, CPF ou CNPJ) e da assinatura, necessários para o login, a cobrança e a nota fiscal.</p></div>
     <p class="note" style="margin:12px 0 0">O Gestor Conex usa só armazenamento essencial, para manter você conectado. Não usamos rastreamento de terceiros nem publicidade.</p></section>
-  <section class="card" data-tour="ajuda"><div class="card-h"><h2>Ajuda</h2></div><div class="link-list"><button data-act="c-tutorial">Ver o tutorial de novo<span>›</span></button></div>
+  <section class="card" data-tour="ajuda"><div class="card-h"><h2>Ajuda</h2></div><div class="link-list"><button data-act="c-tutorial">Ver o tutorial de novo<span>›</span></button><button data-act="c-fb">Enviar sugestão, pedido ou problema<span>›</span></button></div>
+    ${ui.fb?`<form id="f-fb" class="a-form" style="margin-top:12px;max-width:560px"><div class="field"><label for="fb-cat">Assunto</label><select class="inp" id="fb-cat">${FB_CAT.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></div>
+      <div class="field"><label for="fb-msg">Mensagem</label><textarea class="inp" id="fb-msg" rows="5" maxlength="4000" placeholder="Conte o que aconteceu ou o que gostaria de ter no Gestor Conex"></textarea></div>
+      <p class="note" style="margin:0">Esta mensagem não é criptografada: a equipe do Gestor Conex lê para responder. Evite escrever valores do seu negócio.</p>
+      ${ui.fbErr?`<div class="a-err" role="alert">${esc(ui.fbErr)}</div>`:''}<div><button class="btn pri" type="submit">Enviar</button></div></form>`:''}
     <p class="note" style="margin:10px 0 0">Suporte: <b class="sel">${SUPORTE}</b> <button class="lnk" data-act="c-copysup">copiar</button></p></section>`}
 const contaDanger=()=>`<section class="card danger-card"><div class="card-h"><h2>Excluir conta</h2></div><p class="note" style="margin:0 0 12px">Apaga sua conta e todos os dados. Não dá para desfazer.</p><button class="btn danger" data-tab="excluir">Excluir minha conta</button></section>`;
 const PERDAS=['Todas as vendas lançadas, dia a dia.','Todas as despesas mensais, semanais e diárias.','Seus serviços, produtos e cadastros de despesas.','O histórico e os indicadores do painel.','O acesso à conta, no celular e no computador. A assinatura feita pelo site é encerrada.'];
@@ -1337,7 +1421,7 @@ function legalHtml(k){
   if(k==='termos')return `<h1>Termos de uso</h1><p class="faint">Versão ${TERMOS_V} · Última atualização: ${upd}</p>
     <h2>1. O serviço</h2><p>O Gestor Conex é um aplicativo de gestão para pequenos negócios. Você registra vendas e despesas e o app mostra indicadores como faturamento, custos e lucro. É oferecido por ${emp}, CNPJ ${cnpj}.</p>
     <h2>2. Sua conta</h2><p>Você precisa ter 18 anos ou mais e informar dados verdadeiros. A senha é pessoal: não compartilhe. Avise o suporte se suspeitar de uso indevido.</p>
-    <h2>3. Teste grátis e assinatura</h2><ul><li>Toda conta nova tem ${TRIAL_DIAS} dias de teste grátis, sem cartão.</li><li>Depois do teste, o uso depende de uma assinatura mensal de R$ 59,90, sem fidelidade.</li><li>No cartão, a assinatura renova sozinha até você cancelar. No Pix, você paga cada período.</li><li>Ao cancelar, o acesso continua até o fim do período pago. Não há multa.</li><li>Assinaturas feitas pela App Store ou pelo Google Play seguem as regras e o cancelamento da loja.</li></ul>
+    <h2>3. Teste grátis e assinatura</h2><ul><li>Toda conta nova tem ${TRIAL_DIAS} dias de teste grátis, sem cartão.</li><li>Depois do teste, o uso depende de uma assinatura de R$ 59,90 por mês, sem fidelidade. Também há planos de 6 e 12 meses, pagos de uma vez, com desconto.</li><li>No cartão com renovação automática, a assinatura renova sozinha a cada período até você cancelar. No Pix ou no cartão sem renovação, você paga cada período e avisamos por e-mail antes de vencer.</li><li>Ao cancelar, o acesso continua até o fim do período pago. Não há multa.</li><li>Assinaturas feitas pela App Store ou pelo Google Play seguem as regras e o cancelamento da loja.</li></ul>
     <h2>4. Seus dados e os indicadores</h2><p>Os dados lançados são seus. Os indicadores são calculados a partir do que você lança e servem para apoiar suas decisões. Eles não substituem a contabilidade nem orientação de um contador.</p>
     <h2>5. Uso não permitido</h2><p>Não é permitido usar o app para fins ilegais, tentar acessar contas de outras pessoas ou atrapalhar o funcionamento do serviço.</p>
     <h2>6. Disponibilidade</h2><p>Trabalhamos para manter o serviço no ar, mas podem ocorrer pausas para manutenção ou falhas fora do nosso controle.</p>
@@ -1496,7 +1580,7 @@ async function onAuthSubmit(id){
 function contaAct(a,b){
   if(REAL&&C&&C.real){const r=contaActReal(a,b);if(r!==undefined)return r}
   const v=b.dataset.v;
-  if(a==='s-plano'){ui.plano=v;ui.payStep=null;ui.pix=null;render(true)}
+  if(a==='s-plano'){ui.plano=v;ui.planoEsc=true;ui.payStep=null;ui.pix=null;render(true)}
   else if(a==='s-metodo'){ui.metodo=v;ui.payStep=null;ui.payErr='';render(true)}
   else if(a==='s-pagar'){ui.renov=!!($('#s-renov')||{}).checked;ui.payStep='mp';ui.payErr='';render(true)}
   else if(a==='s-recusar'){ui.payStep=null;ui.payErr='O pagamento foi recusado pelo banco. Confira os dados ou use outro cartão.';render(true)}
@@ -1525,6 +1609,8 @@ function contaAct(a,b){
   else if(a==='legal'){ui.tab='legal';ui.legal=v;render();window.scrollTo(0,0)}
   else if(a==='d-next'){ui.delStep=1;ui.delErr='';render();window.scrollTo(0,0)}
   else if(a==='d-confirm')excluirTudo();
+  else if(a==='ct-pdf')imprimeProposta(C.assin.contrato);
+  else if(a==='c-fb'){ui.fb=!ui.fb;ui.fbErr='';render(true);if(ui.fb){const m=$('#fb-msg');if(m)m.focus()}}
   else return false;
   return true;
 }
@@ -1548,7 +1634,7 @@ const TOURS=[
     ['[aria-label="Frequência"]','Mensais, semanais ou diárias','Escolha o tipo da conta: aluguel é mensal, a feira pode ser semanal, o café é diário.'],
     ['#f-desp-q','Conta nova','Cadastre uma conta aqui mesmo e já lance o valor.']]},
   {tab:'conta',steps:[
-    ['[data-tour="assin"]','Sua assinatura',NATIVO?'Aqui você acompanha a situação da sua conta.':`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 59,90 por mês, no cartão ou no Pix.`],
+    ['[data-tour="assin"]','Sua assinatura',C&&C.assin&&C.assin.admin?'Conta de administrador: sem assinatura e sem vencimento.':NATIVO?'Aqui você acompanha a situação da sua conta.':`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 59,90 por mês, no cartão ou no Pix.`],
     ['[data-tour="ajuda"]','Quer rever?','Este tutorial fica aqui, em <b>Ajuda</b>, sempre que precisar.']]}
 ];
 let tourOn=false;
@@ -1568,8 +1654,9 @@ const LN=()=>NATIVO?((window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNo
 function agendaLembretes(){if(!NATIVO)return;clearTimeout(lembT);lembT=setTimeout(agendaAgora,1500)}
 async function agendaAgora(){const P=LN();if(!P)return;
   try{const pend=await P.getPending();if(pend.notifications.length)await P.cancel({notifications:pend.notifications.map(n=>({id:n.id}))});
-    if(!logged||!C||(!LEMB.vendas&&!LEMB.desp))return;
+    if(!logged||!C)return;
     if((await P.checkPermissions()).display!=='granted')return;
+    const vl=avisosVenc();
     const dias=S.negocio.dias||[1,2,3,4,5,6],now=Date.now(),list=[],at=d=>{const x=pd(d);x.setHours(LEMB.hora,0,0,0);return x};
     const ativas=fr=>S.despesas.filter(x=>x.ativo&&x.freq===fr&&(fr!=='mensal'||x.cat!=='fixa'));
     const diarias=LEMB.desp&&ativas('diaria').length;
@@ -1580,7 +1667,16 @@ async function agendaAgora(){const P=LN();if(!P)return;
       list.push({id:1100+m,title:'Lance as despesas do mês',body:'Energia, água e outras contas variáveis mudam todo mês. Lance para o lucro ficar certo.',schedule:{at:t,allowWhileIdle:true},extra:{tab:'despesas',freq:'mensal'}})}
     if(LEMB.desp&&ativas('semanal').length)for(let w=0;w<3;w++){const d=addDays(weekStart(TODAY),7*w),t=at(d);if(t<=now)continue;
       list.push({id:1200+w,title:'Lance as despesas da semana',body:'Toque para lançar as contas semanais no Gestor Conex.',schedule:{at:t,allowWhileIdle:true},extra:{tab:'despesas',freq:'semanal'}})}
+    list.push(...vl);
     if(list.length)await P.schedule({notifications:list})}catch(e){}}
+/* avisos de vencimento no aparelho (mesmos dias do e-mail): teste grátis 3, 1 e 0 dias; pago sem renovação 5, 1 e 0 dias.
+   Texto neutro, sem preço nem chamada de pagamento (regra das lojas): "Os detalhes estão no seu e-mail." */
+function avisosVenc(){const a=C.assin,out=[],now=Date.now(),q=l=>l===0?'hoje':l===1?'amanhã':`em ${l} dias`;
+  const add=(fim,dias,txt,base)=>dias.forEach((n,i)=>{const t=pd(addDays(fim,-n));t.setHours(10,0,0,0);if(t>now)out.push({id:base+i,title:txt(q(n)),body:'Os detalhes estão no seu e-mail.',schedule:{at:t,allowWhileIdle:true},extra:{tab:'assinatura'}})});
+  if(a.falhou||a.admin)return out;
+  if(a.status==='trial'&&!a.renov&&C.trialFim)add(C.trialFim,[3,1,0],w=>`Seu teste grátis termina ${w}`,1300);
+  else if(a.status==='ativa'&&!a.renov&&a.prox)add(a.prox,[5,1,0],w=>`Sua assinatura vence ${w}`,1310);
+  return out}
 // pede a permissão de notificação (uma vez, depois do tutorial, ou ao ligar um lembrete em Ajustes)
 async function pedeLembretes(forcar){const P=LN();if(!P)return;
   try{if(!forcar&&localStorage.getItem('gc.lembPerg'))return agendaAgora();localStorage.setItem('gc.lembPerg','1')}catch(e){}
@@ -1632,7 +1728,7 @@ async function api(path,{method,body}={}){
   catch(e){const er=new Error('Sem conexão com o servidor. Confira a internet e tente de novo.');er.status=0;throw er}
   const j=await res.json().catch(()=>({}));
   if(!res.ok){const er=new Error(j.error||'Algo deu errado. Tente de novo.');er.status=res.status;er.body=j;
-    if(res.status===401&&C&&C.real){sairReal(j.code==='SESSION_REPLACED'?j.error:'Sua sessão expirou. Entre de novo.')}throw er}
+    if(res.status===401&&C&&C.real){sairReal(j.code==='SESSION_REPLACED'||j.code==='ACCOUNT_DISABLED'?j.error:'Sua sessão expirou. Entre de novo.')}throw er}
   return j}
 let stateVer=0;
 const dsIso=s=>s?ds(new Date(s)):null;
@@ -1665,10 +1761,11 @@ async function guardaDK(email){try{localStorage.setItem(CKEY,JSON.stringify({e:e
 async function dkLocal(email){try{const o=JSON.parse(localStorage.getItem(CKEY));if(o&&o.e===email)return await importaDK(ub64(o.k))}catch(e){}return null}
 const apagaDK=()=>{DK=null;try{localStorage.removeItem(CKEY)}catch(e){}};
 const chavesNovas=async pw=>({pw:await lacra(pw,DK),esc:await lacraEmpresa(DK)});
-function aplicaAssin(a){C.trialFim=dsIso(a.trialEndsAt);
-  C.assin={status:a.status,plano:'mensal',metodo:a.method,renov:a.autoRenew,prox:dsIso(a.currentPeriodEnd),cardPending:a.cardPending,acessoSrv:a.acesso,
-    hist:(a.payments||[]).map(p=>({d:dsIso(p.d),plano:'Mensal',metodo:p.metodo,valor:p.valor,st:'Pago'}))}}
-function aplicaMe(me){C={real:true,nome:me.nome,email:me.email,tel:me.tel,emp:me.emp,seg:me.seg,dt:me.dt,doc:me.doc,emailOk:me.emailOk,telOk:me.telOk,tourDone:me.tourDone,criado:dsIso(me.criado),termos:{versao:TERMOS_V}};aplicaAssin(me.assinatura)}
+function aplicaAssin(a){C.trialFim=dsIso(a.trialEndsAt);aplicaPlanos(a.planos);const plano=planoDe(a.ciclo||1);
+  if(!ui.planoEsc)ui.plano=plano; // tela de planos abre no plano atual, até a pessoa escolher outro
+  C.assin={status:a.status,plano,metodo:a.method,renov:a.autoRenew,prox:dsIso(a.currentPeriodEnd),cardPending:a.cardPending,acessoSrv:a.acesso,falhou:!!a.cartaoFalhou,pago:!!a.pago,
+    admin:!!a.admin,contrato:a.contrato||null,hist:(a.payments||[]).map(p=>({d:dsIso(p.d),plano:p.tipo==='CONTRATO'?'Contrato':p.tipo==='ADITIVO'?'Aditivo de contrato':(PLANOS[planoDe(p.meses||1)]||PLANOS.mensal).nome,metodo:p.metodo,valor:p.valor,st:'Pago'}))}}
+function aplicaMe(me){C={real:true,nome:me.nome,email:me.email,tel:me.tel,emp:me.emp,seg:me.seg,dt:me.dt,doc:me.doc,emailOk:me.emailOk,telOk:me.telOk,tourDone:me.tourDone,admin:!!me.admin,criado:dsIso(me.criado),termos:{versao:TERMOS_V}};aplicaAssin(me.assinatura)}
 function normalizaS(){S.gastos=S.gastos||{};S.gastosS=S.gastosS||{};S.gastosD=S.gastosD||{};S.vendas=S.vendas||{};S.itens=S.itens||[];S.despesas=S.despesas||[];S.negocio=S.negocio||{nome:C.emp,segmento:C.seg,dias:[1,2,3,4,5,6]};S.despesas.forEach(x=>{x.freq=x.freq||'mensal'})}
 async function carregaSessao(pw){const [me,st]=await Promise.all([api('/me'),api('/state')]);aplicaMe(me);stateVer=st.version;logged=true;A.chave=null;
   const cr=me.cripto||{};DK=await dkLocal(me.email);if(!DK&&pw)DK=await abre(pw,cr.pw);
@@ -1685,7 +1782,7 @@ async function carregaSessao(pw){const [me,st]=await Promise.all([api('/me'),api
 // abre os dados com a chave recuperada (senha digitada ou código do suporte) e lacra de novo com a senha atual
 async function abreComChave(dk,pw,extra){DK=dk;const st=await api('/state');S=cifrado(st.data)?await decifra(st.data):st.data;stateVer=st.version;
   await api('/me/cripto',{method:'PUT',body:{pw:await lacra(pw,DK),...(extra||{})}});A.chave=null;normalizaS();await guardaDK(C.email)}
-function sairReal(msg){setTok('');apagaDK();A.chave=null;C=null;logged=false;syncPend=false;S=seedExemplo();Object.assign(A,{scr:'login',err:'',info:msg||'',overlay:false,cap:{}});render();window.scrollTo(0,0)}
+function sairReal(msg){setTok('');apagaDK();A.chave=null;Object.assign(ADM,{res:null,lista:null,det:null,err:''});C=null;logged=false;syncPend=false;S=seedExemplo();Object.assign(A,{scr:'login',err:'',info:msg||'',overlay:false,cap:{}});render();window.scrollTo(0,0)}
 
 /* gravação dos dados no servidor: espera 0,7 s de calma, envia com a versão; conflito traz a versão mais nova */
 let syncT=null,syncPend=false,syncBusy=false,offlineAvisado=false;
@@ -1729,6 +1826,151 @@ async function chaveAct(a,b){const k=A.chave;if(!k)return;const v=id=>(($('#'+id
       DK=await novaChave();await api('/me/cripto',{method:'PUT',body:{...(await chavesNovas(p)),clearRec:true}});A.chave=null;S=novoNegocio(C.seg,C.emp);normalizaS();
       syncPend=true;await enviaEstado();await guardaDK(C.email);ui.tab='painel';render();toast('Negócio novo criado')})
   }catch(e){falhou(e.message)}}
+/* ---------- Administração (só o administrador do sistema, só no site) ----------
+   Clientes, situação da assinatura, pagamentos e ajuste do teste grátis. Os números dos negócios não aparecem:
+   são criptografados no aparelho de cada cliente e o servidor não consegue abrir. */
+const ADM={aba:'clientes',res:null,lista:null,busca:'',sit:'',det:null,err:'',carregando:false,edit:false,del:false,novo:false,prev:null,cts:null,ct:null,ctEdit:false,fb:null,fbSt:'ABERTO'};
+const SIT={teste:['Em teste','good'],teste_encerrado:['Teste encerrado','warn'],ativa:['Ativa','good'],vencida:['Vencida','bad'],desativada:['Acesso desativado','bad'],admin:['Administrador','good']};
+const dBR=s=>s?new Date(s).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}):'—';
+const isoDia=s=>s?new Date(s).toISOString().slice(0,10):'';
+const CAMPO={nome:'nome',email:'e-mail',tel:'celular',negocio:'negócio',segmento:'segmento',dt:'tipo de documento',doc:'documento'};
+const ACAO={TRIAL_ADJUSTED:h=>`teste grátis de ${dBR(h.de)} para ${dBR(h.para)}`,ACCOUNT_EDITED:h=>`dados da conta alterados (${Object.keys(h.para||{}).map(k=>CAMPO[k]||k).join(', ')})`,
+  SESSIONS_REVOKED:()=>'sessões encerradas em todos os aparelhos',ACCOUNT_DISABLED:()=>'acesso desativado',ACCOUNT_ENABLED:()=>'acesso reativado'};
+const admSt=k=>{const x=SIT[k]||[k,'warn'];return `<span class="status ${x[1]}"><i></i>${x[0]}</span>`};
+const ctSt=k=>{const x=CT_FASE[k]||[k,'warn'];return `<span class="status ${x[1]}"><i></i>${x[0]}</span>`};
+const PAGO={APPROVED:'Pago',PENDING:'Pendente',REJECTED:'Recusado',CANCELLED:'Cancelado'},TIPO={PLANO:'Plano',CONTRATO:'Contrato',ADITIVO:'Aditivo'};
+const vIn=id=>(($('#'+id)||{}).value||'').trim();
+async function admCarrega(){if(!(REAL&&C&&C.real)){ADM.err='O painel de administração funciona só no site, com a conta de administrador.';return render(true)}
+  ADM.carregando=true;ADM.err='';render(true);
+  try{const qs=new URLSearchParams({busca:ADM.busca,situacao:ADM.sit});
+    const [r,x]=await Promise.all([api('/painel/resumo'),ADM.aba==='contratos'?api('/painel/contratos'):ADM.aba==='feedback'?api('/painel/feedback?status='+ADM.fbSt):api('/painel/clientes?'+qs)]);
+    ADM.res=r;if(ADM.aba==='contratos')ADM.cts=x;else if(ADM.aba==='feedback')ADM.fb=x;else ADM.lista=x}
+  catch(e){ADM.err=e.message}ADM.carregando=false;if(ui.tab==='admin')render(true)}
+async function admAbre(id){ADM.err='';Object.assign(ADM,{aba:'clientes',ct:null,edit:false,del:false,novo:false,prev:null});
+  try{ADM.det=await api('/painel/clientes/'+encodeURIComponent(id))}catch(e){ADM.err=e.message}render();window.scrollTo(0,0)}
+async function admAbreCt(id){ADM.err='';Object.assign(ADM,{aba:'contratos',det:null,ctEdit:false});
+  try{ADM.ct=await api('/painel/contratos/'+encodeURIComponent(id))}catch(e){ADM.err=e.message}render();window.scrollTo(0,0)}
+async function admTeste(){const d=ADM.det;if(!d)return;const dias=parseInt(($('#adm-dias')||{}).value,10),ate=($('#adm-ate')||{}).value||'',motivo=vIn('adm-motivo');
+  if(!ate&&!dias){ADM.err='Informe os dias a somar (ou tirar, com -) ou a nova data final.';return render(true)}
+  try{await api('/painel/clientes/'+encodeURIComponent(d.id)+'/teste',{body:ate?{ate,motivo}:{dias,motivo}});toast('Teste grátis ajustado');ADM.res=null;await admAbre(d.id)}catch(e){ADM.err=e.message;render(true)}}
+// editar: só manda o que mudou
+async function admSalva(){const d=ADM.det,b={},cur={nome:d.nome,email:d.email,tel:d.tel,negocio:d.negocio,segmento:d.segmento,dt:d.dt,doc:d.docNum};
+  for(const k of Object.keys(cur)){const v=vIn('ae-'+k);if(v&&v!==cur[k])b[k]=k==='email'?v.toLowerCase():v}
+  if(!Object.keys(b).length){ADM.err='Nenhum dado mudou.';return render(true)}
+  b.motivo=vIn('ae-motivo');
+  try{await api('/painel/clientes/'+encodeURIComponent(d.id),{method:'PATCH',body:b});toast('Dados da conta atualizados');await admAbre(d.id)}catch(e){ADM.err=e.message;render(true)}}
+async function admExclui(){const d=ADM.det;
+  try{await api('/painel/clientes/'+encodeURIComponent(d.id)+'/excluir',{body:{confirmar:vIn('ad-email'),motivo:vIn('ad-motivo')}});
+    toast('Conta excluída');Object.assign(ADM,{det:null,del:false,lista:null});admCarrega();window.scrollTo(0,0)}catch(e){ADM.err=e.message;render(true)}}
+let prevT;function admPrevia(){clearTimeout(prevT);prevT=setTimeout(async()=>{const prazo=parseInt(vIn('ct-prazo'),10),mensal=parseBRL(vIn('ct-mensal')),pixPct=parseInt(vIn('ct-pix')||'0',10);
+  if(!(prazo>0)||!(mensal>0))return;try{ADM.prev=await api('/painel/contratos/previa?'+new URLSearchParams({prazo,mensal,pixPct:pixPct||0}));const el=$('#ct-prev');if(el)el.innerHTML=prevHtml()}catch(e){}},300)}
+function prevHtml(){const p=ADM.prev;if(!p)return '<p class="note" style="margin:0">Preencha prazo e valor para comparar com o preço do site.</p>';
+  return `<dl class="kv"><dt>Cartão no prazo</dt><dd>${brl(p.cartaoTotal)}</dd><dt>Pix à vista</dt><dd>${brl(p.pixTotal)}</dd><dt>Tabela do site no prazo</dt><dd>${brl(p.tabelaPrazo)} (${brl(p.tabelaMensal)} por mês)</dd><dt>Melhor preço do site no prazo</dt><dd>${brl(p.siteMelhor)} (anual a ${brl(p.anualSite)})</dd></dl>
+    ${p.maisCaro?'<div class="a-err" role="alert">Atenção: esta proposta sai mais cara que contratar direto pelo site.</div>':''}`}
+// formulário do contrato: novo (tudo), alteração antes do pagamento (tudo), Pix pago (prorrogação + aditivo) ou cartão (prazo + valor)
+function ctForm(c){const fase=c?c.fase:'novo',pago=fase==='pago_pix'||fase==='cartao',d=ADM.det||{},hoje=new Date(),f=(id,l,v,t='text',x='')=>`<div class="field"><label for="${id}">${l}</label><input class="inp" id="${id}" type="${t}" value="${esc(v)}" ${x}></div>`;
+  const sug=c&&fase==='pago_pix'?` Sugestão: ${brl(c.tabelaMensal)} × meses a mais${c.pixPct?` − ${c.pixPct}%`:''}.`:'';
+  return `<form id="f-adm-ct" class="a-form"><div class="form-row dq" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+    ${f('ct-prazo',pago?'Novo prazo total (meses)':'Prazo (meses)',c?(c.aditivo&&c.aditivo.prazo)||c.prazo:12,'number','min="1" max="60"')}
+    ${fase==='pago_pix'?f('ct-adpix','Valor do aditivo no Pix (R$)',c.aditivo&&c.aditivo.pix!=null?fmtIn(c.aditivo.pix):'','text','inputmode="decimal"'):f('ct-mensal',pago?'Novo valor mensal no cartão (R$)':'Valor mensal no cartão (R$)',fmtIn(c?(c.aditivo&&c.aditivo.mensal)||c.mensal:''),'text','inputmode="decimal"')}
+    ${pago?'':f('ct-pix','Desconto do Pix (%)',c?c.pixPct:5,'number','min="0" max="50"')}</div>
+    ${pago?`<p class="note" style="margin:0">${fase==='pago_pix'?'Prorrogação de contrato pago no Pix: o cliente aceita e paga o aditivo; os meses a mais valem depois do Pix.'+sug:'Cartão em andamento: o novo valor e o novo prazo valem a partir do aceite do cliente (próxima cobrança).'}</p>`:`<div id="ct-prev">${prevHtml()}</div>`}
+    <div class="form-row dq" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">${f('ct-razao','Razão social ou nome',c?c.razao:d.negocio||'')}${f('ct-doc','CPF ou CNPJ',c?c.doc:d.doc||'')}${f('ct-contato','Responsável',c?c.contato:d.nome||'')}
+    ${f('ct-data','Data da proposta',c?isoDia(c.data):ds(hoje),'date')}${f('ct-validade','Válida até',c?isoDia(c.validade):ds(new Date(hoje.getTime()+7*864e5)),'date')}</div>
+    <div class="field"><label for="ct-obs">Observações (vão na proposta)</label><textarea class="inp" id="ct-obs" rows="3">${esc(c?c.obs:'')}</textarea></div>
+    ${c?'<div class="field"><label for="ct-motivo">Motivo da alteração</label><input class="inp" id="ct-motivo" placeholder="Ex.: renegociado na reunião"></div>':''}
+    <div class="btns"><button class="btn pri" type="submit">${c?(pago?'Enviar aditivo ao cliente':'Salvar alteração'):'Criar contrato e enviar ao cliente'}</button><button class="btn" type="button" data-act="${c?'adm-ct-edit':'adm-novo'}">Cancelar</button></div></form>`}
+async function admSalvaCt(){const c=ADM.ct&&ADM.ctEdit?ADM.ct:null,fase=c?c.fase:'novo',b={};
+  b.prazo=parseInt(vIn('ct-prazo'),10);if($('#ct-mensal'))b.mensal=parseBRL(vIn('ct-mensal'));if($('#ct-pix'))b.pixPct=parseInt(vIn('ct-pix')||'0',10);
+  if($('#ct-adpix')){const v=parseBRL(vIn('ct-adpix'));if(v>0)b.aditivoPix=v}
+  Object.assign(b,{razao:vIn('ct-razao'),doc:vIn('ct-doc'),contato:vIn('ct-contato'),data:vIn('ct-data'),validade:vIn('ct-validade'),obs:vIn('ct-obs')});
+  if(!(b.prazo>0)||(b.mensal!==undefined&&!(b.mensal>0))){ADM.err='Informe o prazo e o valor mensal.';return render(true)}
+  try{if(c){b.motivo=vIn('ct-motivo');await api('/painel/contratos/'+encodeURIComponent(c.id),{method:'PATCH',body:b});toast(fase==='pago_pix'||fase==='cartao'?'Aditivo enviado ao cliente':'Contrato alterado');await admAbreCt(c.id)}
+    else{const r=await api('/painel/clientes/'+encodeURIComponent(ADM.det.id)+'/contrato',{body:b});toast('Contrato criado. Enviamos a proposta ao cliente por e-mail.');ADM.res=null;await admAbreCt(r.id)}}
+  catch(e){ADM.err=e.message;render(true)}}
+function admAct(a,b){const d=ADM.det,id=d&&encodeURIComponent(d.id);
+  const recarrega=msg=>()=>{toast(msg);admAbre(d.id)},falha=e=>{ADM.err=e.message;render(true)};
+  if(a==='adm-aba'){Object.assign(ADM,{aba:b.dataset.v,det:null,ct:null,err:''});admCarrega();window.scrollTo(0,0)}
+  else if(a==='adm-ver')admAbre(b.dataset.id);
+  else if(a==='adm-voltar'){Object.assign(ADM,{det:null,ct:null,err:''});admCarrega();window.scrollTo(0,0)}
+  else if(a==='adm-edit'){ADM.edit=!ADM.edit;ADM.err='';render(true)}
+  else if(a==='adm-del'){ADM.del=!ADM.del;ADM.err='';render(true)}
+  else if(a==='adm-novo'){ADM.novo=!ADM.novo;ADM.prev=null;ADM.err='';render(true);if(ADM.novo)admPrevia()}
+  else if(a==='adm-sessoes')arm(b,()=>api(`/painel/clientes/${id}/sessoes`,{method:'POST'}).then(recarrega('Sessões encerradas')).catch(falha));
+  else if(a==='adm-acesso')arm(b,()=>api(`/painel/clientes/${id}/acesso`,{body:{ativo:b.dataset.v==='on',motivo:vIn('aa-motivo')}}).then(recarrega(b.dataset.v==='on'?'Acesso reativado':'Acesso desativado')).catch(falha));
+  else if(a==='adm-ct-ver')admAbreCt(b.dataset.id);
+  else if(a==='adm-ct-edit'){ADM.ctEdit=!ADM.ctEdit;ADM.err='';render(true)}
+  else if(a==='adm-ct-pdf')imprimeProposta(ADM.ct);
+  else if(a==='adm-ct-cancel'){const m=vIn('ct-cmotivo');if(m.length<3){ADM.err='Escreva o motivo do cancelamento.';return render(true)}
+    arm(b,()=>api('/painel/contratos/'+encodeURIComponent(ADM.ct.id)+'/cancelar',{body:{motivo:m}}).then(r=>{toast(r.rescisao&&r.rescisao.tipo!=='sem_pagamento'?'Contrato cancelado. Multa registrada no histórico.':'Contrato cancelado');admAbreCt(ADM.ct.id)}).catch(falha))}
+  else if(a==='fb-mail')location.href='mailto:'+b.dataset.v+'?subject='+encodeURIComponent('Sua mensagem ao Gestor Conex');
+  else if(a==='fb-st'){ADM.fbSt=b.dataset.v;admCarrega()}
+  else if(a==='fb-res')api('/painel/feedback/'+encodeURIComponent(b.dataset.id),{method:'PATCH',body:{resolvido:b.dataset.v==='1'}}).then(()=>{toast(b.dataset.v==='1'?'Marcado como resolvido':'Reaberto');admCarrega()}).catch(falha)}
+function vAdmCliente(){const d=ADM.det,f=(k,l,t='text')=>`<div class="field"><label for="ae-${k}">${l}</label><input class="inp" id="ae-${k}" type="${t}" value="${esc(k==='doc'?d.docNum:d[k])}"></div>`;
+  return `${topbar('Administração',esc(d.negocio))}${ADM.err?`<div class="a-err" role="alert">${esc(ADM.err)}</div>`:''}<div><button class="lnk" data-act="adm-voltar">← Voltar para a lista</button></div>
+    <section class="card"><div class="card-h"><h2>${esc(d.nome)}</h2>${admSt(d.situacao)}</div><dl class="kv"><dt>E-mail</dt><dd>${esc(d.email)} ${d.emailOk?'<span class="chip">confirmado</span>':''}</dd><dt>Celular</dt><dd>${esc(d.tel)}</dd>
+      <dt>Negócio</dt><dd>${esc(d.negocio)} · ${esc(d.segmento)} · ${esc(d.doc)}</dd><dt>Conta criada</dt><dd>${dBR(d.criado)}</dd><dt>Acesso</dt><dd>${d.desativadaEm?`desativado em ${dBR(d.desativadaEm)}`:'ativo'}</dd>
+      ${d.admin?'<dt>Assinatura</dt><dd>Conta de administrador: sem assinatura e sem vencimento.</dd>':`<dt>Teste grátis até</dt><dd>${dBR(d.testeAte)}</dd><dt>Pago até</dt><dd>${dBR(d.pagoAte)}${d.pagoAte?` · plano de ${d.ciclo} ${d.ciclo>1?'meses':'mês'} · ${d.metodo==='PIX'?'Pix':'cartão'}${d.renov?' com renovação automática':''}`:''}</dd>`}
+      <dt>Dados do negócio</dt><dd>${d.criptografado?'Criptografados: só o cliente vê':'Ainda sem criptografia (cifra no próximo login do cliente)'}</dd></dl>
+      <div class="btns"><button class="btn sm" data-act="adm-edit">Editar dados</button><button class="btn sm" data-act="adm-sessoes">Encerrar sessões</button>
+        ${d.eu?'':d.desativadaEm?'<button class="btn sm" data-act="adm-acesso" data-v="on">Reativar acesso</button>':'<button class="btn sm danger" data-act="adm-acesso" data-v="off">Desativar acesso</button>'}${d.eu?'':'<button class="btn sm danger" data-act="adm-del">Excluir conta</button>'}</div>
+      ${d.eu?'':`<div class="field" style="margin-top:10px;max-width:420px"><label for="aa-motivo">Motivo (fica no histórico)</label><input class="inp" id="aa-motivo" placeholder="Ex.: pedido do cliente"></div>`}
+      <p class="note" style="margin:8px 0 0">Desativar bloqueia o login em todos os aparelhos sem apagar nada; a cobrança automática no cartão, se houver, continua. Encerrar sessões só pede um novo login.</p></section>
+    ${ADM.edit?`<section class="card"><div class="card-h"><h2>Editar dados da conta</h2><p>Só os dados da conta. Os dados do negócio são do cliente e ficam criptografados.</p></div><form id="f-adm-edit" class="a-form"><div class="form-row dq" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+      ${f('nome','Nome')}${f('email','E-mail','email')}${f('tel','Celular','tel')}${f('negocio','Nome do negócio')}${f('segmento','Segmento')}
+      <div class="field"><label for="ae-dt">Documento</label><select class="inp" id="ae-dt">${['CPF','CNPJ'].map(x=>`<option ${d.dt===x?'selected':''}>${x}</option>`).join('')}</select></div>${f('doc','Número do documento')}</div>
+      ${f('motivo','Motivo (fica no histórico)')}<p class="note" style="margin:0">Trocar o e-mail ou o celular pede uma nova confirmação ao cliente. O nome do negócio que aparece dentro do app é o dos Ajustes do cliente (criptografado); aqui muda o da conta, usado nos e-mails e neste painel.</p>
+      <div class="btns"><button class="btn pri" type="submit">Salvar</button><button class="btn" type="button" data-act="adm-edit">Cancelar</button></div></form></section>`:''}
+    ${ADM.del?`<section class="card danger-card"><div class="card-h"><h2>Excluir a conta</h2></div><p class="note" style="margin:0 0 10px">Apaga a conta, o negócio e todos os dados do cliente. Não dá para desfazer. Os pagamentos ficam guardados (obrigação fiscal) e as cobranças no cartão são canceladas.</p>
+      <form id="f-adm-del" class="a-form" style="max-width:420px"><div class="field"><label for="ad-email">Para confirmar, digite o e-mail do cliente</label><input class="inp" id="ad-email" autocomplete="off" placeholder="${esc(d.email)}"></div><div class="field"><label for="ad-motivo">Motivo</label><input class="inp" id="ad-motivo"></div>
+      <div class="btns"><button class="btn danger" type="submit">Excluir definitivamente</button><button class="btn" type="button" data-act="adm-del">Cancelar</button></div></form></section>`:''}
+    ${d.jaPagou||d.admin?'':`<section class="card"><div class="card-h"><h2>Ajustar teste grátis</h2><p>Fica registrado no histórico com o seu e-mail.</p></div>
+      <form id="f-adm-teste" class="form-row dq" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));align-items:end"><div class="field"><label for="adm-dias">Somar dias</label><input class="inp" id="adm-dias" type="number" placeholder="Ex.: 7 ou -3"></div>
+        <div class="field"><label for="adm-ate">ou nova data final</label><input class="inp" id="adm-ate" type="date"></div><div class="field"><label for="adm-motivo">Motivo</label><input class="inp" id="adm-motivo" placeholder="Ex.: pediu mais prazo"></div>
+        <div><button class="btn pri" type="submit">Ajustar</button></div></form></section>`}
+    ${d.admin?'':`<section class="card"><div class="card-h"><h2>Contrato negociado</h2><p>Valor combinado em reunião, cobrado na assinatura do cliente depois do aceite.</p></div>
+      ${d.contratos.length?`<ul class="lst">${d.contratos.map(x=>`<li><button class="lnk" data-act="adm-ct-ver" data-id="${esc(x.id)}">${x.prazo} meses · ${brl(x.mensal)}/mês · Pix ${brl(x.pixTotal)}</button> ${ctSt(x.fase)} <small class="faint">criado em ${dBR(x.criado)}</small></li>`).join('')}</ul>`:'<p class="note" style="margin:0">Nenhum contrato.</p>'}
+      ${d.contratoEmVigor?'':ADM.novo?ctForm(null):'<div class="btns"><button class="btn pri sm" data-act="adm-novo">Novo contrato</button></div>'}</section>`}
+    <section class="card"><div class="card-h"><h2>Pagamentos</h2></div>${d.pagamentos.length?`<div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Forma</th><th>Meses</th><th class="r">Valor</th><th>Situação</th><th>Vale até</th></tr></thead><tbody>${d.pagamentos.map(p=>`<tr><td>${dBR(p.em)}</td><td>${TIPO[p.tipo]||p.tipo}</td><td>${p.metodo==='PIX'?'Pix':'Cartão'}</td><td>${p.meses}</td><td class="r">${brl(p.valor)}</td><td><span class="chip">${PAGO[p.situacao]||p.situacao}</span></td><td>${dBR(p.ate)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="note" style="margin:0">Nenhum pagamento ainda.</p>'}</section>
+    <section class="card"><div class="card-h"><h2>Histórico de ações</h2></div>${d.historico.length?`<ul class="lst">${d.historico.map(h=>`<li>${dBR(h.em)} · ${esc(h.por)}: ${esc((ACAO[h.acao]||(()=>h.acao))(h))}${h.motivo?' · '+esc(h.motivo):''}</li>`).join('')}</ul>`:'<p class="note" style="margin:0">Nenhuma ação registrada.</p>'}</section>`}
+function vAdmContrato(){const c=ADM.ct,cl=c.cliente,emVigor=!['concluido','cancelado'].includes(c.fase),ad=ctLinhasAditivo(c);
+  return `${topbar('Administração','Contrato de '+esc(cl.negocio))}${ADM.err?`<div class="a-err" role="alert">${esc(ADM.err)}</div>`:''}<div><button class="lnk" data-act="adm-voltar">← Voltar para os contratos</button></div>
+    <section class="card"><div class="card-h"><h2>${esc(c.razao)}</h2>${ctSt(c.fase)}</div><dl class="kv"><dt>Cliente</dt><dd><button class="lnk" data-act="adm-ver" data-id="${esc(cl.id)}">${esc(cl.nome)}</button> · ${esc(cl.email)} · ${esc(cl.negocio)}</dd>
+      <dt>Documento</dt><dd>${esc(c.doc||'—')}</dd><dt>Responsável</dt><dd>${esc(c.contato||'—')}</dd><dt>Proposta</dt><dd>${dBR(c.data)}, válida até ${dBR(c.validade)}${c.vencida?' <span class="chip">vencida</span>':''}</dd>
+      <dt>Prazo</dt><dd>${mesesTxt(c.prazo)}</dd><dt>Cartão</dt><dd>${c.prazo} × ${brl(c.mensal)} = ${brl(c.cartaoTotal)}</dd><dt>Pix à vista</dt><dd>${brl(c.pixTotal)}${c.pixPct?` (${c.pixPct}% de desconto)`:''}</dd>
+      <dt>Site no mesmo prazo</dt><dd>tabela ${brl(c.tabelaPrazo)} · melhor preço ${brl(c.siteMelhor)}${c.maisCaro?' <span class="chip">proposta mais cara que o site</span>':''}</dd>
+      <dt>Aceite</dt><dd>${c.aceitoEm?`${dBR(c.aceitoEm)} ${({web:'pelo site','mobile-web':'pelo site no celular',app:'pelo app'})[c.aceitoPor]||''}`:'ainda não'}</dd>
+      <dt>Pagamento</dt><dd>${c.forma==='pix'?'Pix à vista':c.forma==='cartao'?`cartão: ${c.parcelas} de ${c.prazo} cobranças`:'ainda não'}${c.fim?` · válido até ${dBR(c.fim)}`:''}</dd>
+      ${ad.length?`<dt>Aditivo pendente</dt><dd>${ad.map(([k,v])=>`${k}: ${v}`).join('; ')}${c.aditivo.aceitoEm?` · aceito em ${dBR(c.aditivo.aceitoEm)}${c.aditivo.pix!=null?', falta o Pix':''}`:' · aguardando o aceite'}</dd>`:''}</dl>
+      <div class="btns"><button class="btn sm" data-act="adm-ct-pdf">Imprimir proposta</button>${emVigor?`<button class="btn sm" data-act="adm-ct-edit">${c.forma?'Criar aditivo':'Alterar contrato'}</button>`:''}</div>
+      ${emVigor?`<div class="form-row dq" style="grid-template-columns:minmax(0,1fr) auto;align-items:end;margin-top:10px"><div class="field"><label for="ct-cmotivo">Cancelar contrato: motivo</label><input class="inp" id="ct-cmotivo" placeholder="Ex.: cliente pediu o cancelamento"></div><div><button class="btn danger" data-act="adm-ct-cancel">Cancelar contrato</button></div></div>
+        ${c.rescisao?`<p class="note" style="margin:6px 0 0"><b>Se cancelar hoje:</b> ${esc(c.rescisao.texto)}${c.rescisao.tipo!=='sem_pagamento'?' A multa e o reembolso são tratados fora do sistema: nada é cobrado nem estornado automaticamente; o valor fica registrado no histórico.':''}</p>`:''}
+        <p class="note" style="margin:6px 0 0">Ao cancelar, a cobrança no cartão para e o período já pago continua valendo até o fim.${c.forma?'':' Mudar valor ou prazo antes do pagamento desfaz o aceite: o cliente aceita de novo.'}</p>`:''}</section>
+    ${ADM.ctEdit?`<section class="card"><div class="card-h"><h2>${c.forma?'Aditivo do contrato':'Alterar contrato'}</h2></div>${ctForm(c)}</section>`:''}
+    <section class="card"><div class="card-h"><h2>Histórico do contrato</h2><p>Só cresce: nada é editado nem apagado.</p></div><ul class="lst">${c.historico.map(h=>`<li>${dBR(h.em)}${h.por?' · '+esc(h.por):''}: ${esc(h.resumo)}</li>`).join('')}</ul></section>`}
+function vAdmin(){if(!ADM.res&&!ADM.carregando&&!ADM.err)setTimeout(admCarrega,0);
+  if(ADM.det)return vAdmCliente();
+  if(ADM.ct)return vAdmContrato();
+  const err=ADM.err?`<div class="a-err" role="alert">${esc(ADM.err)}</div>`:'',r=ADM.res;
+  const kpi=(t,v,s)=>`<div class="kpi"><span class="s">${t}</span><span class="v">${v}</span>${s?`<span class="s">${s}</span>`:''}</div>`;
+  const abas=`<div class="seg" role="group" aria-label="Seções da administração">${[['clientes','Clientes'],['contratos','Contratos'],['feedback',`Feedback${r&&r.feedbackAbertos?` (${r.feedbackAbertos})`:''}`]].map(([k,l])=>`<button data-act="adm-aba" data-v="${k}" aria-pressed="${ADM.aba===k}">${l}</button>`).join('')}</div>`;
+  let corpo='';
+  if(ADM.aba==='contratos'){const l=ADM.cts;
+    corpo=`<section class="card"><div class="card-h"><h2>Contratos negociados</h2><p>Para criar, abra o cliente em Clientes e use Novo contrato.</p></div>${ADM.carregando&&!l?'<p class="note">Carregando…</p>':l&&l.length?`<div class="tbl-wrap"><table><thead><tr><th>Cliente</th><th>Situação</th><th>Prazo</th><th class="r">Cartão por mês</th><th class="r">Pix à vista</th><th>Criado</th></tr></thead><tbody>${l.map(c=>`<tr><td><button class="lnk" data-act="adm-ct-ver" data-id="${esc(c.id)}">${esc(c.razao)}</button><br><small class="faint">${esc(c.cliente.email)}</small></td><td>${ctSt(c.fase)}${c.aditivo?'<br><small class="faint">aditivo pendente</small>':''}</td><td>${mesesTxt(c.prazo)}</td><td class="r">${brl(c.mensal)}</td><td class="r">${brl(c.pixTotal)}</td><td>${dBR(c.criado)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="note" style="margin:0">Nenhum contrato ainda.</p>'}</section>`}
+  else if(ADM.aba==='feedback'){const l=ADM.fb;
+    corpo=`<section class="card"><div class="card-h"><h2>Feedback dos clientes</h2><p>Enviado em Minha conta → Ajuda. Em aberto aparecem primeiro.</p></div><div class="seg" role="group" aria-label="Filtro">${[['ABERTO','Em aberto'],['RESOLVIDO','Resolvidos'],['','Todos']].map(([k,t])=>`<button data-act="fb-st" data-v="${k}" aria-pressed="${ADM.fbSt===k}">${t}</button>`).join('')}</div>
+      ${ADM.carregando&&!l?'<p class="note">Carregando…</p>':l&&l.length?l.map(f=>`<div class="pane" style="border-top:1px solid var(--line);padding-top:12px"><div><span class="chip">${FB_LBL[f.categoria]||f.categoria}</span> <b>${esc(f.nome)}</b> <small class="faint">${esc(f.email)} · ${dBR(f.em)}${f.tela?' · tela '+esc(f.tela):''}</small> ${f.status==='RESOLVIDO'?`<span class="status good"><i></i>Resolvido ${dBR(f.resolvidoEm)}</span>`:'<span class="status warn"><i></i>Em aberto</span>'}</div>
+        <p style="margin:0;white-space:pre-wrap">${esc(f.mensagem)}</p><div class="btns" style="margin:0">${f.status==='RESOLVIDO'?`<button class="btn sm" data-act="fb-res" data-id="${esc(f.id)}" data-v="0">Reabrir</button>`:`<button class="btn sm pri" data-act="fb-res" data-id="${esc(f.id)}" data-v="1">Marcar como resolvido</button>`}${f.userId?`<button class="btn sm" data-act="adm-ver" data-id="${esc(f.userId)}">Ver cliente</button>`:''}<button class="btn sm" data-act="fb-mail" data-v="${esc(f.email)}">Responder por e-mail</button></div></div>`).join(''):'<p class="note" style="margin:12px 0 0">Nenhum feedback aqui.</p>'}</section>`}
+  else{const l=ADM.lista;
+    corpo=`<section class="card"><form id="f-adm-busca" class="form-row dq" style="grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto;align-items:end">
+    <div class="field"><label for="adm-busca">Buscar</label><input class="inp" id="adm-busca" value="${esc(ADM.busca)}" placeholder="Nome, e-mail, negócio, celular ou documento"></div>
+    <div class="field"><label for="adm-sit">Situação</label><select class="inp" id="adm-sit"><option value="">Todas</option>${Object.entries(SIT).map(([k,[t]])=>`<option value="${k}" ${ADM.sit===k?'selected':''}>${t}</option>`).join('')}</select></div>
+    <div><button class="btn pri" type="submit">Buscar</button></div></form></section>
+  <section class="card">${ADM.carregando&&!l?'<p class="note">Carregando…</p>':l&&l.length?`<div class="card-h"><h2>${l.length} ${l.length===1?'conta':'contas'}</h2></div><div class="tbl-wrap"><table><thead><tr><th>Cliente</th><th>Negócio</th><th>Situação</th><th>Teste / pago até</th><th class="r">Total pago</th><th>Desde</th></tr></thead><tbody>${l.map(c=>`<tr><td><button class="lnk" data-act="adm-ver" data-id="${esc(c.id)}">${esc(c.nome)}</button><br><small class="faint">${esc(c.email)}</small></td><td>${esc(c.negocio)}<br><small class="faint">${esc(c.segmento)}</small></td><td>${admSt(c.situacao)}${c.contrato?`<br><small class="faint">contrato: ${(CT_FASE[c.contrato]||[c.contrato])[0].toLowerCase()}</small>`:''}</td><td>${c.situacao==='admin'?'sem vencimento':dBR(c.pagoAte||c.testeAte)}${c.renov?'<br><small class="faint">renovação automática</small>':''}</td><td class="r">${brl(c.totalPago)}</td><td>${dBR(c.criado)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="note" style="margin:0">Nenhuma conta encontrada.</p>'}</section>`}
+  return `${topbar('Administração','Clientes, contratos e feedback. Os números dos negócios ficam criptografados e não aparecem aqui.')}${err}
+  ${r?`<div class="kpis">${kpi('Clientes',num(r.contas),`${num(r.novas7)} novos em 7 dias · ${num(r.novas30)} em 30`)}${kpi('Em teste',num(r.teste),`${num(r.teste_encerrado)} com teste encerrado`)}${kpi('Assinaturas ativas',num(r.ativa),`${num(r.renovacaoAutomatica)} com renovação automática`)}
+    ${kpi('Vencidas',num(r.vencida),`${num(r.desativada)} com acesso desativado`)}${kpi('Receita em 30 dias',brl(r.receita30),`total ${brl(r.receitaTotal)}`)}${kpi('Contratos em vigor',num(r.contratosEmVigor),`${num(r.feedbackAbertos)} feedback em aberto`)}</div>`:''}
+  ${abas}${corpo}`}
 async function onAuthSubmitReal(id){
   const g=k=>{const e=$('#'+k);return e?String(e.value).trim():''},chk=k=>{const e=$('#'+k);return !!(e&&e.checked)},rad=n=>(document.querySelector(`input[name="${n}"]:checked`)||{}).value;
   const falha=(e,capId)=>{A.err=e.message;if(capId)A.cap[capId]=false;render();window.scrollTo(0,0)};
@@ -1776,11 +2018,18 @@ async function confereePix(manual){if(!ui.pix)return;try{const r=await api('/sub
   if(r.status==='APPROVED'){clearInterval(pixPoll);ui.pix=null;aplicaAssin(r.assinatura);render(true);toast('Pagamento confirmado! Sua assinatura está ativa.')}
   else if(manual)toast(r.status==='PENDING'?'Ainda não recebemos o pagamento. Se já pagou, aguarde alguns segundos.':'O Pix não foi aprovado. Gere um novo código.')}catch(e){if(manual)toast(e.message)}}
 function contaActReal(a,b){
-  if(a==='s-pagar'||a==='s-reativar'){b.disabled=true;b.textContent='Abrindo o Mercado Pago…';
-    api('/subscription/card',{method:'POST'}).then(r=>{if(syncPend)enviaEstado();location.href=r.url}).catch(e=>{ui.payErr=e.message;render(true)});return true}
-  if(a==='s-pix'){b.disabled=true;b.textContent='Gerando o Pix…';
-    api('/subscription/pix',{method:'POST'}).then(r=>{ui.pix={id:r.id,code:r.qrCode,img:r.qrCodeBase64,exp:Date.parse(r.expiresAt)};render(true);clearInterval(pixPoll);pixPoll=setInterval(()=>{if(!ui.pix||ui.tab!=='assinatura'){clearInterval(pixPoll);return}confereePix(false)},5000)})
+  // só o ciclo vai para o servidor; o valor é calculado lá
+  const ciclo=(PLANOS[ui.plano]||PLANOS.mensal).meses;
+  if(a==='s-pagar'||a==='s-reativar'){const renov=a==='s-reativar'||!!($('#s-renov')||{}).checked;ui.renov=renov;b.disabled=true;b.textContent='Abrindo o Mercado Pago…';
+    api('/subscription/card',{method:'POST',body:{ciclo:a==='s-reativar'?(PLANOS[C.assin.plano]||PLANOS.mensal).meses:ciclo,renov}}).then(r=>{if(syncPend)enviaEstado();location.href=r.url}).catch(e=>{ui.payErr=e.message;render(true)});return true}
+  if(a==='s-pix'||a==='ct-pix'||a==='ct-ad-pix'){b.disabled=true;b.textContent='Gerando o Pix…';
+    api(a==='s-pix'?'/subscription/pix':a==='ct-pix'?'/subscription/contract/pix':'/subscription/contract/addon-pix',{method:'POST',body:a==='s-pix'?{ciclo}:{}}).then(r=>{ui.payErr='';ui.pix={id:r.id,code:r.qrCode,img:r.qrCodeBase64,exp:Date.parse(r.expiresAt)};render(true);clearInterval(pixPoll);pixPoll=setInterval(()=>{if(!ui.pix||ui.tab!=='assinatura'){clearInterval(pixPoll);return}confereePix(false)},5000)})
       .catch(e=>{ui.payErr=e.message;render(true)});return true}
+  // contrato negociado: aceite (site, site no celular ou app) e cartão mensal; o valor sai do contrato no servidor
+  if(a==='ct-aceitar'){const modo=b.dataset.v;if(!($('#ct-ok-'+modo)||{}).checked){ui.ctErr='Marque que leu e concorda com as condições.';render(true);return true}
+    b.disabled=true;api('/subscription/contract/'+(modo==='proposta'?'accept':'accept-addon'),{method:'POST',body:{via:ctVia()}}).then(r=>{ui.ctErr='';aplicaAssin(r);render(true);toast(modo==='proposta'?'Proposta aceita.':'Aditivo aceito.')}).catch(e=>{ui.ctErr=e.message;render(true)});return true}
+  if(a==='ct-cartao'){b.disabled=true;b.textContent='Abrindo o Mercado Pago…';
+    api('/subscription/contract/card',{method:'POST'}).then(r=>{if(syncPend)enviaEstado();location.href=r.url}).catch(e=>{ui.payErr=e.message;render(true)});return true}
   if(a==='s-aprovar'){confereePix(true);return true}
   if(a==='s-cancel'){arm(b,()=>api('/subscription/cancel',{method:'POST'}).then(r=>{aplicaAssin(r);render(true);toast(`Renovação cancelada.${C.assin.prox?' Vale até '+fmtD(C.assin.prox)+'.':''}`)}).catch(e=>toast(e.message)));return true}
   if(a==='c-sair'){const go=()=>{A.lastEmail=C.email;sairReal('Você saiu da conta.')};if(syncPend)enviaEstado().finally(go);else go();return true}
@@ -1790,12 +2039,18 @@ function contaActReal(a,b){
 
 /* início no site: links que voltam do e-mail ou do Mercado Pago, e sessão salva */
 async function bootReal(){
-  const q=new URLSearchParams(location.search),del=q.get('excluir'),em=q.get('email'),ret=q.get('assinatura');
+  const q=new URLSearchParams(location.search),del=q.get('excluir'),em=q.get('email'),ret=q.get('assinatura'),pg=q.get('pg'),mpId=q.get('payment_id')||q.get('collection_id');
   if(del||em||ret)history.replaceState(null,'',location.pathname);
   if(del){A.delTok=del;A.scr='del-confirm';logged=false;return renderAuth()}
   if(getTok()){$('#main').innerHTML='<p class="note" style="padding:40px 0;text-align:center">Carregando seus dados…</p>';
-    try{await carregaSessao();if(ret){ui.tab='assinatura';try{aplicaAssin(await api('/subscription'))}catch(e){}}render();
-      if(em==='confirmado')toast('E-mail confirmado. Obrigado!');if(ret)toast(C.assin.renov?'Cartão cadastrado! A renovação automática está ativa.':'Conferindo seu pagamento. Pode levar alguns segundos.');maybeTour();return}
+    try{await carregaSessao();let pago=false;
+      if(ret){ui.tab='assinatura';try{
+        // volta do Checkout Pro (cartão sem renovação): confere o pagamento pela nossa referência
+        if(pg){const r=await api('/subscription/payment/'+encodeURIComponent(pg)+(mpId&&/^\d+$/.test(mpId)?'?mp='+mpId:''));aplicaAssin(r.assinatura);pago=r.status==='APPROVED'}
+        else aplicaAssin(await api('/subscription'))}catch(e){}}
+      render();
+      if(em==='confirmado')toast('E-mail confirmado. Obrigado!');
+      if(ret)toast(pago?'Pagamento confirmado! Sua assinatura está ativa.':C.assin.renov?'Cartão cadastrado! A renovação automática está ativa.':'Conferindo seu pagamento. Pode levar alguns segundos.');maybeTour();return}
     catch(e){if(e.status!==401){A.info=e.message}setTok('')}}
   if(em==='confirmado')A.info='E-mail confirmado. Entre na sua conta.';
   if(C&&!C.real&&logged)return render(); // conta de demonstração local
@@ -1805,14 +2060,14 @@ const aDelConfirm=()=>`<h1>Excluir sua conta</h1><p class="muted" style="margin:
 async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:{token:A.delTok}});setTok('');apagaDK();C=null;logged=false;A.delTok=null;Object.assign(A,{scr:'excluida',err:''});render()}catch(e){A.err=e.message;render()}}
 
 /* ---------- render / eventos ---------- */
-const VIEWS={painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,conta:vConta,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
+const VIEWS={admin:vAdmin,painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,conta:vConta,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
 function render(keepScroll){
   // sem sessão (ou tutorial aberto): telas de entrada no lugar do app
   if(!logged||!C||A.overlay){if(!logged)agendaLembretes();renderAuth();return} // sem sessão: cancela os lembretes do aparelho
   if(A.chave){document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#main').innerHTML=vChave();return}
   if(!(S.fixasRep&&S.fixasRep[ymOf(TODAY)]))repeteFixas();
   document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#auth').innerHTML='';
-  if(!VIEWS[ui.tab])ui.tab='painel';
+  montaNav(!!(C.admin&&!NATIVO));if(!VIEWS[ui.tab]||(ui.tab==='admin'&&!(C.admin&&!NATIVO)))ui.tab='painel';
   document.querySelectorAll('nav [data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===ui.tab?'page':'false'));
   $('#biz-side').textContent=S.negocio.nome;
   const sy=window.scrollY;
@@ -1831,6 +2086,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,n=+b.dataset.n||0;
   if(a.startsWith('a-')){authAct(a,b);return}
   if(a.startsWith('k-')){chaveAct(a,b);return}
+  if(a.startsWith('adm-')||a.startsWith('fb-')){admAct(a,b);return}
   if(contaAct(a,b))return;
   // no modo Dia, abre no último dia com vendas lançadas (hoje só se já lançou)
   if(a==='mode'){ui.mode=b.dataset.v;ui.ref=ui.mode==='dia'?lastDataDay():TODAY;render(true)}
@@ -1866,6 +2122,8 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
   const el=e.target;
+  if(el.id==='adm-sit'){ADM.sit=el.value;admCarrega();return}
+  if(el.id==='ct-prazo'||el.id==='ct-mensal'||el.id==='ct-pix'){admPrevia();return}
   if(el.id==='lb-vendas'||el.id==='lb-desp'||el.id==='lb-hora'){LEMB={vendas:!!($('#lb-vendas')||{}).checked,desp:!!($('#lb-desp')||{}).checked,hora:+(($('#lb-hora')||{}).value)||19};
     try{localStorage.setItem(LKEY,JSON.stringify(LEMB))}catch(x){}if(LEMB.vendas||LEMB.desp)pedeLembretes(true);else agendaAgora();toast('Lembretes atualizados');return}
   if(el.name==='r-dt'){A.reg=A.reg||{};A.reg['r-dt']=el.value;A.reg['r-doc']='';render();return}
@@ -1884,6 +2142,12 @@ document.addEventListener('change',e=>{
 });
 document.addEventListener('submit',e=>{
   e.preventDefault();
+  if(e.target.id==='f-adm-busca'){ADM.busca=($('#adm-busca')||{}).value||'';admCarrega();return}
+  if(e.target.id==='f-adm-teste'){admTeste();return}
+  if(e.target.id==='f-fb'){enviaFeedback();return}
+  if(e.target.id==='f-adm-edit'){admSalva();return}
+  if(e.target.id==='f-adm-del'){admExclui();return}
+  if(e.target.id==='f-adm-ct'){admSalvaCt();return}
   if(AUTH_FORMS.includes(e.target.id)){onAuthSubmit(e.target.id);return}
   if(e.target.id==='f-item'){const nome=$('#ni-nome').value.trim(),preco=parseBRL($('#ni-preco').value);if(!nome||isNaN(preco)){toast('Preencha nome e preço');return}
     S.itens.push({id:uid(),nome,tipo:$('#ni-tipo').value,preco,custo:parseBRL($('#ni-custo').value)||0,ativo:true});save();render(true);toast(`${nome} adicionado`)}
