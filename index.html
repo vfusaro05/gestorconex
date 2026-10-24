@@ -495,6 +495,8 @@ const REAL=!!API_BASE;
 // app instalado pelas lojas (Capacitor): sem preço, plano nem pagamento dentro do app (regra 3.1.1 da Apple e de pagamentos da
 // Google Play); a assinatura é feita só pelo site, como no Chat Conex. O app só mostra a situação da conta.
 const NATIVO=typeof window!=='undefined'&&!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+// App da Apple (iPhone/iPad): só entra com conta já existente. A Apple recusou o Chat Conex (3.1.1) por ter cadastro de empresa no app.
+const IOS=NATIVO&&!!(window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='ios');
 /* ---------- utilidades ---------- */
 const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
@@ -1455,7 +1457,7 @@ const SLIDES=[
   {ic:'despesas',t:'Registre suas contas',x:'Aluguel, energia, internet: mensais, semanais ou diárias. O app divide pelos dias para comparar certo.'},
   {ic:'painel',t:'Veja quanto sobrou',x:'Na tela inicial: o lucro, se está melhor ou pior que o mês passado e as 3 coisas mais importantes.'},
   {ic:'ajustes',t:'Entenda o que mudou',x:'O que ajudou e o que atrapalhou o lucro, item por item, e quanto precisa vender para pagar as contas.'},
-  {ic:'conta',t:`${TRIAL_DIAS} dias grátis`,x:NATIVO?'Teste tudo sem cartão e sem compromisso.':'Teste tudo sem cartão. Depois, assine por R$ 59,90 por mês. Cancele quando quiser.'}];
+  ...(IOS?[]:[{ic:'conta',t:`${TRIAL_DIAS} dias grátis`,x:NATIVO?'Teste tudo sem cartão e sem compromisso.':'Teste tudo sem cartão. Depois, assine por R$ 59,90 por mês. Cancele quando quiser.'}])];
 const errBox=()=>A.err?`<div class="a-err" role="alert">${esc(A.err)}</div>`:'';
 const infoBox=()=>A.info?`<div class="a-info" role="status">${A.info}</div>`:'';
 const LEGAL_SCR=['termos','privacidade','excluir-info'];
@@ -1470,8 +1472,8 @@ function aLogin(){return `<h1>Entrar</h1><p class="muted" style="margin:0">Use o
     ${capW('l-robo')}
     <button class="btn pri big" type="submit">Entrar</button></form>
   <div class="a-links"><button class="lnk" data-act="a-go" data-v="esqueci">Esqueceu a senha?</button></div>
-  <div class="a-sep"><span>Ainda não tem conta?</span></div>
-  <button class="btn big" data-act="a-go" data-v="cadastro">Criar conta · ${TRIAL_DIAS} dias grátis</button>`}
+  ${IOS?'':`<div class="a-sep"><span>Ainda não tem conta?</span></div>
+  <button class="btn big" data-act="a-go" data-v="cadastro">Criar conta · ${TRIAL_DIAS} dias grátis</button>`}`}
 function aCadastro(){const r=A.reg||{},dt=r['r-dt']||'CNPJ',v=k=>esc(r[k]||'');
   return `<button class="lnk" data-act="a-go" data-v="login">← Já tenho conta</button><h1>Criar conta</h1><p class="muted" style="margin:0">Etapa 1 de 2 · ${TRIAL_DIAS} dias grátis, sem cartão.</p>${errBox()}
   <form id="f-reg" class="a-form" novalidate>
@@ -1506,6 +1508,7 @@ function aNovaSenha(){return `<h1>Crie uma senha nova</h1><p class="muted" style
 const aExcluida=()=>`<h1>Conta excluída</h1><p class="muted" style="margin:0">Apagamos sua conta e todos os seus dados. Registros de pagamento ficam guardados pelo prazo da lei fiscal e depois também são apagados.</p><button class="btn pri big" data-act="a-go" data-v="login">Voltar ao início</button>`;
 function renderAuth(){
   document.body.classList.add('auth-on');const el=$('#auth');el.hidden=false;
+  if(IOS&&(A.scr==='cadastro'||A.scr==='verificar'))A.scr='login';
   const s=A.scr,F={'del-confirm':aDelConfirm,intro:aIntro,login:aLogin,cadastro:aCadastro,verificar:aVerificar,esqueci:aEsqueci,enviada:aEnviada,'nova-senha':aNovaSenha,excluida:aExcluida};
   const body=LEGAL_SCR.includes(s)?`<button class="lnk" data-act="a-back">← Voltar</button><div class="legal">${legalHtml(s)}</div>`:(F[s]||aLogin)();
   el.innerHTML=`<div class="auth ${LEGAL_SCR.includes(s)?'is-legal':''}">
