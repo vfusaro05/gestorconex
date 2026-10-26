@@ -497,6 +497,9 @@ const REAL=!!API_BASE;
 const NATIVO=typeof window!=='undefined'&&!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 // App da Apple (iPhone/iPad): só entra com conta já existente. A Apple recusou o Chat Conex (3.1.1) por ter cadastro de empresa no app.
 const IOS=NATIVO&&!!(window.Capacitor.getPlatform&&window.Capacitor.getPlatform()==='ios');
+// No app instalado o login e o "esqueci a senha" não usam o captcha (no iPhone o desafio da Cloudflare não conclui
+// dentro do app); a API protege com limite por IP e bloqueio do e-mail depois de 5 senhas erradas. Cadastro (só Android) segue com captcha.
+const APPOS=IOS?'ios':'android';
 /* ---------- utilidades ---------- */
 const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
@@ -1219,7 +1222,7 @@ let logged=false;try{logged=!!C&&localStorage.getItem(SESS)===C.email}catch(e){}
 const setSess=v=>{logged=v;try{v?localStorage.setItem(SESS,C.email):localStorage.removeItem(SESS)}catch(e){}};
 let A={scr:'login',slide:0,err:'',info:'',reg:null,pend:null,code:null,overlay:false,legalBack:'login',lastEmail:'',proto:'',cap:{}};
 // Widget de verificação: imita o fluxo do Cloudflare Turnstile usado no Chat Conex (o real não carrega dentro do artifact)
-const capW=id=>{if(TS_REAL)return `<div class="ts-host" data-id="${id}"${NATIVO?' style="min-height:0"':''}></div><input type="checkbox" id="${id}" hidden>`;const ok=!!A.cap[id];return `<div class="cap ${ok?'ok':''}" id="cap-${id}"><button type="button" class="cap-box" data-act="a-cap" data-id="${id}" aria-label="Verificação de segurança: não sou um robô"><span class="cap-chk" aria-hidden="true"></span><span class="cap-t">${ok?'Verificado':'Não sou um robô'}</span></button><div class="cap-brand" aria-hidden="true">${IC.conta}<small>Verificação<br>de segurança</small></div><input type="checkbox" id="${id}" ${ok?'checked':''} hidden></div>`};
+const capW=id=>{if(NATIVO&&REAL&&id!=='r-robo')return '';if(TS_REAL)return `<div class="ts-host" data-id="${id}"${NATIVO?' style="min-height:0"':''}></div><input type="checkbox" id="${id}" hidden>`;const ok=!!A.cap[id];return `<div class="cap ${ok?'ok':''}" id="cap-${id}"><button type="button" class="cap-box" data-act="a-cap" data-id="${id}" aria-label="Verificação de segurança: não sou um robô"><span class="cap-chk" aria-hidden="true"></span><span class="cap-t">${ok?'Verificado':'Não sou um robô'}</span></button><div class="cap-brand" aria-hidden="true">${IC.conta}<small>Verificação<br>de segurança</small></div><input type="checkbox" id="${id}" ${ok?'checked':''} hidden></div>`};
 Object.assign(ui,{plano:'mensal',metodo:'cartao',renov:true,payStep:null,payErr:'',pix:null,chgPw:false,export:false,delStep:0,delErr:'',legal:'privacidade'});
 IC.conta='<svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>';
 
@@ -2006,7 +2009,7 @@ async function onAuthSubmitReal(id){
     if(!em||!pw){A.err='Preencha e-mail e senha.';return render()}
     if(em==='demo@gestorconex.com.br'&&pw==='Demo@2026'){A.err='';return entrarDemo()}
     if(!NATIVO&&!A.capTok['l-robo']){A.err='Complete a verificação de segurança.';return render()}
-    try{const captcha=await capToken('l-robo');const r=await api('/auth/login',{body:{email:em,pw,captcha}});setTok(r.token);
+    try{const r=await api('/auth/login',{body:NATIVO?{email:em,pw,app:APPOS}:{email:em,pw,captcha:A.capTok['l-robo']}});setTok(r.token);
       if(r.mustChange){A.err='';A.scr='nova-senha';return render()}
       await entrou('Bem-vindo de volta!',pw)}catch(e){falha(e,'l-robo')}}
   else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini='zero';
@@ -2028,7 +2031,7 @@ async function onAuthSubmitReal(id){
       await entrou('Conta criada. Seu teste grátis de 14 dias começou.',p.pw)}catch(e){A.err=e.message;A.info='';render()}}
   else if(id==='f-esq'){const em=g('e-email').toLowerCase();if(!emailOk(em)){A.err='Informe um e-mail válido.';return render()}
     if(!NATIVO&&!A.capTok['e-robo']){A.err='Complete a verificação de segurança.';return render()}
-    try{const captcha=await capToken('e-robo');await api('/auth/forgot',{body:{email:em,captcha}});A.lastEmail=em;A.err='';A.scr='enviada';render()}catch(e){falha(e,'e-robo')}}
+    try{await api('/auth/forgot',{body:NATIVO?{email:em,app:APPOS}:{email:em,captcha:A.capTok['e-robo']}});A.lastEmail=em;A.err='';A.scr='enviada';render()}catch(e){falha(e,'e-robo')}}
   else if(id==='f-nova'){const pw=($('#n-pw')||{}).value||'',pw2=($('#n-pw2')||{}).value||'';const er=pwError(pw,A.lastEmail)||(pw!==pw2?'As duas senhas não são iguais.':'');
     if(er){A.err=er;return render()}
     try{const r=await api('/auth/change-password',{body:{nova:pw}});setTok(r.token);await entrou('Senha trocada. Use a nova no próximo login.',pw)}catch(e){A.err=e.message;render()}}
