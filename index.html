@@ -1838,10 +1838,11 @@ const dBR=s=>s?new Date(s).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Pau
 const isoDia=s=>s?new Date(s).toISOString().slice(0,10):'';
 const CAMPO={nome:'nome',email:'e-mail',tel:'celular',negocio:'negócio',segmento:'segmento',dt:'tipo de documento',doc:'documento'};
 const ACAO={TRIAL_ADJUSTED:h=>`teste grátis de ${dBR(h.de)} para ${dBR(h.para)}`,ACCOUNT_EDITED:h=>`dados da conta alterados (${Object.keys(h.para||{}).map(k=>CAMPO[k]||k).join(', ')})`,
-  SESSIONS_REVOKED:()=>'sessões encerradas em todos os aparelhos',ACCOUNT_DISABLED:()=>'acesso desativado',ACCOUNT_ENABLED:()=>'acesso reativado'};
+  SESSIONS_REVOKED:()=>'sessões encerradas em todos os aparelhos',ACCOUNT_DISABLED:()=>'acesso desativado',ACCOUNT_ENABLED:()=>'acesso reativado',
+  PAYMENT_REFUNDED:h=>`pagamento de ${brl(h.valor)} ${h.motivo==='charged_back'?'contestado pelo cliente':'devolvido'} no Mercado Pago: pago até ${dBR(h.de)} passou para ${h.para?dBR(h.para):'sem período pago'}${h.contrato?' · confira o contrato':''}`};
 const admSt=k=>{const x=SIT[k]||[k,'warn'];return `<span class="status ${x[1]}"><i></i>${x[0]}</span>`};
 const ctSt=k=>{const x=CT_FASE[k]||[k,'warn'];return `<span class="status ${x[1]}"><i></i>${x[0]}</span>`};
-const PAGO={APPROVED:'Pago',PENDING:'Pendente',REJECTED:'Recusado',CANCELLED:'Cancelado'},TIPO={PLANO:'Plano',CONTRATO:'Contrato',ADITIVO:'Aditivo'};
+const PAGO={APPROVED:'Pago',PENDING:'Pendente',REJECTED:'Recusado',CANCELLED:'Cancelado',REFUNDED:'Devolvido'},TIPO={PLANO:'Plano',CONTRATO:'Contrato',ADITIVO:'Aditivo'};
 const vIn=id=>(($('#'+id)||{}).value||'').trim();
 async function admCarrega(){if(!(REAL&&C&&C.real)){ADM.err='O painel de administração funciona só no site, com a conta de administrador.';return render(true)}
   ADM.carregando=true;ADM.err='';render(true);
