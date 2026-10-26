@@ -1219,7 +1219,7 @@ let logged=false;try{logged=!!C&&localStorage.getItem(SESS)===C.email}catch(e){}
 const setSess=v=>{logged=v;try{v?localStorage.setItem(SESS,C.email):localStorage.removeItem(SESS)}catch(e){}};
 let A={scr:'login',slide:0,err:'',info:'',reg:null,pend:null,code:null,overlay:false,legalBack:'login',lastEmail:'',proto:'',cap:{}};
 // Widget de verificação: imita o fluxo do Cloudflare Turnstile usado no Chat Conex (o real não carrega dentro do artifact)
-const capW=id=>{if(TS_REAL)return `<div class="ts-host" data-id="${id}"></div><input type="checkbox" id="${id}" hidden>`;const ok=!!A.cap[id];return `<div class="cap ${ok?'ok':''}" id="cap-${id}"><button type="button" class="cap-box" data-act="a-cap" data-id="${id}" aria-label="Verificação de segurança: não sou um robô"><span class="cap-chk" aria-hidden="true"></span><span class="cap-t">${ok?'Verificado':'Não sou um robô'}</span></button><div class="cap-brand" aria-hidden="true">${IC.conta}<small>Verificação<br>de segurança</small></div><input type="checkbox" id="${id}" ${ok?'checked':''} hidden></div>`};
+const capW=id=>{if(TS_REAL)return `<div class="ts-host" data-id="${id}"${NATIVO?' style="min-height:0"':''}></div><input type="checkbox" id="${id}" hidden>`;const ok=!!A.cap[id];return `<div class="cap ${ok?'ok':''}" id="cap-${id}"><button type="button" class="cap-box" data-act="a-cap" data-id="${id}" aria-label="Verificação de segurança: não sou um robô"><span class="cap-chk" aria-hidden="true"></span><span class="cap-t">${ok?'Verificado':'Não sou um robô'}</span></button><div class="cap-brand" aria-hidden="true">${IC.conta}<small>Verificação<br>de segurança</small></div><input type="checkbox" id="${id}" ${ok?'checked':''} hidden></div>`};
 Object.assign(ui,{plano:'mensal',metodo:'cartao',renov:true,payStep:null,payErr:'',pix:null,chgPw:false,export:false,delStep:0,delErr:'',legal:'privacidade'});
 IC.conta='<svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg>';
 
@@ -1711,7 +1711,30 @@ const TS_REAL=REAL&&typeof location!=='undefined'&&/(^|\.)gestorconex\.com\.br$|
 let tsLoad=null;A.capTok={};
 function loadTurnstile(){if(tsLoad)return tsLoad;tsLoad=new Promise((res,rej)=>{if(window.turnstile)return res();
   const s=document.createElement('script');s.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';s.async=true;s.onload=()=>res();s.onerror=()=>{tsLoad=null;rej()};document.head.appendChild(s)});return tsLoad}
-async function mountTurnstile(){if(!TS_REAL)return;const hosts=[...document.querySelectorAll('.ts-host')];if(!hosts.length)return;
+/* App instalado (WKWebView do iPhone): montado na abertura da tela o desafio falhava (erro 600010) — como no Chat Conex,
+   o captcha só roda no toque em Entrar, invisível a menos que peça um clique, com até 2 novas tentativas automáticas. */
+const CAPP={}; // pedido em andamento por captcha: o widget é montado uma vez e os callbacks atendem o pedido da vez
+function capToken(id){
+  if(!TS_REAL)return Promise.resolve('');
+  if(!NATIVO)return Promise.resolve(A.capTok[id]||'');
+  return new Promise(async(res,rej)=>{
+    try{await loadTurnstile()}catch(e){return rej(new Error('Não foi possível carregar a verificação de segurança. Confira a internet e tente de novo.'))}
+    const h=document.querySelector(`.ts-host[data-id="${id}"]`);
+    if(!h)return rej(new Error('Complete a verificação de segurança.'));
+    const p=CAPP[id]={res,rej,tent:0,prazo:null};
+    const fim=()=>clearTimeout(p.prazo);
+    p.arma=()=>{fim();p.prazo=setTimeout(()=>{if(CAPP[id]===p){delete CAPP[id];rej(new Error('A verificação de segurança demorou demais. Toque em Entrar de novo.'))}},30000)};
+    p.fim=fim;p.arma();
+    if(h.dataset.wid){window.turnstile.reset(h.dataset.wid);return}
+    h.dataset.wid=window.turnstile.render(h,{sitekey:TS_SITEKEY,language:'pt-br',theme:ui.look==='escuro'?'dark':'light',appearance:'interaction-only',
+      callback:tok=>{const q=CAPP[id];A.capTok[id]=tok;if(q){q.fim();delete CAPP[id];q.res(tok)}},
+      'before-interactive-callback':()=>{const q=CAPP[id];if(q)q.fim()}, // vai pedir um toque: sem prazo enquanto a pessoa decide
+      'expired-callback':()=>{A.capTok[id]=''},
+      'error-callback':()=>{const q=CAPP[id];if(!q)return true;
+        if(q.tent++<2){q.arma();window.turnstile.reset(h.dataset.wid);return true}
+        q.fim();delete CAPP[id];q.rej(new Error('Não foi possível concluir a verificação de segurança. Toque em Entrar de novo.'));return true}});
+  })}
+async function mountTurnstile(){if(!TS_REAL||NATIVO)return;const hosts=[...document.querySelectorAll('.ts-host')];if(!hosts.length)return;
   try{await loadTurnstile()}catch(e){hosts.forEach(h=>h.innerHTML='<div class="a-err">Não foi possível carregar a verificação de segurança. Recarregue a página.</div>');return}
   for(const h of hosts){if(h.dataset.mounted)continue;h.dataset.mounted='1';const id=h.dataset.id;A.cap[id]=false;A.capTok[id]='';const inp=$('#'+id);if(inp)inp.checked=false;
     window.turnstile.render(h,{sitekey:TS_SITEKEY,language:'pt-br',theme:ui.look==='escuro'?'dark':'light',
@@ -1982,8 +2005,8 @@ async function onAuthSubmitReal(id){
   if(id==='f-login'){const em=g('l-email').toLowerCase(),pw=($('#l-pw')||{}).value||'';A.lastEmail=em;A.info='';
     if(!em||!pw){A.err='Preencha e-mail e senha.';return render()}
     if(em==='demo@gestorconex.com.br'&&pw==='Demo@2026'){A.err='';return entrarDemo()}
-    if(!A.capTok['l-robo']){A.err='Complete a verificação de segurança.';return render()}
-    try{const r=await api('/auth/login',{body:{email:em,pw,captcha:A.capTok['l-robo']}});setTok(r.token);
+    if(!NATIVO&&!A.capTok['l-robo']){A.err='Complete a verificação de segurança.';return render()}
+    try{const captcha=await capToken('l-robo');const r=await api('/auth/login',{body:{email:em,pw,captcha}});setTok(r.token);
       if(r.mustChange){A.err='';A.scr='nova-senha';return render()}
       await entrou('Bem-vindo de volta!',pw)}catch(e){falha(e,'l-robo')}}
   else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini='zero';
@@ -1992,9 +2015,9 @@ async function onAuthSubmitReal(id){
     if(nome.length<3)er='Informe seu nome completo.';else if(!emailOk(em))er='Informe um e-mail válido.';else if(onlyD(tel).length<10)er='Informe o celular com DDD.';
     else if(!emp)er='Informe o nome do negócio.';else if(dt==='CNPJ'?!cnpjOk(doc):!cpfOk(doc))er=`${dt} inválido. Confira os números.`;
     else if(pwError(pw,em))er=pwError(pw,em);else if(pw!==pw2)er='As duas senhas não são iguais.';
-    else if(!chk('r-ok'))er='Para criar a conta, aceite os Termos de uso e a Política de privacidade.';else if(!A.capTok['r-robo'])er='Complete a verificação de segurança.';
+    else if(!chk('r-ok'))er='Para criar a conta, aceite os Termos de uso e a Política de privacidade.';else if(!NATIVO&&!A.capTok['r-robo'])er='Complete a verificação de segurança.';
     if(er){A.err=er;render();window.scrollTo(0,0);return}
-    try{const r=await api('/auth/register/start',{body:{nome,email:em,tel,emp,seg,dt,doc,pw,aceite:true,captcha:A.capTok['r-robo']}});
+    try{const captcha=await capToken('r-robo');const r=await api('/auth/register/start',{body:{nome,email:em,tel,emp,seg,dt,doc,pw,aceite:true,captcha}});
       A.pend={pendingId:r.pendingId,via:r.via,destino:r.destino,email:em,tel,emp,seg,ini,pw};A.err='';A.info='';
       if(r.via==='none')return onAuthSubmitReal('f-ver'); // cadastro sem código (provisório): conclui direto
       A.scr='verificar';render();window.scrollTo(0,0)}catch(e){falha(e,'r-robo')}}
@@ -2004,8 +2027,8 @@ async function onAuthSubmitReal(id){
     try{DK=await novaChave();const r=await api('/auth/register/confirm',{body:{pendingId:p.pendingId,code:g('v-code'),estado:await cifra(estado),cripto:await chavesNovas(p.pw)}});setTok(r.token);A.pend=null;A.reg=null;
       await entrou('Conta criada. Seu teste grátis de 14 dias começou.',p.pw)}catch(e){A.err=e.message;A.info='';render()}}
   else if(id==='f-esq'){const em=g('e-email').toLowerCase();if(!emailOk(em)){A.err='Informe um e-mail válido.';return render()}
-    if(!A.capTok['e-robo']){A.err='Complete a verificação de segurança.';return render()}
-    try{await api('/auth/forgot',{body:{email:em,captcha:A.capTok['e-robo']}});A.lastEmail=em;A.err='';A.scr='enviada';render()}catch(e){falha(e,'e-robo')}}
+    if(!NATIVO&&!A.capTok['e-robo']){A.err='Complete a verificação de segurança.';return render()}
+    try{const captcha=await capToken('e-robo');await api('/auth/forgot',{body:{email:em,captcha}});A.lastEmail=em;A.err='';A.scr='enviada';render()}catch(e){falha(e,'e-robo')}}
   else if(id==='f-nova'){const pw=($('#n-pw')||{}).value||'',pw2=($('#n-pw2')||{}).value||'';const er=pwError(pw,A.lastEmail)||(pw!==pw2?'As duas senhas não são iguais.':'');
     if(er){A.err=er;return render()}
     try{const r=await api('/auth/change-password',{body:{nova:pw}});setTok(r.token);await entrou('Senha trocada. Use a nova no próximo login.',pw)}catch(e){A.err=e.message;render()}}
