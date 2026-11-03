@@ -38,9 +38,12 @@
   --f-display:"Sora","Segoe UI",system-ui,sans-serif;
   --f-body:"Plus Jakarta Sans","Segoe UI",system-ui,-apple-system,sans-serif;
   --r:12px;
+  /* canais de e-commerce (VendasConex, Mercado Livre, Amazon, Shopee): paleta categórica validada (daltonismo) nos dois visuais */
+  --ec1:#2a78d6; --ec2:#eb6834; --ec3:#1baf7a; --ec4:#eda100;
 }
 :root[data-look="escuro"]{
   color-scheme:dark;
+  --ec1:#3987e5; --ec2:#d95926; --ec3:#199e70; --ec4:#c98500;
   --bg:#05070d; --bg-2:#0a0f1a; --glass:rgba(16,23,38,.72); --glass-2:rgba(26,36,58,.6); --line:rgba(130,170,255,.13); --line-2:rgba(130,170,255,.24);
   --ink:#e9efff; --muted:#93a0bd; --faint:#5f6b86;
   --acc:#3ee0ff; --acc-soft:rgba(62,224,255,.06); --acc-bd:rgba(62,224,255,.4); --violet:#8f7bff; --accent-ink:#04121a; --pri:linear-gradient(135deg,#3ee0ff,#6aa8ff);
@@ -239,6 +242,31 @@ select.sel{border:1px solid var(--line-2);background:var(--bg-2);border-radius:1
 .peso-n{font-family:var(--f-display);font-weight:600;font-size:1.15rem}
 .peso p{margin:0;font-size:.86rem;line-height:1.45}
 .eyebrow .chip{border:0;cursor:pointer;vertical-align:middle;margin-left:4px;background:var(--warn-soft);color:var(--warn)}
+/* e-commerce */
+.ec-seg{max-width:100%;overflow-x:auto;scrollbar-width:none} .ec-seg button{white-space:nowrap;display:inline-flex;align-items:center}
+.ec-dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;flex:none}
+.ec-onde{display:flex;flex-direction:column;gap:10px}
+.ec-or{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) 72px 80px;align-items:center;gap:10px;font-size:.88rem}
+.ec-or b{text-align:right} .ec-or small{text-align:right;color:var(--muted)}
+.ec-or.lucro{border-top:1px solid var(--line);padding-top:10px;font-weight:700}
+.ec-bar{height:10px;border-radius:5px;background:var(--track);overflow:hidden} .ec-bar i{display:block;height:100%;border-radius:0 4px 4px 0}
+@media (max-width:520px){.ec-or{grid-template-columns:minmax(0,1fr) 64px;row-gap:4px}.ec-or .ec-bar{grid-column:1/-1;grid-row:2}.ec-or small{display:none}}
+.ec-cmp{display:flex;flex-direction:column;gap:12px}
+.ec-cr{display:grid;grid-template-columns:minmax(0,130px) minmax(0,1fr) minmax(0,150px);align-items:center;gap:12px}
+.ec-cn{font-weight:700;font-size:.9rem;display:flex;align-items:center;min-width:0}
+.ec-cb{position:relative;height:22px} .ec-cb i{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0} .ec-cb i.l{top:auto;height:6px;background:var(--ink);opacity:.55}
+.ec-cv{display:flex;flex-direction:column;text-align:right} .ec-cv small{color:var(--muted);font-size:.78rem}
+@media (max-width:520px){.ec-cr{grid-template-columns:minmax(0,1fr) auto}.ec-cb{grid-column:1/-1;grid-row:2}}
+tr.tot td{font-weight:800;border-top:2px solid var(--line-2)}
+.ec-pag{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:.86rem}
+.ec-in{max-width:120px;text-align:right;padding:7px 9px;margin-left:auto}
+.ec-chk{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem;margin:0 0 12px;cursor:pointer}
+.ec-chk input{width:18px;height:18px;accent-color:var(--acc)}
+.ec-opts{display:flex;gap:10px 24px;flex-wrap:wrap;align-items:flex-end} .ec-opts .ec-chk{margin:0 0 10px} .ec-imp{max-width:220px}
+.ec-novos{display:flex;flex-direction:column;gap:10px}
+.ec-novo{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.ec-novo>div{display:flex;align-items:center;flex-wrap:wrap;gap:2px 0} .ec-novo small{flex-basis:100%;padding-left:17px}
+.ec-vc{display:flex;flex-direction:column;gap:10px;border:1px dashed var(--acc-bd);background:var(--acc-soft);border-radius:12px;padding:14px;margin-top:-4px}
 details.fold{padding:0}
 details.fold summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 details.fold summary::-webkit-details-marker{display:none}
@@ -615,8 +643,9 @@ const applyLook=()=>{if(ui.look==='escuro')document.documentElement.setAttribute
 applyLook();
 const save=()=>{agendaLembretes();if(REAL&&C&&C.real)return queueSync();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const saveUi=()=>{try{localStorage.setItem(UKEY,JSON.stringify({tab:ui.tab,mode:ui.mode,view:ui.view,look:ui.look}))}catch(e){}};
-const itemById=id=>S.itens.find(i=>i.id===id);
-const despById=id=>S.despesas.find(i=>i.id===id);
+// "ec:<canal>" = vendas dos e-commerces que somam no Início (ver E-COMMERCE)
+const itemById=id=>S.itens.find(i=>i.id===id)||ecItem(id);
+const despById=id=>S.despesas.find(i=>i.id===id)||ecDesp(id);
 let toastT; function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),1800)}
 
 /* ---------- períodos ---------- */
@@ -662,10 +691,16 @@ function metrics(r){
     if(v){m.lanc++;for(const id in v){const x=v[id],val=x.q*x.p,cv=x.q*(x.c||0);f+=val;m.cmv+=cv;
       const it=m.itens[id]||(m.itens[id]={q:0,fat:0,cmv:0});it.q+=x.q;it.fat+=val;it.cmv+=cv;
       if((itemById(id)||{}).tipo==='servico')m.serv+=x.q;else m.prod+=x.q}}
+    // e-commerces com "Somar no Início": receita como item "ec:<canal>", custo do produto no CMV (centavos → reais)
+    const ec=EC.dias&&EC.dias[d];
+    if(ec)for(const ch in ec){const x=ec[ch],id='ec:'+ch,it=m.itens[id]||(m.itens[id]={q:0,fat:0,cmv:0});
+      f+=x.receita/100;m.cmv+=x.cmv/100;it.q+=x.unidades;it.fat+=x.receita/100;it.cmv+=x.cmv/100;m.prod+=x.unidades}
     if(dias.includes(pd(d).getDay()))m.abertos++;
     m.fat+=f;m.dias.push({d,fat:f});
     // rateio: mensal ÷ dias do mês, semanal ÷ 7, diária no próprio dia
     const add=(id,a)=>{m.desp+=a;m.desps[id]=(m.desps[id]||0)+a};
+    // comissões e taxas, frete e impostos dos e-commerces entram como despesas variáveis do dia
+    if(ec)for(const ch in ec){const x=ec[ch];if(x.comissao+x.taxas)add('ec:'+ch+':com',(x.comissao+x.taxas)/100);if(x.frete)add('ec:'+ch+':frete',x.frete/100);if(x.imposto)add('ec:'+ch+':imp',x.imposto/100)}
     const ym=ymOf(d),g=S.gastos[ym]||{},n=dim(ym);
     for(const id in g)add(id,(+g[id]||0)/n);
     const gw=S.gastosS[weekStart(d)];if(gw)for(const id in gw)add(id,(+gw[id]||0)/7);
@@ -674,7 +709,7 @@ function metrics(r){
   m.custo=m.desp+m.cmv;m.lucro=m.fat-m.custo;m.margem=m.fat?m.lucro/m.fat:0;m.ticket=m.serv?m.fat/m.serv:0;
   return m;
 }
-function dayFat(d){const v=S.vendas[d];if(!v)return null;let f=0;for(const id in v)f+=v[id].q*v[id].p;return f}
+function dayFat(d){const v=S.vendas[d],ec=EC.dias&&EC.dias[d];if(!v&&!ec)return null;let f=0;if(v)for(const id in v)f+=v[id].q*v[id].p;if(ec)for(const ch in ec)f+=ec[ch].receita/100;return f}
 
 /* Gera os avisos. Cada um tem versão curta (s) para a visão geral e completa (t/x) para o detalhe. */
 function insights(cur,prev,ctx,fr){
@@ -711,6 +746,7 @@ function insights(cur,prev,ctx,fr){
 const IC={
   painel:'<svg viewBox="0 0 24 24"><path d="M4 20V11M10 20V5M16 20v-6M21 20H3"/></svg>',
   vendas:'<svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
+  ecom:'<svg viewBox="0 0 24 24"><path d="M3 4h2.2l2.3 11h10.8l2-8H6.3"/><circle cx="9.5" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/></svg>',
   despesas:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M15 15h3"/></svg>',
   cadastros:'<svg viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
   ajustes:'<svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>',
@@ -719,7 +755,8 @@ const IC={
   sair:'<svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg>'
 };
 // [aba, nome no menu lateral, nome curto na barra do celular, ícone]
-const TABS=[['painel','Início'],['vendas','Vendas'],['despesas','Despesas'],['cadastros','Cadastros'],['conta','Minha conta','Conta','perfil'],['ajustes','Ajustes']];
+// App da Apple: sem a aba E-commerce por enquanto (fica fora da revisão da App Store; site e Android têm)
+const TABS=[['painel','Início'],['vendas','Vendas'],['despesas','Despesas'],['ecommerce','E-commerce','Online','ecom'],['cadastros','Cadastros'],['conta','Minha conta','Conta','perfil'],['ajustes','Ajustes']].filter(t=>!(IOS&&t[0]==='ecommerce'));
 let navKey='';
 function montaNav(adm){const t=TABS.concat(adm?[['admin','Administração','Admin']]:[]),k=t.map(x=>x[0]).join();if(k===navKey)return;navKey=k;
   $('#nav-side').innerHTML=t.map(([k,l,,ic])=>`<button data-tab="${k}">${IC[ic||k]}${l}</button>`).join('')+`<button data-act="c-sair">${IC.sair}Sair</button>`;
@@ -1269,6 +1306,8 @@ function acessoOk(){const a=C.assin;if(a.admin)return true;if(C.real)return !!a.
 function trialBanner(){if(!C||ui.tab==='assinatura'||C.assin.admin)return'';const a=C.assin,mail=' Os detalhes estão no seu e-mail.';
   // proposta ou aditivo esperando o aceite: aparece também no app das lojas (não é pagamento)
   const pd=ctPendente();if(pd)return `<div class="banner"><span><b>${pd==='proposta'?'Você tem uma proposta do Gestor Conex para aprovar.':'Há um aditivo do seu contrato para aprovar.'}</b></span><button class="btn sm pri" data-tab="assinatura">${pd==='proposta'?'Ver proposta':'Ver aditivo'}</button></div>`;
+  // App da Apple: nenhuma faixa de teste grátis, vencimento ou cobrança (regra 3.1.1); acesso pausado tem tela própria
+  if(IOS)return'';
   const fx=(txt,btn)=>`<div class="banner"><span>${txt}${NATIVO&&btn?mail:''}</span>${NATIVO||!btn?'':`<button class="btn sm pri" data-tab="assinatura">${btn}</button>`}</div>`;
   const quando=l=>l===0?'hoje':l===1?'amanhã':`em ${l} dias`;
   if(a.falhou)return fx('<b>A cobrança no cartão não foi aprovada.</b>','Resolver');
@@ -1354,6 +1393,7 @@ async function enviaFeedback(){const cat=($('#fb-cat')||{}).value||'OUTRO',msg=(
 function vAssinatura(){const st=assinStatus(),a=C.assin;
   const sit=`<section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p></section>`;
   if(a.admin)return `${topbar('Assinatura')}${sit}`; // administrador do sistema: sem planos nem pagamento
+  if(IOS)return `${topbar('Proposta')}${ctCard()}`; // App da Apple: só o aceite de proposta/aditivo, sem situação de teste ou assinatura
   if(NATIVO)return `${topbar('Assinatura')}${sit}${ctCard()}`;
   return `${topbar('Assinatura')}
   <section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p>
@@ -1368,7 +1408,7 @@ function vAssinatura(){const st=assinStatus(),a=C.assin;
   ${a.hist&&a.hist.length?`<section class="card"><div class="card-h"><h2>Pagamentos</h2></div><div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Plano</th><th>Forma</th><th class="r">Valor</th><th>Situação</th></tr></thead><tbody>${a.hist.map(h=>`<tr><td>${fmtD(h.d)}</td><td>${h.plano}</td><td>${h.metodo==='pix'?'Pix':'Cartão'}</td><td class="r">${brl(h.valor)}</td><td><span class="chip">${h.st}</span></td></tr>`).join('')}</tbody></table></div></section>`:''}
   ${REAL?'':`<section class="card proto"><b>Testes do protótipo</b><div class="btns"><button class="btn sm" data-act="s-sim-fim">Simular fim do teste grátis</button><button class="btn sm" data-act="s-sim-trial">Voltar para o teste grátis</button>${a.status==='ativa'?'<button class="btn sm" data-act="s-sim-venc">Simular assinatura vencida</button>':''}</div></section>`}`}
 function vBloqueado(){const st=assinStatus(),pd=ctPendente(),ct=C.assin.contrato;
-  return `${topbar('Acesso pausado')}<section class="card" style="max-width:600px"><div class="card-h"><h2>${st.t}</h2></div><p class="muted" style="margin:0 0 8px">${st.x}</p>
+  return `${topbar('Acesso pausado')}<section class="card" style="max-width:600px"><div class="card-h"><h2>${IOS?'Acesso pausado':st.t}</h2></div>${IOS?'':`<p class="muted" style="margin:0 0 8px">${st.x}</p>`}
     <p class="muted" style="margin:0">Nada foi apagado: vendas, despesas e cadastros continuam guardados.${NATIVO?` Enviamos para <b class="sel">${esc(C.email)}</b> as instruções para voltar a usar.`:' Assine para voltar a usar.'}</p>
     <div class="btns">${pd?`<button class="btn pri" data-tab="assinatura">${pd==='proposta'?'Ver proposta':'Ver aditivo'}</button>`:''}${NATIVO||pd?'':`<button class="btn pri" data-tab="assinatura">${ct?'Ver contrato':'Ver planos'}</button>`}<button class="btn" data-act="c-export-go">Exportar meus dados</button></div></section>`}
 
@@ -1386,14 +1426,14 @@ function contaCards(){const st=assinStatus();
       <div class="field"><label for="c-new">Nova senha</label><div class="pw"><input class="inp" id="c-new" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-chg')}</div>
       <div class="field"><label for="c-new2">Repita a nova senha</label><input class="inp" id="c-new2" type="password" autocomplete="new-password"></div>
       ${ui.chgErr?`<div class="a-err" role="alert">${esc(ui.chgErr)}</div>`:''}<button class="btn pri" type="submit">Salvar nova senha</button></form>`:''}</section>
-  <section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:${NATIVO||C.assin.admin?'0':'0 0 12px'}">${st.x}</p>${NATIVO||C.assin.admin?'':`<button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button>`}</section>
+  ${IOS?'':`<section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:${NATIVO||C.assin.admin?'0':'0 0 12px'}">${st.x}</p>${NATIVO||C.assin.admin?'':`<button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button>`}</section>`}
   <section class="card" id="priv"><div class="card-h"><h2>Privacidade e dados</h2><p>seus direitos pela LGPD</p></div>
     <div class="link-list"><button data-act="c-export">Exportar meus dados<span>›</span></button><button data-act="legal" data-v="privacidade">Política de privacidade<span>›</span></button><button data-act="legal" data-v="termos">Termos de uso<span>›</span></button><button data-act="legal" data-v="excluir-info">Como funciona a exclusão de conta<span>›</span></button></div>
     ${ui.export?`<div style="margin-top:12px"><p class="note">Copie o texto abaixo e guarde. Ele tem todos os seus dados (formato JSON, abre em qualquer planilha ou sistema).</p><textarea id="exp-txt" class="inp" rows="6" readonly>${esc(exportJson())}</textarea><button class="btn sm" data-act="c-copy" style="margin-top:8px">Copiar dados</button></div>`:''}
     <div class="cta" style="margin-top:14px;display:block"><b>Seus números são só seus</b>
       <p class="note" style="margin:6px 0 0">Vendas, despesas, serviços e resultados são criptografados neste aparelho antes de ir para os nossos servidores, com uma chave que só a sua senha abre. <b>Nem a equipe do Gestor Conex consegue ver.</b></p>
       <p class="note" style="margin:6px 0 0">Se você esquecer a senha, dá para recuperar: guardamos uma cópia lacrada da sua chave, fora dos servidores, usada só quando você pede a recuperação ao suporte pelo e-mail da conta.</p>
-      <p class="note" style="margin:6px 0 0">Ficam visíveis para nós apenas os dados da conta (nome, e-mail, celular, CPF ou CNPJ) e da assinatura, necessários para o login, a cobrança e a nota fiscal.</p></div>
+      <p class="note" style="margin:6px 0 0">${IOS?'Ficam visíveis para nós apenas os dados da conta (nome, e-mail, celular, CPF ou CNPJ), necessários para o login.':'Ficam visíveis para nós apenas os dados da conta (nome, e-mail, celular, CPF ou CNPJ) e da assinatura, necessários para o login, a cobrança e a nota fiscal.'}</p></div>
     <p class="note" style="margin:12px 0 0">O Gestor Conex usa só armazenamento essencial, para manter você conectado. Não usamos rastreamento de terceiros nem publicidade.</p></section>
   <section class="card" data-tour="ajuda"><div class="card-h"><h2>Ajuda</h2></div><div class="link-list"><button data-act="c-tutorial">Ver o tutorial de novo<span>›</span></button><button data-act="c-fb">Enviar sugestão, pedido ou problema<span>›</span></button></div>
     ${ui.fb?`<form id="f-fb" class="a-form" style="margin-top:12px;max-width:560px"><div class="field"><label for="fb-cat">Assunto</label><select class="inp" id="fb-cat">${FB_CAT.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></div>
@@ -1413,7 +1453,7 @@ function vExcluir(){const st=ui.delStep||0;
     ${ui.delErr?`<div class="a-err" role="alert">${esc(ui.delErr)}</div>`:''}<button class="btn danger big" type="submit">Enviar e-mail de confirmação</button></form>
     <div class="btns"><button class="btn" data-tab="conta">Cancelar</button></div></section>`;
   return `${topbar('Excluir minha conta','Antes de continuar, veja o que muda para você.')}
-  <section class="card" style="max-width:720px"><h2>O que você vai perder</h2><ul class="lst">${PERDAS.map(x=>`<li>${x}</li>`).join('')}</ul></section>
+  <section class="card" style="max-width:720px"><h2>O que você vai perder</h2><ul class="lst">${PERDAS.map(x=>IOS?x.replace(' A assinatura feita pelo site é encerrada.',''):x).map(x=>`<li>${x}</li>`).join('')}</ul></section>
   <section class="card" style="max-width:720px"><h2>Antes de decidir</h2><ul class="lst">${NATIVO?'':'<li>Quer só parar de pagar? <button class="lnk" data-tab="assinatura">Cancele a renovação</button> e mantenha seus dados.</li>'}<li>Quer guardar seus números? <button class="lnk" data-act="c-export-go">Exporte seus dados</button> antes.</li><li>Algo não funcionou? Fale com a gente: <b class="sel">${SUPORTE}</b></li></ul></section>
   <div class="btns" style="max-width:720px;margin:0"><button class="btn danger" data-act="d-next">Continuar com a exclusão</button><button class="btn" data-tab="conta">Cancelar</button></div>`}
 function excluirTudo(){try{[KEY,AKEY,SESS,UKEY,INTRO].forEach(k=>localStorage.removeItem(k))}catch(e){}
@@ -1422,7 +1462,7 @@ function vLegal(){return `<div><button class="lnk" data-tab="conta">← Voltar p
 
 /* ---------- textos legais ---------- */
 function legalHtml(k){
-  const emp='FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA',cnpj='56.911.022/0001-68',dpo=SUPORTE,upd='21 de outubro de 2026';
+  const emp='FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA',cnpj='56.911.022/0001-68',dpo=SUPORTE,upd='28 de outubro de 2026';
   if(k==='termos')return `<h1>Termos de uso</h1><p class="faint">Versão ${TERMOS_V} · Última atualização: ${upd}</p>
     <h2>1. O serviço</h2><p>O Gestor Conex é um aplicativo de gestão para pequenos negócios. Você registra vendas e despesas e o app mostra indicadores como faturamento, custos e lucro. É oferecido por ${emp}, CNPJ ${cnpj}.</p>
     <h2>2. Sua conta</h2><p>Você precisa ter 18 anos ou mais e informar dados verdadeiros. A senha é pessoal: não compartilhe. Avise o suporte se suspeitar de uso indevido.</p>
@@ -1437,18 +1477,19 @@ function legalHtml(k){
     <h2>1. Pelo app</h2><p>Abra o Gestor Conex, entre na sua conta e vá em <b>Minha conta → Excluir conta</b>. Confirme sua senha e abra o link que enviamos para o seu e-mail.</p>
     <h2>2. Pelo site</h2><p>Entre pelo navegador e siga o mesmo caminho: <b>Minha conta → Excluir conta</b>.</p>
     <h2>3. Sem acesso à conta</h2><p>Envie um e-mail para <b class="sel">${SUPORTE}</b> a partir do e-mail cadastrado, com o assunto "Excluir minha conta". Respondemos em até 15 dias.</p>
-    <h2>4. O que é excluído</h2><p>Conta, dados de cadastro, vendas, despesas, serviços, produtos e todo o histórico. A exclusão é definitiva e acontece em até 30 dias nos nossos servidores e cópias de segurança.</p>
+    <h2>4. O que é excluído</h2><p>Conta, dados de cadastro, vendas, despesas, serviços, produtos, pedidos e conexões dos e-commerces e todo o histórico. A exclusão é definitiva e acontece em até 30 dias nos nossos servidores e cópias de segurança.</p>
     <h2>5. O que fica guardado e por quanto tempo</h2><ul><li>Registros de pagamento e notas fiscais: 5 anos, por obrigação fiscal.</li><li>Registros de acesso (data, hora e IP): 6 meses, como exige o Marco Civil da Internet.</li></ul><p>Depois desses prazos, também são apagados.</p>
     <h2>6. Assinatura</h2><p>A exclusão encerra a assinatura feita pelo site. Se você assinou pela App Store ou pelo Google Play, cancele também na loja para não ser cobrado.</p>`;
   return `<h1>Política de privacidade</h1><p class="faint">Última atualização: ${upd}</p>
     <h2>1. Quem cuida dos seus dados</h2><p>${emp}, CNPJ ${cnpj}, é a controladora dos dados tratados no Gestor Conex. Encarregado de dados (DPO): ${dpo}.</p>
-    <h2>2. Quais dados coletamos</h2><ul><li><b>Cadastro:</b> nome, e-mail, celular, nome do negócio, CPF ou CNPJ.</li><li><b>Dados do negócio:</b> vendas, despesas, serviços e produtos que você lança. Eles são criptografados no seu aparelho e não conseguimos ler (veja o item 7).</li><li><b>Pagamento:</b> plano, valor, data e situação. Os dados do cartão são digitados direto no Mercado Pago, na App Store ou no Google Play. Nós não vemos nem guardamos o número do cartão.</li><li><b>Técnicos:</b> modelo do aparelho, versão do app, data, hora e IP de acesso, para segurança.</li><li><b>Suporte:</b> o que você nos escrever.</li></ul>
-    <h2>3. Para que usamos</h2><ul><li>Prestar o serviço e calcular seus indicadores (execução de contrato).</li><li>Cobrar a assinatura e emitir nota fiscal (obrigação legal).</li><li>Proteger sua conta e evitar fraudes (legítimo interesse).</li><li>Enviar novidades, só se você autorizar (consentimento, que pode ser retirado a qualquer momento).</li></ul>
-    <h2>4. Com quem compartilhamos</h2><p>Só com quem ajuda a prestar o serviço: hospedagem em nuvem, processador de pagamento (Mercado Pago, Apple ou Google), envio de e-mail e SMS, e autoridades quando a lei exigir. <b>Não vendemos seus dados e não usamos para publicidade.</b></p>
+    <h2>2. Quais dados coletamos</h2><ul><li><b>Cadastro:</b> nome, e-mail, celular, nome do negócio, CPF ou CNPJ.</li><li><b>Dados do negócio:</b> vendas, despesas, serviços e produtos que você lança. Eles são criptografados no seu aparelho e não conseguimos ler (veja o item 7).</li><li><b>E-commerces conectados (opcional):</b> se você conectar Mercado Livre, Amazon, Shopee ou VendasConex, guardamos a autorização de acesso (cifrada) e os pedidos dessas contas: data, itens, valores, comissões, frete, impostos e o custo dos produtos que você cadastrar. Não guardamos nome, endereço nem contato dos compradores.</li><li><b>Pagamento:</b> plano, valor, data e situação. Os dados do cartão são digitados direto no Mercado Pago, na App Store ou no Google Play. Nós não vemos nem guardamos o número do cartão.</li><li><b>Técnicos:</b> modelo do aparelho, versão do app, data, hora e IP de acesso, para segurança.</li><li><b>Suporte:</b> o que você nos escrever.</li></ul>
+    <h2>3. Para que usamos</h2><ul><li>Prestar o serviço e calcular seus indicadores, inclusive a análise dos e-commerces que você conectar (execução de contrato).</li><li>Cobrar a assinatura e emitir nota fiscal (obrigação legal).</li><li>Proteger sua conta e evitar fraudes (legítimo interesse).</li><li>Enviar novidades, só se você autorizar (consentimento, que pode ser retirado a qualquer momento).</li></ul>
+    <h2>4. Com quem compartilhamos</h2><p>Só com quem ajuda a prestar o serviço: hospedagem em nuvem, os e-commerces que você conectar (só para ler seus pedidos), processador de pagamento (Mercado Pago, Apple ou Google), envio de e-mail e SMS, e autoridades quando a lei exigir. <b>Não vendemos seus dados e não usamos para publicidade.</b></p>
     <h2>5. Por quanto tempo guardamos</h2><p>Enquanto sua conta existir. Depois da exclusão, apagamos em até 30 dias, exceto registros de pagamento e fiscais (5 anos) e registros de acesso (6 meses), que a lei manda guardar.</p>
     <h2>6. Seus direitos (LGPD, art. 18)</h2><p>Você pode confirmar se tratamos seus dados, acessar, corrigir, levar para outro serviço (exportar), pedir a exclusão, saber com quem compartilhamos e retirar consentimentos. Faça isso em <b>Minha conta → Privacidade e dados</b> ou pelo e-mail ${dpo}. Respondemos em até 15 dias.</p>
     <h2>7. Segurança e criptografia de ponta a ponta</h2><p>Os dados do seu negócio (vendas, despesas, serviços, produtos e resultados) são criptografados no seu aparelho, com AES de 256 bits, antes de serem enviados. A chave é protegida pela sua senha e nunca chega aos nossos servidores sem estar lacrada. Por isso, <b>nem a equipe do Gestor Conex nem quem tenha acesso aos servidores consegue ler esses dados</b>.</p>
     <p>Para que você não perca tudo se esquecer a senha, guardamos também uma cópia da sua chave lacrada com uma chave de recuperação da empresa, que fica guardada fora dos servidores. Ela só é usada quando você pede a recuperação ao suporte, a partir do e-mail da conta, e gera um código de uso único enviado a você.</p>
+    <p>Os pedidos dos e-commerces conectados não usam essa criptografia de ponta a ponta: o servidor precisa buscá-los nos canais e guardá-los para calcular a análise. Eles ficam protegidos no banco de dados, só a sua conta acessa, e são apagados quando você desconecta a conta do canal ou exclui sua conta do Gestor Conex.</p>
     <p>Os dados da conta (nome, e-mail, celular, CPF ou CNPJ, nome do negócio) e da assinatura não são criptografados dessa forma, porque são necessários para o login, a cobrança e a nota fiscal. Todo o tráfego usa HTTPS e as senhas são guardadas de forma irreversível (hash).</p>
     <h2>8. Armazenamento no aparelho</h2><p>Usamos só armazenamento essencial, para manter você conectado e lembrar suas preferências. Não há rastreamento de terceiros.</p>
     <h2>9. Menores de idade</h2><p>O Gestor Conex é destinado a maiores de 18 anos.</p>
@@ -1527,7 +1568,7 @@ function renderAuth(){
 async function entrarDemo(){
   C={nome:'Conta de demonstração',email:'demo@gestorconex.com.br',tel:'(11) 99999-0000',emp:'Barbearia do Zé',seg:'Barbearia',dt:'CNPJ',doc:'11.222.333/0001-81',pw:await hashPw('Demo@2026'),
     criado:TODAY,trialFim:addDays(TODAY,TRIAL_DIAS),emailOk:true,telOk:true,termos:{versao:TERMOS_V,em:TODAY},assin:{status:'trial',hist:[]},demo:true};
-  saveC();S=seedExemplo({seed:(Math.random()*1e9)|0});save();setSess(true);ui.tab='painel';ui.view='geral';A.err='';A.info='';render();window.scrollTo(0,0);toast('Você está na conta de demonstração');maybeTour()}
+  saveC();S=seedExemplo({seed:(Math.random()*1e9)|0});save();setSess(true);ui.tab='painel';ui.view='geral';A.err='';A.info='';render();window.scrollTo(0,0);toast('Você está na conta de demonstração');maybeTour();ecCarregaDias()}
 function authAct(a,b){
   if(a==='a-cap'){const id=b.dataset.id,box=$('#cap-'+id);if(!box||box.classList.contains('ok')||box.classList.contains('loading'))return;
     box.classList.add('loading');b.querySelector('.cap-t').textContent='Verificando…';
@@ -1640,7 +1681,7 @@ const TOURS=[
     ['[aria-label="Frequência"]','Mensais, semanais ou diárias','Escolha o tipo da conta: aluguel é mensal, a feira pode ser semanal, o café é diário.'],
     ['#f-desp-q','Conta nova','Cadastre uma conta aqui mesmo e já lance o valor.']]},
   {tab:'conta',steps:[
-    ['[data-tour="assin"]','Sua assinatura',C&&C.assin&&C.assin.admin?'Conta de administrador: sem assinatura e sem vencimento.':NATIVO?'Aqui você acompanha a situação da sua conta.':`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 59,90 por mês, no cartão ou no Pix.`],
+    ...(IOS?[]:[['[data-tour="assin"]','Sua assinatura',C&&C.assin&&C.assin.admin?'Conta de administrador: sem assinatura e sem vencimento.':NATIVO?'Aqui você acompanha a situação da sua conta.':`Você tem ${TRIAL_DIAS} dias grátis. Depois, a assinatura é de R$ 59,90 por mês, no cartão ou no Pix.`]]),
     ['[data-tour="ajuda"]','Quer rever?','Este tutorial fica aqui, em <b>Ajuda</b>, sempre que precisar.']]}
 ];
 let tourOn=false;
@@ -1679,7 +1720,7 @@ async function agendaAgora(){const P=LN();if(!P)return;
    Texto neutro, sem preço nem chamada de pagamento (regra das lojas): "Os detalhes estão no seu e-mail." */
 function avisosVenc(){const a=C.assin,out=[],now=Date.now(),q=l=>l===0?'hoje':l===1?'amanhã':`em ${l} dias`;
   const add=(fim,dias,txt,base)=>dias.forEach((n,i)=>{const t=pd(addDays(fim,-n));t.setHours(10,0,0,0);if(t>now)out.push({id:base+i,title:txt(q(n)),body:'Os detalhes estão no seu e-mail.',schedule:{at:t,allowWhileIdle:true},extra:{tab:'assinatura'}})});
-  if(a.falhou||a.admin)return out;
+  if(a.falhou||a.admin||IOS)return out; // App da Apple: sem aviso de teste grátis ou vencimento
   if(a.status==='trial'&&!a.renov&&C.trialFim)add(C.trialFim,[3,1,0],w=>`Seu teste grátis termina ${w}`,1300);
   else if(a.status==='ativa'&&!a.renov&&a.prox)add(a.prox,[5,1,0],w=>`Sua assinatura vence ${w}`,1310);
   return out}
@@ -1807,11 +1848,11 @@ async function carregaSessao(pw){const [me,st]=await Promise.all([api('/me'),api
     // conta criada antes da criptografia: cifra agora (precisa da senha; sem ela fica para o próximo login)
     if(pw){DK=DK||await novaChave();await api('/me/cripto',{method:'PUT',body:await chavesNovas(pw)});syncPend=true;await enviaEstado()}
   }
-  normalizaS();if(DK)await guardaDK(me.email)}
+  normalizaS();if(DK)await guardaDK(me.email);EC={...EC,info:null,cur:null,prev:null,key:'',prod:null,ped:null,pedKey:'',dias:null};ecCarregaDias()}
 // abre os dados com a chave recuperada (senha digitada ou código do suporte) e lacra de novo com a senha atual
 async function abreComChave(dk,pw,extra){DK=dk;const st=await api('/state');S=cifrado(st.data)?await decifra(st.data):st.data;stateVer=st.version;
   await api('/me/cripto',{method:'PUT',body:{pw:await lacra(pw,DK),...(extra||{})}});A.chave=null;normalizaS();await guardaDK(C.email)}
-function sairReal(msg){setTok('');apagaDK();A.chave=null;Object.assign(ADM,{res:null,lista:null,det:null,err:''});C=null;logged=false;syncPend=false;S=seedExemplo();Object.assign(A,{scr:'login',err:'',info:msg||'',overlay:false,cap:{}});render();window.scrollTo(0,0)}
+function sairReal(msg){setTok('');apagaDK();A.chave=null;clearTimeout(EC.pollT);EC={...EC,info:null,cur:null,prev:null,key:'',prod:null,ped:null,pedKey:'',dias:null,vc:false};Object.assign(ADM,{res:null,lista:null,det:null,err:''});C=null;logged=false;syncPend=false;S=seedExemplo();Object.assign(A,{scr:'login',err:'',info:msg||'',overlay:false,cap:{}});render();window.scrollTo(0,0)}
 
 /* gravação dos dados no servidor: espera 0,7 s de calma, envia com a versão; conflito traz a versão mais nova */
 let syncT=null,syncPend=false,syncBusy=false,offlineAvisado=false;
@@ -2070,7 +2111,10 @@ function contaActReal(a,b){
 /* início no site: links que voltam do e-mail ou do Mercado Pago, e sessão salva */
 async function bootReal(){
   const q=new URLSearchParams(location.search),del=q.get('excluir'),em=q.get('email'),ret=q.get('assinatura'),pg=q.get('pg'),mpId=q.get('payment_id')||q.get('collection_id');
-  if(del||em||ret)history.replaceState(null,'',location.pathname);
+  // volta da autorização de um e-commerce (?ecom=ok|erro&canal=ml&nome=…#ecommerce)
+  const eco=q.get('ecom'),ecoMsg=eco==='ok'?`${q.get('nome')||'Conta'} conectada. Buscando os pedidos…`:eco?(q.get('msg')||'Não foi possível conectar.'):'';
+  if(del||em||ret||eco)history.replaceState(null,'',location.pathname);
+  if(eco){ui.tab='ecommerce';ui.ecSec='contas';A.info=esc(ecoMsg)+' Entre para ver.'}
   if(del){A.delTok=del;A.scr='del-confirm';logged=false;return renderAuth()}
   if(getTok()){$('#main').innerHTML='<p class="note" style="padding:40px 0;text-align:center">Carregando seus dados…</p>';
     try{await carregaSessao();let pago=false;
@@ -2078,7 +2122,8 @@ async function bootReal(){
         // volta do Checkout Pro (cartão sem renovação): confere o pagamento pela nossa referência
         if(pg){const r=await api('/subscription/payment/'+encodeURIComponent(pg)+(mpId&&/^\d+$/.test(mpId)?'?mp='+mpId:''));aplicaAssin(r.assinatura);pago=r.status==='APPROVED'}
         else aplicaAssin(await api('/subscription'))}catch(e){}}
-      render();
+      if(eco)A.info='';render();
+      if(eco)toast(ecoMsg);
       if(em==='confirmado')toast('E-mail confirmado. Obrigado!');
       if(ret)toast(pago?'Pagamento confirmado! Sua assinatura está ativa.':C.assin.renov?'Cartão cadastrado! A renovação automática está ativa.':'Conferindo seu pagamento. Pode levar alguns segundos.');maybeTour();return}
     catch(e){if(e.status!==401){A.info=e.message}setTok('')}}
@@ -2090,21 +2135,251 @@ const aDelConfirm=()=>`<h1>Excluir sua conta</h1><p class="muted" style="margin:
 async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:{token:A.delTok}});setTok('');apagaDK();C=null;logged=false;A.delTok=null;Object.assign(A,{scr:'excluida',err:''});render()}catch(e){A.err=e.message;render()}}
 
 /* ---------- render / eventos ---------- */
-const VIEWS={admin:vAdmin,painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,conta:vConta,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
+/* ---------- E-COMMERCE: Mercado Livre, Amazon, Shopee e VendasConex ----------
+   As vendas chegam pela API (api/src/routes/ecom.ts) e ficam no servidor sem a criptografia de ponta a ponta.
+   No protótipo (sem API) tudo é simulado aqui, pelas mesmas rotas (ecDemoApi). Valores em centavos.
+   As contas com "Somar no Início" ligado entram no faturamento, no custo dos produtos e nas despesas do Início
+   (itens "ec:<canal>" e despesas "ec:<canal>:com|frete|imp"). */
+const EC_CH={VENDASCONEX:{n:'VendasConex',k:1},ML:{n:'Mercado Livre',k:2},AMAZON:{n:'Amazon',k:3},SHOPEE:{n:'Shopee',k:4}};
+const ecNome=c=>(EC_CH[c]||{n:c}).n;
+const ecCor=c=>`var(--ec${(EC_CH[c]||{k:1}).k})`;
+const cb0=v=>brl0((v||0)/100),cb=v=>brl((v||0)/100);
+const EC_P=[['mes','Este mês'],['mesant','Mês passado'],['7d','Últimos 7 dias'],['30d','Últimos 30 dias'],['90d','Últimos 90 dias'],['ano','Este ano']];
+const EC_DESP={com:'Comissões e taxas',frete:'Frete',imp:'Impostos'};
+const ecItem=id=>{const m=/^ec:([A-Z]+)$/.exec(id||'');return m?{id,nome:'Vendas '+ecNome(m[1]),tipo:'produto',ativo:false,ec:1}:undefined};
+const ecDesp=id=>{const m=/^ec:([A-Z]+):(com|frete|imp)$/.exec(id||'');return m?{id,nome:`${EC_DESP[m[2]]} · ${ecNome(m[1])}`,cat:'variavel',ativo:false,ec:1}:undefined};
+let EC={info:null,cur:null,prev:null,key:'',carregando:false,err:'',prod:null,ped:null,pedKey:'',pedOn:false,dias:null,demo:null,vc:false,pollT:null};
+const ecReal=()=>REAL&&C&&C.real;
+
+function ecRange(){const p=ui.ecP||'mes',t=TODAY;let s,e=t,ps,pe;
+  if(p==='mesant'){const ym=addYm(ymOf(t),-1),pym=addYm(ym,-1);s=ym+'-01';e=ym+'-'+pad(dim(ym));ps=pym+'-01';pe=pym+'-'+pad(dim(pym))}
+  else if(p==='ano'){s=t.slice(0,4)+'-01-01';ps=addMonths(s,-12);pe=addMonths(e,-12)}
+  else if(p==='mes'){s=ymOf(t)+'-01';ps=addMonths(s,-1);pe=addMonths(e,-1)}
+  else{const n=parseInt(p,10);s=addDays(t,-(n-1));ps=addDays(s,-n);pe=addDays(s,-1)}
+  return {s,e,ps,pe}}
+
+/* mesma conta da API (services/ecomAnalise.ts), usada no protótipo */
+function ecAnalisa(orders,custos,tax){
+  const z=()=>({pedidos:0,unidades:0,bruto:0,descontos:0,freteRecebido:0,receita:0,comissao:0,taxas:0,freteVendedor:0,imposto:0,cmv:0,custos:0,lucro:0,margem:0,ticket:0,repasse:0,cancelados:0,canceladosValor:0,devolvidos:0,devolvidosValor:0,pendentes:0,semCusto:0});
+  const total=z(),canais={},dias={},prod={};
+  for(const o of orders){const ks=[total,canais[o.channel]||(canais[o.channel]=z())],valor=o.grossCents-o.discountCents+o.shippingPaidCents;
+    if(o.status!=='PAGO'){for(const k of ks){if(o.status==='CANCELADO'){k.cancelados++;k.canceladosValor+=valor}else if(o.status==='DEVOLVIDO'){k.devolvidos++;k.devolvidosValor+=valor}else k.pendentes++}continue}
+    let cmv=0,un=0,sc=0;
+    for(const i of o.items){const cu=custos[i.sku]!=null?custos[i.sku]:i.unitCostCents;if(cu==null)sc+=i.qty;else cmv+=cu*i.qty;un+=i.qty;
+      const p=prod[i.sku]||(prod[i.sku]={sku:i.sku,titulo:i.title,canais:[],unidades:0,receita:0,cmv:0,custoUnit:cu});
+      if(!p.canais.includes(o.channel))p.canais.push(o.channel);p.unidades+=i.qty;p.receita+=i.unitPriceCents*i.qty;p.cmv+=(cu||0)*i.qty}
+    const imp=ecImposto(o,tax[o.connectionId]||0);
+    for(const k of ks){k.pedidos++;k.unidades+=un;k.bruto+=o.grossCents;k.descontos+=o.discountCents;k.freteRecebido+=o.shippingPaidCents;k.receita+=valor;
+      k.comissao+=o.commissionCents;k.taxas+=o.feeCents;k.freteVendedor+=o.shippingCostCents;k.imposto+=imp;k.cmv+=cmv;k.semCusto+=sc}
+    const dd=dias[o.dia]||(dias[o.dia]={}),x=dd[o.channel]||(dd[o.channel]={receita:0,cmv:0,comissao:0,taxas:0,frete:0,imposto:0,pedidos:0,unidades:0});
+    x.receita+=valor;x.cmv+=cmv;x.comissao+=o.commissionCents;x.taxas+=o.feeCents;x.frete+=o.shippingCostCents;x.imposto+=imp;x.pedidos++;x.unidades+=un}
+  const fe=k=>{k.custos=k.comissao+k.taxas+k.freteVendedor+k.imposto+k.cmv;k.lucro=k.receita-k.custos;k.repasse=k.receita-k.comissao-k.taxas-k.freteVendedor;k.margem=k.receita?k.lucro/k.receita:0;k.ticket=k.pedidos?Math.round(k.receita/k.pedidos):0};
+  fe(total);Object.values(canais).forEach(fe);
+  return {total,canais,dias,produtos:Object.values(prod).map(p=>({...p,lucroBruto:p.receita-p.cmv})).sort((a,b)=>b.receita-a.receita)}}
+const ecImposto=(o,bps)=>o.taxCents>0?o.taxCents:Math.round(Math.max(0,o.grossCents-o.discountCents)*bps/1e4);
+
+/* ---------- protótipo: lojas e pedidos simulados (mesmas rotas da API) ---------- */
+function ecDemoGera(){const r=mulberry32(4242);
+  const PR=[['CAM-01','Camiseta básica',5990,2200],['CAN-01','Caneca personalizada',3990,1400],['BON-01','Boné bordado',4990,1800],['KIT-01','Kit presente',11990,null]];
+  const cx=[{id:'d-vc',canal:'VENDASCONEX',nome:'Sua loja no VendasConex',status:'OK',somaNoResultado:true,impostoPct:6},{id:'d-ml',canal:'ML',nome:'SUALOJA_ML',status:'OK',somaNoResultado:true,impostoPct:6},{id:'d-sh',canal:'SHOPEE',nome:'Sua Loja Shopee',status:'OK',somaNoResultado:true,impostoPct:6}];
+  const media={VENDASCONEX:1,ML:2.4,SHOPEE:1.6},orders=[];
+  for(let i=420;i>=0;i--){const d=addDays(TODAY,-i);
+    for(const c of cx){const n=Math.floor(r()*media[c.canal]*2);
+      for(let j=0;j<n;j++){const p=PR[Math.floor(r()*PR.length)],q=r()<.8?1:2,g=p[2]*q,x=r(),st=x<.05?'CANCELADO':x<.07?'DEVOLVIDO':'PAGO';
+        const o={id:c.id+d+j,channel:c.canal,connectionId:c.id,externalId:(c.canal==='ML'?'2000':c.canal==='SHOPEE'?'24':'VC')+d.replace(/-/g,'').slice(2)+j,status:st,dia:d,soldAt:d+'T'+pad(9+Math.floor(r()*12))+':'+pad(Math.floor(r()*60))+':00',
+          grossCents:g,discountCents:0,shippingPaidCents:0,shippingCostCents:0,commissionCents:0,feeCents:0,taxCents:0,feesFinal:true,items:[{sku:p[0],title:p[1],qty:q,unitPriceCents:p[2],unitCostCents:null}]};
+        if(c.canal==='VENDASCONEX'){o.shippingPaidCents=r()<.6?800:0;o.items[0].unitCostCents=p[3]}
+        else if(c.canal==='ML'){o.commissionCents=Math.round(g*.13);if(g>=7900)o.shippingCostCents=2190;else o.feeCents=675*q}
+        else{o.commissionCents=Math.round(g*.14);o.feeCents=400*q;o.feesFinal=i>10}
+        orders.push(o)}}}
+  return {conexoes:cx,orders,custos:{'CAM-01':2200,'CAN-01':1400,'BON-01':1800}}}
+function ecDemoApi(path,method,body){const D=EC.demo||(EC.demo=ecDemoGera());const [p,qs]=path.split('?'),q=new URLSearchParams(qs||'');
+  const tax=Object.fromEntries(D.conexoes.map(c=>[c.id,Math.round(c.impostoPct*100)])),de=q.get('de'),ate=q.get('ate'),cn=q.get('canal');
+  const ativos=new Set(D.conexoes.map(c=>c.id)),noPer=o=>ativos.has(o.connectionId)&&o.dia>=de&&o.dia<=ate&&(!cn||o.channel===cn);
+  if(p==='/ecom')return {canais:Object.keys(EC_CH).map(c=>({canal:c,nome:ecNome(c),slug:c.toLowerCase(),modo:c==='VENDASCONEX'?'chave':'oauth',disponivel:c!=='AMAZON'})),
+    conexoes:D.conexoes.map(c=>({...c,ultimaSync:new Date().toISOString(),sincronizando:false,erro:null,pedidos:D.orders.filter(o=>o.connectionId===c.id).length}))};
+  if(p==='/ecom/analise')return ecAnalisa(D.orders.filter(noPer),D.custos,tax);
+  if(p==='/ecom/diario'){const soma=new Set(D.conexoes.filter(c=>c.somaNoResultado).map(c=>c.id));return {dias:ecAnalisa(D.orders.filter(o=>soma.has(o.connectionId)&&o.dia>=de&&o.dia<=ate),D.custos,tax).dias}}
+  if(p==='/ecom/pedidos'){const l=D.orders.filter(noPer).sort((a,b)=>a.soldAt<b.soldAt?1:-1),pg=+q.get('pagina')||1;
+    return {total:l.length,paginas:Math.max(1,Math.ceil(l.length/50)),pedidos:l.slice((pg-1)*50,pg*50).map(o=>{const cmv=o.items.reduce((s,i)=>s+(D.custos[i.sku]!=null?D.custos[i.sku]:i.unitCostCents||0)*i.qty,0),imposto=ecImposto(o,tax[o.connectionId]),receita=o.grossCents-o.discountCents+o.shippingPaidCents;
+      return {id:o.id,canal:o.channel,numero:o.externalId,status:o.status,data:o.soldAt,receita,comissao:o.commissionCents,taxas:o.feeCents,frete:o.shippingCostCents,imposto,cmv,lucro:receita-o.commissionCents-o.feeCents-o.shippingCostCents-imposto-cmv,final:o.feesFinal,itens:o.items.map(i=>({sku:i.sku,titulo:i.title,qtd:i.qty,preco:i.unitPriceCents}))}})}}
+  if(p==='/ecom/produtos'){const m={};for(const o of D.orders){if(!ativos.has(o.connectionId))continue;for(const i of o.items){const x=m[i.sku]||(m[i.sku]={sku:i.sku,titulo:i.title,canais:[],unidades:0,preco:i.unitPriceCents,custoCanal:i.unitCostCents});
+      if(!x.canais.includes(o.channel))x.canais.push(o.channel);if(o.status==='PAGO'&&o.dia>=addDays(TODAY,-365))x.unidades+=i.qty}}
+    return {produtos:Object.values(m).map(x=>({...x,custo:D.custos[x.sku]!=null?D.custos[x.sku]:null})).sort((a,b)=>b.unidades-a.unidades)}}
+  if(p==='/ecom/custos'){for(const i of body.itens){if(i.custo==null)delete D.custos[i.sku];else D.custos[i.sku]=i.custo}return {ok:true}}
+  let m=/^\/ecom\/conexoes\/([^/]+)(\/\w+)?$/.exec(p);
+  if(m){const c=D.conexoes.find(x=>x.id===m[1]);if(!c)throw new Error('Conexão não encontrada.');
+    if(m[2]==='/desconectar'){D.conexoes=D.conexoes.filter(x=>x!==c);D.orders=D.orders.filter(o=>o.connectionId!==c.id)}
+    else if(!m[2]){if(body.somaNoResultado!=null)c.somaNoResultado=body.somaNoResultado;if(body.impostoPct!=null)c.impostoPct=body.impostoPct}
+    return {ok:true}}
+  if(/^\/ecom\/\w+\/conectar$/.test(p))throw new Error('No protótipo a conexão é simulada. No site, este botão leva para a autorização do canal.');
+  throw new Error('Rota desconhecida.')}
+const ecGet=(path,o)=>ecReal()?api(path,o):Promise.resolve().then(()=>ecDemoApi(path,o&&o.method,o&&o.body));
+
+/* ---------- carregamento ---------- */
+async function ecCarregaDias(){if(IOS)return;try{const r=await ecGet(`/ecom/diario?de=${addDays(TODAY,-430)}&ate=${TODAY}`);EC.dias=r.dias||{};if(ui.tab==='painel'&&logged)render(true)}catch(e){}}
+async function ecCarregaInfo(){try{EC.info=await ecGet('/ecom');EC.err=''}catch(e){EC.err=e.message}
+  clearTimeout(EC.pollT);
+  // enquanto alguma conta sincroniza, confere de novo a cada 5 s
+  if(EC.info&&EC.info.conexoes.some(c=>c.sincronizando))EC.pollT=setTimeout(async()=>{const antes=EC.info.conexoes.filter(c=>c.sincronizando).length;await ecCarregaInfo();
+    if(EC.info&&EC.info.conexoes.filter(c=>c.sincronizando).length<antes)ecInvalida();if(ui.tab==='ecommerce')render(true)},5000)}
+function ecInvalida(){EC.key='';EC.prod=null;EC.pedKey='';ecCarregaDias()}
+async function ecCarregaAn(){const R=ecRange(),cn=ui.ecCanal&&ui.ecCanal!=='geral'?'&canal='+ui.ecCanal:'',key=R.s+'|'+R.e+cn;EC.key=key;EC.carregando=true;
+  try{const [a,b]=await Promise.all([ecGet(`/ecom/analise?de=${R.s}&ate=${R.e}${cn}`),ecGet(`/ecom/analise?de=${R.ps}&ate=${R.pe}${cn}`)]);if(EC.key===key){EC.cur=a;EC.prev=b;EC.err=''}}
+  catch(e){EC.err=e.message}
+  EC.carregando=false;if(ui.tab==='ecommerce')render(true)}
+async function ecCarregaPed(pg){const R=ecRange(),cn=ui.ecCanal&&ui.ecCanal!=='geral'?'&canal='+ui.ecCanal:'',key=R.s+'|'+R.e+cn+'|'+(pg||1);EC.pedKey=key;
+  try{const r=await ecGet(`/ecom/pedidos?de=${R.s}&ate=${R.e}${cn}&pagina=${pg||1}`);if(EC.pedKey===key)EC.ped={...r,pagina:pg||1}}catch(e){toast(e.message)}
+  if(ui.tab==='ecommerce')render(true)}
+async function ecCarregaProd(){EC.prod={carregando:true,produtos:[]};try{EC.prod=await ecGet('/ecom/produtos')}catch(e){EC.prod=null;EC.err=e.message}if(ui.tab==='ecommerce')render(true)}
+function ecPrecisa(){const sec=ui.ecSec||'analise',R=ecRange(),cn=ui.ecCanal&&ui.ecCanal!=='geral'?'&canal='+ui.ecCanal:'';
+  if(!EC.info&&!EC.infoLoad){EC.infoLoad=true;setTimeout(()=>ecCarregaInfo().then(()=>{EC.infoLoad=false;render(true)}),0);return}
+  if(!EC.info||!EC.info.conexoes.length)return;
+  if(sec==='analise'&&!EC.carregando&&EC.key!==R.s+'|'+R.e+cn)setTimeout(ecCarregaAn,0);
+  if(sec==='analise'&&EC.pedOn&&!(EC.pedKey||'').startsWith(R.s+'|'+R.e+cn+'|'))setTimeout(()=>ecCarregaPed(1),0);
+  if(sec==='produtos'&&!EC.prod)setTimeout(ecCarregaProd,0)}
+
+/* ---------- tela ---------- */
+const ecSt={OK:['Conectada','good'],ERRO:['Falha na última busca','warn'],REAUTORIZAR:['Conecte de novo','bad']};
+const ecDot=c=>`<i class="ec-dot" style="background:${ecCor(c)}"></i>`;
+const ecPct=(a,b)=>b?Math.round(a/b*1000)/10+'%':'–';
+function vEcom(){ecPrecisa();const I=EC.info,sec=ui.ecSec||'analise';
+  const head=`${topbar('E-commerce','Vendas, custos e lucro dos seus canais on-line')}
+    <div class="seg ec-seg" role="group" aria-label="Seção">${[['analise','Análise'],['produtos','Custos'],['contas','Contas']].map(([k,l])=>`<button data-act="ec-sec" data-v="${k}" aria-pressed="${sec===k}">${l}</button>`).join('')}</div>`;
+  if(!I)return head+`<section class="card"><p class="note" style="margin:0">${EC.err?esc(EC.err):'Carregando…'}</p></section>`;
+  if(sec==='contas')return head+ecContas();
+  if(!I.conexoes.length)return head+`<section class="card"><div class="cta"><div><b>Conecte seu primeiro canal de venda on-line</b><span class="muted" style="font-size:.86rem">VendasConex, Mercado Livre, Amazon e Shopee. As vendas, comissões, fretes e impostos chegam sozinhos.</span></div><button class="btn pri" data-act="ec-sec" data-v="contas">Conectar</button></div></section>`;
+  return head+(sec==='produtos'?ecProdutos():ecAnalise())}
+
+function ecAnalise(){const I=EC.info,canais=[...new Set(I.conexoes.map(c=>c.canal))].sort((a,b)=>EC_CH[a].k-EC_CH[b].k),cn=ui.ecCanal&&canais.includes(ui.ecCanal)?ui.ecCanal:'geral';ui.ecCanal=cn;
+  const ctl=`<div class="controls"><div class="seg ec-seg" role="group" aria-label="Canal">${[['geral','Todos'],...canais.map(c=>[c,ecNome(c)])].map(([k,l])=>`<button data-act="ec-canal" data-v="${k}" aria-pressed="${cn===k}">${k!=='geral'?ecDot(k):''}${l}</button>`).join('')}</div>
+    <select class="sel" id="ecP" aria-label="Período">${EC_P.map(([k,l])=>`<option value="${k}" ${(ui.ecP||'mes')===k?'selected':''}>${l}</option>`).join('')}</select></div>`;
+  if(!EC.cur)return ctl+`<section class="card"><p class="note" style="margin:0">${EC.err?esc(EC.err):'Calculando…'}</p></section>`;
+  const R=ecRange(),A=EC.cur,k=A.total,b=EC.prev.total,quem=cn==='geral'?'nos seus canais':'no '+ecNome(cn);
+  const kpi=(l,v,d,s,cls='')=>`<div class="kpi ${cls}"><div class="eyebrow">${l}</div><div class="v ${v.neg?'neg':''}">${v.t}</div>${d}<div class="s">${s}</div></div>`;
+  const kpis=`<div class="kpis">
+    ${kpi('Receita',{t:cb0(k.receita)},delta(k.receita,b.receita),'vendas + frete pago pelo cliente','hero2')}
+    ${kpi('Lucro',{t:cb0(k.lucro),neg:k.lucro<0},delta(k.lucro,b.lucro),'depois de produto, canal, frete e imposto')}
+    ${kpi('Margem',{t:k.receita?Math.round(k.margem*100)+'%':'–',neg:k.margem<0},b.receita?`<span class="d ${k.margem>=b.margem?'good':'bad'}">${k.margem>=b.margem?'▲':'▼'} ${Math.abs(Math.round((k.margem-b.margem)*100))} pts</span>`:'<span class="d flat">–</span>','de cada R$ 100 vendidos')}
+    ${kpi('Ticket médio',{t:cb0(k.ticket)},delta(k.ticket,b.ticket),'receita por pedido')}
+    ${kpi('Pedidos',{t:num(k.pedidos)},delta(k.pedidos,b.pedidos),`${num(k.unidades)} ${k.unidades===1?'unidade':'unidades'}`)}
+    ${kpi('Custos',{t:cb0(k.custos)},delta(k.custos,b.custos,{inv:true}),'produto, canal, frete e imposto')}</div>`;
+  const aviso=k.semCusto?`<div class="pend"><span><b>${num(k.semCusto)} ${k.semCusto>1?'unidades vendidas':'unidade vendida'} sem custo cadastrado.</b> Sem o custo do produto, o lucro aparece maior do que é.</span><button class="btn sm" data-act="ec-sec" data-v="produtos">Cadastrar custos</button></div>`:'';
+  // para onde vai cada R$ 100 vendidos
+  const parts=[['Produto (custo)',k.cmv],['Comissão do canal',k.comissao],['Outras taxas',k.taxas],['Frete pago por você',k.freteVendedor],['Impostos',k.imposto]];
+  const r100=v=>k.receita?`R$ ${(v/k.receita*100).toLocaleString('pt-BR',{maximumFractionDigits:1,minimumFractionDigits:v&&v/k.receita<.1?1:0})}`:'–';
+  const onde=`<section class="card"><div class="card-h"><h2>Para onde vai cada R$ 100 vendidos</h2><p>${esc(EC_P.find(x=>x[0]===(ui.ecP||'mes'))[1].toLowerCase())}, ${quem}</p></div>
+    <div class="ec-onde">${parts.map(([n,v])=>`<div class="ec-or"><span>${n}</span><div class="ec-bar"><i style="width:${k.receita?Math.min(100,v/k.receita*100):0}%;background:var(--cost)"></i></div><b>${r100(v)}</b><small>${cb0(v)}</small></div>`).join('')}
+    <div class="ec-or lucro"><span>Sobrou (lucro)</span><div class="ec-bar"><i style="width:${k.receita?Math.max(0,Math.min(100,k.lucro/k.receita*100)):0}%;background:var(--profit)"></i></div><b class="${k.lucro<0?'tb':''}">${r100(k.lucro)}</b><small>${cb0(k.lucro)}</small></div></div>
+    <p class="note" style="margin:12px 0 0">O canal deposita para você <b>${cb0(k.repasse)}</b> (receita menos comissão, taxas e frete). ${k.cancelados||k.devolvidos?`Fora da conta: ${k.cancelados?`${num(k.cancelados)} ${k.cancelados>1?'pedidos cancelados':'pedido cancelado'} (${cb0(k.canceladosValor)})`:''}${k.cancelados&&k.devolvidos?' e ':''}${k.devolvidos?`${num(k.devolvidos)} ${k.devolvidos>1?'devolvidos':'devolvido'} (${cb0(k.devolvidosValor)})`:''}.`:''}${k.pendentes?` ${num(k.pendentes)} aguardando pagamento.`:''}</p></section>`;
+  // comparação entre canais (só em "Todos" e com mais de um canal)
+  const cs=Object.keys(A.canais).filter(c=>A.canais[c].pedidos).sort((a,b)=>A.canais[b].receita-A.canais[a].receita);
+  const maxR=Math.max(1,...cs.map(c=>A.canais[c].receita));
+  const cmp=cn==='geral'&&cs.length>1?`<section class="card"><div class="card-h"><h2>Comparação entre canais</h2><p>${esc(rangeTxt(R))}</p></div>
+    <div class="ec-cmp">${cs.map(c=>{const x=A.canais[c],w=x.receita/maxR*100,wl=x.receita?Math.max(0,x.lucro)/maxR*100:0;
+      return `<div class="ec-cr"><div class="ec-cn">${ecDot(c)}${ecNome(c)}</div><div class="ec-cb" title="${esc(ecNome(c))}: receita ${cb0(x.receita)}, lucro ${cb0(x.lucro)}"><i style="width:${w}%;background:${ecCor(c)}"></i><i class="l" style="width:${wl}%"></i></div>
+        <div class="ec-cv"><b>${cb0(x.receita)}</b><small>lucro ${cb0(x.lucro)} · ${Math.round(x.margem*100)}%</small></div></div>`}).join('')}</div>
+    <p class="note" style="margin:6px 0 12px">Barra colorida: receita do canal. Faixa escura por baixo: quanto dela virou lucro.</p>
+    <div class="tbl-wrap"><table><thead><tr><th>Canal</th><th class="r">Pedidos</th><th class="r">Receita</th><th class="r">Ticket</th><th class="r">Comissão + taxas</th><th class="r">Frete</th><th class="r">Imposto</th><th class="r">Custo produto</th><th class="r">Lucro</th><th class="r">Margem</th></tr></thead><tbody>
+    ${cs.map(c=>{const x=A.canais[c];return `<tr><td>${ecDot(c)}${ecNome(c)}</td><td class="r">${num(x.pedidos)}</td><td class="r">${cb0(x.receita)}</td><td class="r">${cb0(x.ticket)}</td><td class="r">${cb0(x.comissao+x.taxas)} <small class="faint">${ecPct(x.comissao+x.taxas,x.receita)}</small></td><td class="r">${cb0(x.freteVendedor)}</td><td class="r">${cb0(x.imposto)}</td><td class="r">${cb0(x.cmv)}</td><td class="r ${x.lucro<0?'tb':''}">${cb0(x.lucro)}</td><td class="r">${Math.round(x.margem*100)}%</td></tr>`}).join('')}
+    <tr class="tot"><td>Total</td><td class="r">${num(k.pedidos)}</td><td class="r">${cb0(k.receita)}</td><td class="r">${cb0(k.ticket)}</td><td class="r">${cb0(k.comissao+k.taxas)} <small class="faint">${ecPct(k.comissao+k.taxas,k.receita)}</small></td><td class="r">${cb0(k.freteVendedor)}</td><td class="r">${cb0(k.imposto)}</td><td class="r">${cb0(k.cmv)}</td><td class="r">${cb0(k.lucro)}</td><td class="r">${Math.round(k.margem*100)}%</td></tr></tbody></table></div></section>`:'';
+  const serie=cn==='geral'?cs:[cn];
+  const graf=`<section class="card"><div class="card-h"><h2>Receita ao longo do período</h2>${serie.length>1?`<div class="legend">${serie.map(c=>`<span><i class="sq" style="background:${ecCor(c)}"></i>${ecNome(c)}</span>`).join('')}</div>`:''}</div><div class="chart" id="ec-ch" style="min-height:230px"></div></section>`;
+  const top=A.produtos.slice(0,10);
+  const prods=`<section class="card"><div class="card-h"><h2>Produtos que mais venderam</h2><p>receita dos itens, sem frete</p></div>${top.length?`<div class="tbl-wrap"><table><thead><tr><th>Produto</th><th class="r">Unid.</th><th class="r">Receita</th><th class="r">Custo unit.</th><th class="r">Sobra bruta</th></tr></thead><tbody>
+    ${top.map(p=>`<tr><td>${esc(p.titulo)}<br><small class="faint">${esc(p.sku)} · ${p.canais.map(ecNome).join(', ')}</small></td><td class="r">${num(p.unidades)}</td><td class="r">${cb0(p.receita)}</td><td class="r">${p.custoUnit==null?'<button class="lnk" data-act="ec-sec" data-v="produtos">cadastrar</button>':cb(p.custoUnit)}</td><td class="r">${p.custoUnit==null?'–':cb0(p.lucroBruto)+` <small class="faint">${ecPct(p.lucroBruto,p.receita)}</small>`}</td></tr>`).join('')}</tbody></table></div>
+    <p class="note" style="margin:10px 0 0">Sobra bruta: receita do produto menos o custo dele, antes de comissão, frete e imposto.</p>`:'<p class="note" style="margin:0">Nenhuma venda no período.</p>'}</section>`;
+  const P2=EC.ped,ST={PAGO:'pago',PENDENTE:'aguardando',CANCELADO:'cancelado',DEVOLVIDO:'devolvido'};
+  const peds=`<section class="card"><div class="card-h"><h2>Pedidos do período</h2><p>data, valores, comissão, frete e imposto de cada venda</p></div>
+    ${!EC.pedOn?'<button class="btn" data-act="ec-ped">Ver pedidos</button>':!P2?'<p class="note" style="margin:0">Carregando…</p>':P2.pedidos.length?`<div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Canal</th><th>Pedido</th><th>Itens</th><th class="r">Receita</th><th class="r">Comissão + taxas</th><th class="r">Frete</th><th class="r">Imposto</th><th class="r">Custo</th><th class="r">Lucro</th></tr></thead><tbody>
+    ${P2.pedidos.map(o=>{const ok=o.status==='PAGO';return `<tr class="${ok?'':'faint'}"><td>${new Date(o.data).toLocaleDateString('pt-BR')}<br><small class="faint">${new Date(o.data).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</small></td><td>${ecDot(o.canal)}${ecNome(o.canal)}</td><td>${esc(o.numero)}<br>${ok?(o.final?'':'<span class="chip" title="O canal ainda pode mudar comissão e frete">tarifa em aberto</span>'):`<span class="chip">${ST[o.status]||o.status}</span>`}</td>
+      <td>${o.itens.map(i=>`${i.qtd}× ${esc(i.titulo)}`).join('<br>')}</td><td class="r">${cb(o.receita)}</td><td class="r">${cb(o.comissao+o.taxas)}</td><td class="r">${cb(o.frete)}</td><td class="r">${cb(o.imposto)}</td><td class="r">${cb(o.cmv)}</td><td class="r ${ok&&o.lucro<0?'tb':''}">${ok?cb(o.lucro):'–'}</td></tr>`}).join('')}</tbody></table></div>
+    <div class="ec-pag"><span class="muted">${num(P2.total)} pedidos · página ${P2.pagina} de ${P2.paginas}</span><span><button class="btn sm" data-act="ec-pg" data-n="${P2.pagina-1}" ${P2.pagina<=1?'disabled':''}>‹ Anteriores</button> <button class="btn sm" data-act="ec-pg" data-n="${P2.pagina+1}" ${P2.pagina>=P2.paginas?'disabled':''}>Próximos ›</button></span></div>`:'<p class="note" style="margin:0">Nenhum pedido no período.</p>'}</section>`;
+  const soma=I.conexoes.filter(c=>c.somaNoResultado).length;
+  const nota=`<p class="note">${soma?`${soma===I.conexoes.length?'Todas as contas':`${soma} de ${I.conexoes.length} contas`} somam no <button class="lnk" data-tab="painel">Início</button> (faturamento, custos e lucro).`:'Nenhuma conta soma no Início.'} Isso muda em <button class="lnk" data-act="ec-sec" data-v="contas">Contas</button>. Comparação com ${esc(rangeTxt({s:R.ps,e:R.pe}))}.</p>`;
+  return ctl+aviso+kpis+onde+cmp+graf+prods+peds+nota}
+const rangeTxt=R=>R.s===R.e?dShort(R.s):`${dShort(R.s)} a ${dShort(R.e)}${R.s.slice(0,4)!==TODAY.slice(0,4)?' de '+R.s.slice(0,4):''}`;
+
+/* receita por dia (ou semana/mês, em períodos longos), empilhada por canal */
+function ecDraw(){const host=$('#ec-ch');if(!host||!EC.cur)return;const R=ecRange(),A=EC.cur,cn=ui.ecCanal||'geral';
+  const serie=(cn==='geral'?Object.keys(A.canais):[cn]).filter(c=>A.canais[c]&&A.canais[c].pedidos).sort((a,b)=>EC_CH[a].k-EC_CH[b].k);
+  const n=daysBetween(R.s,R.e)+1,un=n<=45?'dia':n<=120?'semana':'mes',bk=[];
+  for(let d=R.s;d<=R.e;d=addDays(d,1)){const key=un==='dia'?d:un==='semana'?weekStart(d):ymOf(d);let b=bk[bk.length-1];
+    if(!b||b.key!==key){b={key,s:d,e:d,v:{}};bk.push(b)}b.e=d;const x=A.dias[d]||{};for(const c of serie)b.v[c]=(b.v[c]||0)+((x[c]||{}).receita||0)}
+  const W=Math.max(280,host.clientWidth),H=230,m={t:12,r:8,b:26,l:54},iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const tot=b=>serie.reduce((s,c)=>s+(b.v[c]||0),0),max=niceMax(Math.max(10000,...bk.map(tot)));
+  const bw=iw/bk.length,gap=Math.min(6,bw*.25),y=v=>m.t+ih-v/max*ih;
+  let g='';for(let i=0;i<=4;i++){const v=max*i/4;g+=`<line x1="${m.l}" x2="${m.l+iw}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end">${i?brlK(v/100):'0'}</text>`}
+  const lab=b=>un==='mes'?cap(MES3[+b.key.slice(5)-1]):un==='semana'?dShort(b.s):String(pd(b.s).getDate());
+  const every=Math.ceil(bk.length/(W<520?6:12));
+  bk.forEach((b,i)=>{const x0=m.l+i*bw+gap/2,w=Math.max(1,bw-gap);let acc=0;const t=tot(b);
+    const tip=`${un==='dia'?dShort(b.s):un==='semana'?'Semana de '+dShort(b.s):ymLabel(b.key)}: ${cb0(t)}${serie.length>1?serie.map(c=>`\n${ecNome(c)}: ${cb0(b.v[c]||0)}`).join(''):''}`;
+    g+=`<g><title>${esc(tip)}</title><rect x="${m.l+i*bw}" y="${m.t}" width="${bw}" height="${ih}" fill="transparent"/>`;
+    serie.forEach((c,j)=>{const v=b.v[c]||0;if(!v)return;const y1=y(acc+v),h=Math.max(1,y(acc)-y1-(acc?2:0));const top=serie.slice(j+1).every(z=>!b.v[z]);
+      g+=`<rect x="${x0}" y="${y1}" width="${w}" height="${h}" rx="${top&&w>6?3:0}" fill="${ecCor(c)}"/>`;acc+=v});
+    g+='</g>';if(i%every===0)g+=`<text x="${x0+w/2}" y="${H-8}" text-anchor="middle">${lab(b)}</text>`});
+  host.innerHTML=`<svg width="${W}" height="${H}" role="img" aria-label="Receita por ${un}">${g}</svg>`}
+
+function ecProdutos(){const P=EC.prod;if(!P||P.carregando)return '<section class="card"><p class="note" style="margin:0">Carregando…</p></section>';
+  const l=P.produtos.filter(p=>!ui.ecSemCusto||(p.custo==null&&p.custoCanal==null)),falta=P.produtos.filter(p=>p.custo==null&&p.custoCanal==null&&p.unidades).length;
+  return `<section class="card"><div class="card-h"><h2>Custo dos produtos vendidos</h2><p>quanto você paga em cada produto. Entra no custo e no lucro de todos os canais.</p></div>
+    <p class="note" style="margin:0 0 12px">O mesmo SKU em canais diferentes usa o mesmo custo. O custo informado pelo canal (VendasConex) vale enquanto você não cadastrar um aqui. Apague o valor para voltar a usar o do canal.</p>
+    ${falta?`<label class="ec-chk"><input type="checkbox" id="ec-semcusto" ${ui.ecSemCusto?'checked':''}> Mostrar só os ${num(falta)} sem custo</label>`:''}
+    ${l.length?`<div class="tbl-wrap"><table><thead><tr><th>Produto</th><th>Canais</th><th class="r">Vendidos (12 meses)</th><th class="r">Preço</th><th class="r">Custo do canal</th><th class="r">Seu custo</th></tr></thead><tbody>
+    ${l.map(p=>`<tr><td>${esc(p.titulo)}<br><small class="faint">${esc(p.sku)}</small></td><td>${p.canais.map(c=>ecDot(c)+ecNome(c)).join('<br>')}</td><td class="r">${num(p.unidades)}</td><td class="r">${p.preco?cb(p.preco):'–'}</td><td class="r">${p.custoCanal==null?'–':cb(p.custoCanal)}</td>
+      <td class="r"><input class="inp ec-in" inputmode="decimal" placeholder="${p.custoCanal==null?'R$ 0,00':fmtIn(p.custoCanal/100)}" aria-label="Custo de ${esc(p.titulo)}" data-ecsku="${esc(p.sku)}" data-ectit="${esc(p.titulo)}" value="${p.custo==null?'':fmtIn(p.custo/100)}"></td></tr>`).join('')}</tbody></table></div>`
+    :'<p class="note" style="margin:0">Nenhum produto vendido ainda. Eles aparecem aqui depois da primeira sincronização.</p>'}</section>`}
+
+function ecContas(){const I=EC.info,cs=I.conexoes;
+  const conta=c=>{const [st,cl]=ecSt[c.status]||[c.status,'warn'],s=c.sincronizando;
+    return `<section class="card"><div class="card-h"><h2>${ecDot(c.canal)}${esc(c.nome)}</h2><span class="status ${s?'warn':cl}"><i></i>${s?'Buscando pedidos…':st}</span></div>
+      <p class="note" style="margin:0 0 12px">${ecNome(c.canal)} · ${num(c.pedidos)} ${c.pedidos===1?'pedido':'pedidos'}${c.ultimaSync?` · última busca ${new Date(c.ultimaSync).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:''}${c.erro&&!s?`<br><span class="tb">${esc(c.erro)}</span>`:''}</p>
+      <div class="ec-opts"><label class="ec-chk"><input type="checkbox" data-ecsoma="${c.id}" ${c.somaNoResultado?'checked':''}> Somar no Início <small class="faint">(faturamento, custos e lucro)</small></label>
+        <div class="field ec-imp"><label for="ecimp-${c.id}">Imposto sobre a venda (%)</label><input class="inp" id="ecimp-${c.id}" inputmode="decimal" data-ecimp="${c.id}" value="${fmtIn(c.impostoPct).replace(/,00$/,'')}"></div></div>
+      <p class="note" style="margin:6px 0 12px">Use a alíquota do seu regime (ex.: Simples Nacional). Quando o canal informa o imposto do pedido, vale o do canal.</p>
+      <div class="btns">${c.status==='REAUTORIZAR'&&c.canal!=='VENDASCONEX'?`<button class="btn pri sm" data-act="ec-con" data-v="${c.canal}">Conectar de novo</button>`:''}<button class="btn sm" data-act="ec-sync" data-id="${c.id}" ${s?'disabled':''}>Atualizar agora</button><button class="btn sm danger" data-act="ec-del" data-id="${c.id}">Desconectar</button></div></section>`};
+  const novo=I.canais.map(k=>{const tem=cs.some(c=>c.canal===k.canal);
+    return `<div class="ec-novo"><div>${ecDot(k.canal)}<b>${k.nome}</b><small class="faint">${!k.disponivel?'em breve':k.modo==='chave'?'com a chave gerada no painel do VendasConex':'você autoriza no site do canal'}</small></div>
+      ${k.disponivel?`<button class="btn sm ${tem?'':'pri'}" data-act="ec-con" data-v="${k.canal}">${tem?'Conectar outra conta':'Conectar'}</button>`:'<span class="chip">em breve</span>'}</div>
+      ${k.canal==='VENDASCONEX'&&EC.vc?`<form class="ec-vc" id="f-ec-vc"><p class="note" style="margin:0">No painel do VendasConex, abra <b>Ajustes → Integração com o Gestor Conex</b>, toque em <b>Gerar chave</b> e cole aqui. A chave só lê os pedidos (sem dados dos seus clientes).</p>
+        <div class="field"><label for="ec-chave">Chave do VendasConex</label><input class="inp" id="ec-chave" autocomplete="off" placeholder="vcx_gc_…"></div><div class="btns"><button class="btn pri sm">Conectar</button><button class="btn sm" type="button" data-act="ec-vc-x">Cancelar</button></div></form>`:''}`}).join('');
+  return `${cs.map(conta).join('')}
+    <section class="card"><div class="card-h"><h2>Conectar um canal</h2><p>as vendas chegam sozinhas a cada 30 minutos</p></div><div class="ec-novos">${novo}</div>
+    <p class="note" style="margin:12px 0 0">Para analisar, o Gestor Conex guarda nos servidores os pedidos dos canais conectados (data, itens, valores, comissões, frete e impostos), sem nome nem endereço dos compradores. Esses dados não usam a criptografia de ponta a ponta dos dados que você lança à mão. Ao desconectar, os pedidos daquela conta são apagados.</p></section>`}
+
+async function ecAct(a,b){const id=b.dataset.id;
+  if(a==='ec-sec'){ui.ecSec=b.dataset.v;ui.tab='ecommerce';render();window.scrollTo(0,0);return}
+  if(a==='ec-canal'){ui.ecCanal=b.dataset.v;EC.ped=null;render(true);return}
+  if(a==='ec-ped'){EC.pedOn=true;EC.ped=null;EC.pedKey='';render(true);return}
+  if(a==='ec-pg'){const n=+b.dataset.n;if(n>0)ecCarregaPed(n);return}
+  if(a==='ec-vc-x'){EC.vc=false;render(true);return}
+  if(a==='ec-con'){const ch=b.dataset.v;if(ch==='VENDASCONEX'){EC.vc=true;render(true);setTimeout(()=>{const i=$('#ec-chave');if(i)i.focus()},50);return}
+    b.disabled=true;try{const r=await ecGet('/ecom/'+ch.toLowerCase()+'/conectar',{method:'POST'});location.href=r.url}catch(e){toast(e.message);b.disabled=false}return}
+  if(a==='ec-sync'){b.disabled=true;try{await ecGet(`/ecom/conexoes/${id}/sincronizar`,{method:'POST'});if(!ecReal())toast('No protótipo os pedidos já estão em dia.');await ecCarregaInfo();render(true)}catch(e){toast(e.message);b.disabled=false}return}
+  if(a==='ec-del')arm(b,async()=>{try{await ecGet(`/ecom/conexoes/${id}/desconectar`,{method:'POST'});await ecCarregaInfo();ecInvalida();render(true);toast('Conta desconectada')}catch(e){toast(e.message)}})}
+async function ecSalvaConexao(id,body){try{await ecGet('/ecom/conexoes/'+id,{method:'PATCH',body});await ecCarregaInfo();ecInvalida();toast('Salvo');render(true)}catch(e){toast(e.message)}}
+async function ecSalvaCusto(el){const v=el.value.trim()?parseBRL(el.value):null;if(v!=null&&(isNaN(v)||v<0)){toast('Valor inválido');return}
+  try{await ecGet('/ecom/custos',{method:'PUT',body:{itens:[{sku:el.dataset.ecsku,titulo:el.dataset.ectit,custo:v==null?null:Math.round(v*100)}]}});
+    const p=EC.prod&&EC.prod.produtos.find(x=>x.sku===el.dataset.ecsku);if(p)p.custo=v==null?null:Math.round(v*100);el.value=v==null?'':fmtIn(v);EC.key='';ecCarregaDias();toast('Custo salvo')}catch(e){toast(e.message)}}
+async function ecConectaVC(){const chave=vIn('ec-chave');if(!chave){toast('Cole a chave');return}
+  try{const r=await ecGet('/ecom/vendasconex/conectar',{method:'POST',body:{chave}});EC.vc=false;await ecCarregaInfo();ecInvalida();render(true);toast(`${r.nome} conectada. Buscando os pedidos…`)}catch(e){toast(e.message)}}
+
+const VIEWS={admin:vAdmin,ecommerce:vEcom,painel:vPainel,vendas:vVendas,despesas:vDespesas,cadastros:vCadastros,ajustes:vAjustes,conta:vConta,assinatura:vAssinatura,excluir:vExcluir,legal:vLegal};
 function render(keepScroll){
   // sem sessão (ou tutorial aberto): telas de entrada no lugar do app
   if(!logged||!C||A.overlay){if(!logged)agendaLembretes();renderAuth();return} // sem sessão: cancela os lembretes do aparelho
   if(A.chave){document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#main').innerHTML=vChave();return}
   if(!(S.fixasRep&&S.fixasRep[ymOf(TODAY)]))repeteFixas();
   document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#auth').innerHTML='';
-  montaNav(!!(C.admin&&!NATIVO));if(!VIEWS[ui.tab]||(ui.tab==='admin'&&!(C.admin&&!NATIVO)))ui.tab='painel';
+  montaNav(!!(C.admin&&!NATIVO));if(!VIEWS[ui.tab]||(ui.tab==='admin'&&!(C.admin&&!NATIVO))||(IOS&&ui.tab==='ecommerce'))ui.tab='painel';
   document.querySelectorAll('nav [data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===ui.tab?'page':'false'));
   $('#biz-side').textContent=S.negocio.nome;
   const sy=window.scrollY;
-  const pausado=['painel','vendas','despesas','cadastros'].includes(ui.tab)&&!acessoOk();
+  const pausado=['painel','vendas','despesas','cadastros','ecommerce'].includes(ui.tab)&&!acessoOk();
   $('#main').innerHTML=pausado?vBloqueado():VIEWS[ui.tab]();
   if(pausado){saveUi();return}
   if(ui.tab==='painel')drawCharts();
+  if(ui.tab==='ecommerce')ecDraw();
   if(ui.tab==='vendas')updDay();
   if(ui.tab==='despesas')updG();
   if(keepScroll)window.scrollTo(0,sy);
@@ -2117,6 +2392,7 @@ document.addEventListener('click',e=>{
   if(a.startsWith('a-')){authAct(a,b);return}
   if(a.startsWith('k-')){chaveAct(a,b);return}
   if(a.startsWith('adm-')||a.startsWith('fb-')){admAct(a,b);return}
+  if(a.startsWith('ec-')){ecAct(a,b);return}
   if(contaAct(a,b))return;
   // no modo Dia, abre no último dia com vendas lançadas (hoje só se já lançou)
   if(a==='mode'){ui.mode=b.dataset.v;ui.ref=ui.mode==='dia'?lastDataDay():TODAY;render(true)}
@@ -2153,6 +2429,11 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const el=e.target;
   if(el.id==='adm-sit'){ADM.sit=el.value;admCarrega();return}
+  if(el.id==='ecP'){ui.ecP=el.value;EC.ped=null;render(true);return}
+  if(el.id==='ec-semcusto'){ui.ecSemCusto=el.checked;render(true);return}
+  if(el.dataset.ecsku!=null){ecSalvaCusto(el);return}
+  if(el.dataset.ecsoma){ecSalvaConexao(el.dataset.ecsoma,{somaNoResultado:el.checked});return}
+  if(el.dataset.ecimp){const v=el.value.trim()?parseBRL(el.value):0;if(isNaN(v)||v<0||v>40){toast('Informe um percentual entre 0 e 40');return}ecSalvaConexao(el.dataset.ecimp,{impostoPct:v});return}
   if(el.id==='ct-prazo'||el.id==='ct-mensal'||el.id==='ct-pix'){admPrevia();return}
   if(el.id==='lb-vendas'||el.id==='lb-desp'||el.id==='lb-hora'){LEMB={vendas:!!($('#lb-vendas')||{}).checked,desp:!!($('#lb-desp')||{}).checked,hora:+(($('#lb-hora')||{}).value)||19};
     try{localStorage.setItem(LKEY,JSON.stringify(LEMB))}catch(x){}if(LEMB.vendas||LEMB.desp)pedeLembretes(true);else agendaAgora();toast('Lembretes atualizados');return}
@@ -2175,6 +2456,7 @@ document.addEventListener('submit',e=>{
   if(e.target.id==='f-adm-busca'){ADM.busca=($('#adm-busca')||{}).value||'';admCarrega();return}
   if(e.target.id==='f-adm-teste'){admTeste();return}
   if(e.target.id==='f-fb'){enviaFeedback();return}
+  if(e.target.id==='f-ec-vc'){ecConectaVC();return}
   if(e.target.id==='f-adm-edit'){admSalva();return}
   if(e.target.id==='f-adm-del'){admExclui();return}
   if(e.target.id==='f-adm-ct'){admSalvaCt();return}
@@ -2184,7 +2466,7 @@ document.addEventListener('submit',e=>{
   if(e.target.id==='f-desp-q'){const nome=$('#nq-nome').value.trim();if(!nome)return;S.despesas.push({id:uid(),nome,cat:$('#nq-cat').value,freq:ui.gFreq,ativo:true});save();render(true);toast(`${nome} adicionada. Já pode lançar o valor.`);const last=S.despesas[S.despesas.length-1];setTimeout(()=>{const i=$('#g-'+last.id);if(i)i.focus()},50)}
   if(e.target.id==='f-desp'){const nome=$('#nd-nome').value.trim();if(!nome)return;S.despesas.push({id:uid(),nome,cat:$('#nd-cat').value,freq:$('#nd-freq').value,ativo:true});save();render(true);toast(`${nome} adicionada`)}
 });
-let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(ui.tab==='painel')drawCharts()},150)});
+let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(ui.tab==='painel')drawCharts();if(ui.tab==='ecommerce')ecDraw()},150)});
 if(location.hash&&VIEWS[location.hash.slice(1)])ui.tab=location.hash.slice(1);
 // links públicos para as lojas (abrem sem login): /#privacidade, /#termos, /#excluir-conta
 {const lh={privacidade:'privacidade',termos:'termos','excluir-conta':'excluir-info'}[(location.hash||'').slice(1)];if(lh){A.scr=lh;A.legalBack='login';ui.legal=lh;if(logged&&C){ui.tab='legal'}}
@@ -2196,7 +2478,7 @@ if(NATIVO){const AppP=(window.Capacitor.Plugins&&window.Capacitor.Plugins.App)||
     if(tourOn||A.overlay)return;
     if(!logged||!C){if(A.scr==='login'||A.scr==='excluida')return AppP.exitApp();A.scr=LEGAL_SCR.includes(A.scr)?(A.legalBack||'login'):'login';A.err='';render();window.scrollTo(0,0);return}
     if(ui.tab!=='painel'){ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0)}else AppP.exitApp()})}
-if(REAL)bootReal();else render();
+if(REAL)bootReal();else{ecCarregaDias();render()}
 </script>
 
 </body>
