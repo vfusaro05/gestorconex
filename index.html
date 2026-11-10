@@ -38,12 +38,12 @@
   --f-display:"Sora","Segoe UI",system-ui,sans-serif;
   --f-body:"Plus Jakarta Sans","Segoe UI",system-ui,-apple-system,sans-serif;
   --r:12px;
-  /* canais de e-commerce (VendasConex, Mercado Livre, Amazon, Shopee): paleta categórica validada (daltonismo) nos dois visuais */
-  --ec1:#2a78d6; --ec2:#eb6834; --ec3:#1baf7a; --ec4:#eda100;
+  /* canais de e-commerce (VendasConex, Mercado Livre, Amazon, Shopee, Magalu, TikTok Shop): paleta categórica validada (daltonismo) nos dois visuais */
+  --ec1:#2a78d6; --ec2:#eb6834; --ec3:#1baf7a; --ec4:#eda100; --ec5:#e87ba4; --ec6:#008300;
 }
 :root[data-look="escuro"]{
   color-scheme:dark;
-  --ec1:#3987e5; --ec2:#d95926; --ec3:#199e70; --ec4:#c98500;
+  --ec1:#3987e5; --ec2:#d95926; --ec3:#199e70; --ec4:#c98500; --ec5:#d55181; --ec6:#008300;
   --bg:#05070d; --bg-2:#0a0f1a; --glass:rgba(16,23,38,.72); --glass-2:rgba(26,36,58,.6); --line:rgba(130,170,255,.13); --line-2:rgba(130,170,255,.24);
   --ink:#e9efff; --muted:#93a0bd; --faint:#5f6b86;
   --acc:#3ee0ff; --acc-soft:rgba(62,224,255,.06); --acc-bd:rgba(62,224,255,.4); --violet:#8f7bff; --accent-ink:#04121a; --pri:linear-gradient(135deg,#3ee0ff,#6aa8ff);
@@ -113,6 +113,7 @@ main{min-width:0;padding-block:18px 112px;display:flex;flex-direction:column;gap
 .btn.danger{color:var(--bad);border-color:var(--bad-bd);background:transparent}
 .btn.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
 .btn.sm{padding:7px 11px;font-size:.85rem}
+.btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
 .btn.big{width:100%;padding:15px;font-size:1rem}
 .icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line-2);background:var(--glass);display:grid;place-items:center;font-size:1.2rem;font-weight:700;padding:0}
 .icon-btn:disabled{opacity:.35;cursor:default}
@@ -184,6 +185,9 @@ select.sel{border:1px solid var(--line-2);background:var(--bg-2);border-radius:1
 .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media (min-width:700px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (min-width:1150px){.kpis{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.kpis.k4{margin-top:-6px}
+.ec-datas{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media (min-width:700px){.kpis.k4{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .kpi{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0;box-shadow:var(--shadow)}
 .kpi .v{font-family:var(--f-display);font-weight:800;font-size:1.3rem;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi .v.neg{color:var(--bad)}
@@ -499,6 +503,8 @@ textarea.inp{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;resize
 /* no celular o aviso fica no alto, para não cobrir o total do dia nem a barra de navegação */
 @media (max-width:899px){#toast{bottom:auto;top:calc(12px + env(safe-area-inset-top,0px))}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* iPhone: campo com letra menor que 16px faz o iOS dar zoom ao tocar e a tela fica maior que o aparelho (desliza para os lados). Em tela de toque os campos ficam com 16px. */
+@media (pointer:coarse){input,select,textarea,textarea.inp{font-size:16px}select{max-width:100%;contain:paint}}
 </style>
 </head>
 <body>
@@ -1304,10 +1310,10 @@ function assinStatus(){const s=assinStatusWeb();if(!NATIVO||C.assin.admin)return
 function acessoOk(){const a=C.assin;if(a.admin)return true;if(C.real)return !!a.acessoSrv;if(a.status==='ativa')return a.renov||TODAY<=a.prox;return daysBetween(TODAY,C.trialFim)>=0}
 /* faixa de aviso no topo de todas as telas (teste grátis, vencimento, cobrança recusada). No app das lojas: texto neutro, sem botão de pagar. */
 function trialBanner(){if(!C||ui.tab==='assinatura'||C.assin.admin)return'';const a=C.assin,mail=' Os detalhes estão no seu e-mail.';
-  // proposta ou aditivo esperando o aceite: aparece também no app das lojas (não é pagamento)
-  const pd=ctPendente();if(pd)return `<div class="banner"><span><b>${pd==='proposta'?'Você tem uma proposta do Gestor Conex para aprovar.':'Há um aditivo do seu contrato para aprovar.'}</b></span><button class="btn sm pri" data-tab="assinatura">${pd==='proposta'?'Ver proposta':'Ver aditivo'}</button></div>`;
-  // App da Apple: nenhuma faixa de teste grátis, vencimento ou cobrança (regra 3.1.1); acesso pausado tem tela própria
+  // App da Apple: nenhuma faixa de teste grátis, vencimento, cobrança, proposta ou aditivo (regra 3.1.1, igual ao VendasConex)
   if(IOS)return'';
+  // proposta ou aditivo esperando o aceite: aparece no app do Android (não é pagamento)
+  const pd=ctPendente();if(pd)return `<div class="banner"><span><b>${pd==='proposta'?'Você tem uma proposta do Gestor Conex para aprovar.':'Há um aditivo do seu contrato para aprovar.'}</b></span><button class="btn sm pri" data-tab="assinatura">${pd==='proposta'?'Ver proposta':'Ver aditivo'}</button></div>`;
   const fx=(txt,btn)=>`<div class="banner"><span>${txt}${NATIVO&&btn?mail:''}</span>${NATIVO||!btn?'':`<button class="btn sm pri" data-tab="assinatura">${btn}</button>`}</div>`;
   const quando=l=>l===0?'hoje':l===1?'amanhã':`em ${l} dias`;
   if(a.falhou)return fx('<b>A cobrança no cartão não foi aprovada.</b>','Resolver');
@@ -1393,7 +1399,6 @@ async function enviaFeedback(){const cat=($('#fb-cat')||{}).value||'OUTRO',msg=(
 function vAssinatura(){const st=assinStatus(),a=C.assin;
   const sit=`<section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p></section>`;
   if(a.admin)return `${topbar('Assinatura')}${sit}`; // administrador do sistema: sem planos nem pagamento
-  if(IOS)return `${topbar('Proposta')}${ctCard()}`; // App da Apple: só o aceite de proposta/aditivo, sem situação de teste ou assinatura
   if(NATIVO)return `${topbar('Assinatura')}${sit}${ctCard()}`;
   return `${topbar('Assinatura')}
   <section class="card"><div class="card-h"><h2>Situação</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="muted" style="margin:0">${st.x}</p>
@@ -1410,7 +1415,7 @@ function vAssinatura(){const st=assinStatus(),a=C.assin;
 function vBloqueado(){const st=assinStatus(),pd=ctPendente(),ct=C.assin.contrato;
   return `${topbar('Acesso pausado')}<section class="card" style="max-width:600px"><div class="card-h"><h2>${IOS?'Acesso pausado':st.t}</h2></div>${IOS?'':`<p class="muted" style="margin:0 0 8px">${st.x}</p>`}
     <p class="muted" style="margin:0">Nada foi apagado: vendas, despesas e cadastros continuam guardados.${NATIVO?` Enviamos para <b class="sel">${esc(C.email)}</b> as instruções para voltar a usar.`:' Assine para voltar a usar.'}</p>
-    <div class="btns">${pd?`<button class="btn pri" data-tab="assinatura">${pd==='proposta'?'Ver proposta':'Ver aditivo'}</button>`:''}${NATIVO||pd?'':`<button class="btn pri" data-tab="assinatura">${ct?'Ver contrato':'Ver planos'}</button>`}<button class="btn" data-act="c-export-go">Exportar meus dados</button></div></section>`}
+    <div class="btns">${pd&&!IOS?`<button class="btn pri" data-tab="assinatura">${pd==='proposta'?'Ver proposta':'Ver aditivo'}</button>`:''}${NATIVO||pd?'':`<button class="btn pri" data-tab="assinatura">${ct?'Ver contrato':'Ver planos'}</button>`}<button class="btn" data-act="c-export-go">Exportar meus dados</button></div></section>`}
 
 /* ---------- conta dentro do app (Ajustes) ---------- */
 function exportJson(){const {pw,tempPw,tempExp,...conta}=C;return JSON.stringify({exportadoEm:new Date().toISOString(),conta,negocio:S.negocio,itens:S.itens,despesas:S.despesas,vendas:S.vendas,despesasMensais:S.gastos,despesasSemanais:S.gastosS,despesasDiarias:S.gastosD},null,1)}
@@ -1422,9 +1427,9 @@ function contaCards(){const st=assinStatus();
     <p class="note" style="margin:12px 0 0">Para trocar e-mail, celular ou documento, fale com o suporte: <b class="sel">${SUPORTE}</b>. O nome do negócio muda em <button class="lnk" data-tab="ajustes">Ajustes</button>.</p>
     <div class="btns"><button class="btn sm" data-act="c-nome">Editar nome</button><button class="btn sm" data-act="c-chgpw">Trocar senha</button><button class="btn sm" data-act="c-tutorial">Ver o tutorial</button><button class="btn sm" data-act="c-sair">Sair da conta</button></div>
     ${ui.chgPw?`<form id="f-chg" class="a-form" style="margin-top:14px;max-width:420px">
-      <div class="field"><label for="c-cur">Senha atual</label><input class="inp" id="c-cur" type="password" autocomplete="current-password"></div>
+      <div class="field"><label for="c-cur">Senha atual</label><div class="pw"><input class="inp" id="c-cur" type="password" autocomplete="current-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
       <div class="field"><label for="c-new">Nova senha</label><div class="pw"><input class="inp" id="c-new" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-chg')}</div>
-      <div class="field"><label for="c-new2">Repita a nova senha</label><input class="inp" id="c-new2" type="password" autocomplete="new-password"></div>
+      <div class="field"><label for="c-new2">Repita a nova senha</label><div class="pw"><input class="inp" id="c-new2" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
       ${ui.chgErr?`<div class="a-err" role="alert">${esc(ui.chgErr)}</div>`:''}<button class="btn pri" type="submit">Salvar nova senha</button></form>`:''}</section>
   ${IOS?'':`<section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:${NATIVO||C.assin.admin?'0':'0 0 12px'}">${st.x}</p>${NATIVO||C.assin.admin?'':`<button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button>`}</section>`}
   <section class="card" id="priv"><div class="card-h"><h2>Privacidade e dados</h2><p>seus direitos pela LGPD</p></div>
@@ -1462,7 +1467,7 @@ function vLegal(){return `<div><button class="lnk" data-tab="conta">← Voltar p
 
 /* ---------- textos legais ---------- */
 function legalHtml(k){
-  const emp='FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA',cnpj='56.911.022/0001-68',dpo=SUPORTE,upd='28 de outubro de 2026';
+  const emp='FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA',cnpj='56.911.022/0001-68',dpo=SUPORTE,upd='4 de novembro de 2026';
   if(k==='termos')return `<h1>Termos de uso</h1><p class="faint">Versão ${TERMOS_V} · Última atualização: ${upd}</p>
     <h2>1. O serviço</h2><p>O Gestor Conex é um aplicativo de gestão para pequenos negócios. Você registra vendas e despesas e o app mostra indicadores como faturamento, custos e lucro. É oferecido por ${emp}, CNPJ ${cnpj}.</p>
     <h2>2. Sua conta</h2><p>Você precisa ter 18 anos ou mais e informar dados verdadeiros. A senha é pessoal: não compartilhe. Avise o suporte se suspeitar de uso indevido.</p>
@@ -1482,7 +1487,7 @@ function legalHtml(k){
     <h2>6. Assinatura</h2><p>A exclusão encerra a assinatura feita pelo site. Se você assinou pela App Store ou pelo Google Play, cancele também na loja para não ser cobrado.</p>`;
   return `<h1>Política de privacidade</h1><p class="faint">Última atualização: ${upd}</p>
     <h2>1. Quem cuida dos seus dados</h2><p>${emp}, CNPJ ${cnpj}, é a controladora dos dados tratados no Gestor Conex. Encarregado de dados (DPO): ${dpo}.</p>
-    <h2>2. Quais dados coletamos</h2><ul><li><b>Cadastro:</b> nome, e-mail, celular, nome do negócio, CPF ou CNPJ.</li><li><b>Dados do negócio:</b> vendas, despesas, serviços e produtos que você lança. Eles são criptografados no seu aparelho e não conseguimos ler (veja o item 7).</li><li><b>E-commerces conectados (opcional):</b> se você conectar Mercado Livre, Amazon, Shopee ou VendasConex, guardamos a autorização de acesso (cifrada) e os pedidos dessas contas: data, itens, valores, comissões, frete, impostos e o custo dos produtos que você cadastrar. Não guardamos nome, endereço nem contato dos compradores.</li><li><b>Pagamento:</b> plano, valor, data e situação. Os dados do cartão são digitados direto no Mercado Pago, na App Store ou no Google Play. Nós não vemos nem guardamos o número do cartão.</li><li><b>Técnicos:</b> modelo do aparelho, versão do app, data, hora e IP de acesso, para segurança.</li><li><b>Suporte:</b> o que você nos escrever.</li></ul>
+    <h2>2. Quais dados coletamos</h2><ul><li><b>Cadastro:</b> nome, e-mail, celular, nome do negócio, CPF ou CNPJ.</li><li><b>Dados do negócio:</b> vendas, despesas, serviços e produtos que você lança. Eles são criptografados no seu aparelho e não conseguimos ler (veja o item 7).</li><li><b>E-commerces conectados (opcional):</b> se você conectar Mercado Livre, Amazon, Shopee, Magalu, TikTok Shop ou VendasConex, guardamos a autorização de acesso (cifrada) e os pedidos dessas contas: data, itens, valores, comissões, frete, impostos e o custo dos produtos que você cadastrar. Não guardamos nome, endereço nem contato dos compradores.</li><li><b>Pagamento:</b> plano, valor, data e situação. Os dados do cartão são digitados direto no Mercado Pago, na App Store ou no Google Play. Nós não vemos nem guardamos o número do cartão.</li><li><b>Técnicos:</b> modelo do aparelho, versão do app, data, hora e IP de acesso, para segurança.</li><li><b>Suporte:</b> o que você nos escrever.</li></ul>
     <h2>3. Para que usamos</h2><ul><li>Prestar o serviço e calcular seus indicadores, inclusive a análise dos e-commerces que você conectar (execução de contrato).</li><li>Cobrar a assinatura e emitir nota fiscal (obrigação legal).</li><li>Proteger sua conta e evitar fraudes (legítimo interesse).</li><li>Enviar novidades, só se você autorizar (consentimento, que pode ser retirado a qualquer momento).</li></ul>
     <h2>4. Com quem compartilhamos</h2><p>Só com quem ajuda a prestar o serviço: hospedagem em nuvem, os e-commerces que você conectar (só para ler seus pedidos), processador de pagamento (Mercado Pago, Apple ou Google), envio de e-mail e SMS, e autoridades quando a lei exigir. <b>Não vendemos seus dados e não usamos para publicidade.</b></p>
     <h2>5. Por quanto tempo guardamos</h2><p>Enquanto sua conta existir. Depois da exclusão, apagamos em até 30 dias, exceto registros de pagamento e fiscais (5 anos) e registros de acesso (6 meses), que a lei manda guardar.</p>
@@ -1532,7 +1537,7 @@ function aCadastro(){const r=A.reg||{},dt=r['r-dt']||'CNPJ',v=k=>esc(r[k]||'');
       <input class="inp" id="r-doc" data-mask="doc" inputmode="numeric" placeholder="${dt==='CNPJ'?'00.000.000/0000-00':'000.000.000-00'}" value="${v('r-doc')}"></div>
     <p class="a-sec">Senha</p>
     <div class="field"><label for="r-pw">Crie uma senha</label><div class="pw"><input class="inp" id="r-pw" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-reg')}</div>
-    <div class="field"><label for="r-pw2">Repita a senha</label><input class="inp" id="r-pw2" type="password" autocomplete="new-password"></div>
+    <div class="field"><label for="r-pw2">Repita a senha</label><div class="pw"><input class="inp" id="r-pw2" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
     <label class="chk"><input type="checkbox" id="r-ok" ${r['r-ok']?'checked':''}><span>Li e aceito os <button type="button" class="lnk" data-act="a-go" data-v="termos">Termos de uso</button> e a <button type="button" class="lnk" data-act="a-go" data-v="privacidade">Política de privacidade</button>.</span></label>
     ${capW('r-robo')}
     <button class="btn pri big" type="submit">Continuar</button></form>`}
@@ -1548,7 +1553,7 @@ function aEnviada(){return `<h1>Confira seu e-mail</h1><p class="muted" style="m
   ${REAL?'':`<div class="proto"><b>Protótipo:</b> ${A.proto}</div>`}<button class="btn pri big" data-act="a-go" data-v="login">Voltar para o login</button>`}
 function aNovaSenha(){return `<h1>Crie uma senha nova</h1><p class="muted" style="margin:0">Você entrou com uma senha temporária. Escolha a sua senha definitiva.</p>${errBox()}
   <form id="f-nova" class="a-form"><div class="field"><label for="n-pw">Nova senha</label><div class="pw"><input class="inp" id="n-pw" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-nova')}</div>
-  <div class="field"><label for="n-pw2">Repita a senha</label><input class="inp" id="n-pw2" type="password" autocomplete="new-password"></div><button class="btn pri big" type="submit">Salvar e entrar</button></form>`}
+  <div class="field"><label for="n-pw2">Repita a senha</label><div class="pw"><input class="inp" id="n-pw2" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div><button class="btn pri big" type="submit">Salvar e entrar</button></form>`}
 const aExcluida=()=>`<h1>Conta excluída</h1><p class="muted" style="margin:0">Apagamos sua conta e todos os seus dados. Registros de pagamento ficam guardados pelo prazo da lei fiscal e depois também são apagados.</p><button class="btn pri big" data-act="a-go" data-v="login">Voltar ao início</button>`;
 function renderAuth(){
   document.body.classList.add('auth-on');const el=$('#auth');el.hidden=false;
@@ -1848,7 +1853,7 @@ async function carregaSessao(pw){const [me,st]=await Promise.all([api('/me'),api
     // conta criada antes da criptografia: cifra agora (precisa da senha; sem ela fica para o próximo login)
     if(pw){DK=DK||await novaChave();await api('/me/cripto',{method:'PUT',body:await chavesNovas(pw)});syncPend=true;await enviaEstado()}
   }
-  normalizaS();if(DK)await guardaDK(me.email);EC={...EC,info:null,cur:null,prev:null,key:'',prod:null,ped:null,pedKey:'',dias:null};ecCarregaDias()}
+  normalizaS();if(DK)await guardaDK(me.email);EC={...EC,info:null,cur:null,prev:null,key:'',prod:null,ped:null,pedKey:'',dias:null,infoAt:0};ecCarregaDias();ecAtualiza();if(EC.pend&&!IOS){ui.tab='ecommerce';ui.ecSec='contas'}}
 // abre os dados com a chave recuperada (senha digitada ou código do suporte) e lacra de novo com a senha atual
 async function abreComChave(dk,pw,extra){DK=dk;const st=await api('/state');S=cifrado(st.data)?await decifra(st.data):st.data;stateVer=st.version;
   await api('/me/cripto',{method:'PUT',body:{pw:await lacra(pw,DK),...(extra||{})}});A.chave=null;normalizaS();await guardaDK(C.email)}
@@ -1869,7 +1874,7 @@ function aplicaMeSemPerder(me){if(!C||!C.real)return;const tour=C.tourDone;aplic
 if(typeof window!=='undefined'&&window.addEventListener)window.addEventListener('beforeunload',e=>{if(REAL&&syncPend){e.preventDefault();e.returnValue=''}});
 
 /* tela de abrir/recuperar os dados cifrados */
-function vChave(){const k=A.chave,campoPw=id=>k.pw?'':`<div class="field"><label for="${id}">Sua senha</label><input class="inp" id="${id}" type="password" autocomplete="current-password"></div>`;
+function vChave(){const k=A.chave,campoPw=id=>k.pw?'':`<div class="field"><label for="${id}">Sua senha</label><div class="pw"><input class="inp" id="${id}" type="password" autocomplete="current-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>`;
   return `${topbar('Seus dados estão protegidos')}<section class="card" style="max-width:640px"><p class="muted" style="margin:0 0 12px">Suas vendas e despesas ficam criptografadas e só abrem com a chave da sua conta. Nem a equipe do Gestor Conex consegue ver.</p>
     ${k.err?`<div class="a-err" role="alert">${esc(k.err)}</div>`:''}
     ${!k.pw&&k.temPw?`<div class="a-form" style="max-width:420px">${campoPw('k-pw')}<button class="btn pri" data-act="k-senha">Abrir meus dados</button></div>`:''}
@@ -2112,9 +2117,10 @@ function contaActReal(a,b){
 async function bootReal(){
   const q=new URLSearchParams(location.search),del=q.get('excluir'),em=q.get('email'),ret=q.get('assinatura'),pg=q.get('pg'),mpId=q.get('payment_id')||q.get('collection_id');
   // volta da autorização de um e-commerce (?ecom=ok|erro&canal=ml&nome=…#ecommerce)
-  const eco=q.get('ecom'),ecoMsg=eco==='ok'?`${q.get('nome')||'Conta'} conectada. Buscando os pedidos…`:eco?(q.get('msg')||'Não foi possível conectar.'):'';
+  const eco=q.get('ecom'),ecoMsg=eco==='ok'?`${q.get('nome')||'Conta'} conectada. Buscando os pedidos…`:eco==='pendente'?`Loja ${q.get('nome')||''} autorizada. Confirme na aba E-commerce para conectar à sua conta.`:eco?(q.get('msg')||'Não foi possível conectar.'):'';
+  if(eco==='pendente'&&q.get('p'))ecPendSet({p:q.get('p'),nome:q.get('nome')||'',canal:(q.get('canal')||'').toUpperCase()});
   if(del||em||ret||eco)history.replaceState(null,'',location.pathname);
-  if(eco){ui.tab='ecommerce';ui.ecSec='contas';A.info=esc(ecoMsg)+' Entre para ver.'}
+  if(eco){ui.tab='ecommerce';ui.ecSec='contas';A.info=esc(ecoMsg)+' Entre para ver.';if(eco!=='ok'&&eco!=='pendente')EC.aviso=ecoMsg}
   if(del){A.delTok=del;A.scr='del-confirm';logged=false;return renderAuth()}
   if(getTok()){$('#main').innerHTML='<p class="note" style="padding:40px 0;text-align:center">Carregando seus dados…</p>';
     try{await carregaSessao();let pago=false;
@@ -2135,23 +2141,25 @@ const aDelConfirm=()=>`<h1>Excluir sua conta</h1><p class="muted" style="margin:
 async function confirmaExclusao(){try{await api('/account/delete/confirm',{body:{token:A.delTok}});setTok('');apagaDK();C=null;logged=false;A.delTok=null;Object.assign(A,{scr:'excluida',err:''});render()}catch(e){A.err=e.message;render()}}
 
 /* ---------- render / eventos ---------- */
-/* ---------- E-COMMERCE: Mercado Livre, Amazon, Shopee e VendasConex ----------
+/* ---------- E-COMMERCE: Mercado Livre, Amazon, Shopee, Magalu, TikTok Shop e VendasConex ----------
    As vendas chegam pela API (api/src/routes/ecom.ts) e ficam no servidor sem a criptografia de ponta a ponta.
    No protótipo (sem API) tudo é simulado aqui, pelas mesmas rotas (ecDemoApi). Valores em centavos.
    As contas com "Somar no Início" ligado entram no faturamento, no custo dos produtos e nas despesas do Início
    (itens "ec:<canal>" e despesas "ec:<canal>:com|frete|imp"). */
-const EC_CH={VENDASCONEX:{n:'VendasConex',k:1},ML:{n:'Mercado Livre',k:2},AMAZON:{n:'Amazon',k:3},SHOPEE:{n:'Shopee',k:4}};
+const EC_CH={VENDASCONEX:{n:'VendasConex',k:1},ML:{n:'Mercado Livre',k:2},AMAZON:{n:'Amazon',k:3},SHOPEE:{n:'Shopee',k:4},MAGALU:{n:'Magalu',k:5},TIKTOK:{n:'TikTok Shop',k:6}};
 const ecNome=c=>(EC_CH[c]||{n:c}).n;
 const ecCor=c=>`var(--ec${(EC_CH[c]||{k:1}).k})`;
 const cb0=v=>brl0((v||0)/100),cb=v=>brl((v||0)/100);
-const EC_P=[['mes','Este mês'],['mesant','Mês passado'],['7d','Últimos 7 dias'],['30d','Últimos 30 dias'],['90d','Últimos 90 dias'],['ano','Este ano']];
+const EC_P=[['mes','Este mês'],['mesant','Mês passado'],['7d','Últimos 7 dias'],['30d','Últimos 30 dias'],['90d','Últimos 90 dias'],['ano','Este ano'],['custom','Período específico']];
 const EC_DESP={com:'Comissões e taxas',frete:'Frete',imp:'Impostos'};
 const ecItem=id=>{const m=/^ec:([A-Z]+)$/.exec(id||'');return m?{id,nome:'Vendas '+ecNome(m[1]),tipo:'produto',ativo:false,ec:1}:undefined};
 const ecDesp=id=>{const m=/^ec:([A-Z]+):(com|frete|imp)$/.exec(id||'');return m?{id,nome:`${EC_DESP[m[2]]} · ${ecNome(m[1])}`,cat:'variavel',ativo:false,ec:1}:undefined};
-let EC={info:null,cur:null,prev:null,key:'',carregando:false,err:'',prod:null,ped:null,pedKey:'',pedOn:false,dias:null,demo:null,vc:false,pollT:null};
+let EC={info:null,cur:null,prev:null,key:'',carregando:false,err:'',prod:null,ped:null,pedKey:'',pedOn:false,dias:null,demo:null,vc:false,pollT:null,pend:(()=>{try{return JSON.parse(sessionStorage.getItem('gc-ec-pend')||'null')}catch(e){return null}})()};
+const ecPendSet=v=>{EC.pend=v;try{v?sessionStorage.setItem('gc-ec-pend',JSON.stringify(v)):sessionStorage.removeItem('gc-ec-pend')}catch(e){}};
 const ecReal=()=>REAL&&C&&C.real;
 
 function ecRange(){const p=ui.ecP||'mes',t=TODAY;let s,e=t,ps,pe;
+  if(p==='custom'){s=ui.ecDe||ymOf(t)+'-01';e=ui.ecAte||t;if(s>e)[s,e]=[e,s];const n=daysBetween(s,e)+1;pe=addDays(s,-1);ps=addDays(s,-n);return {s,e,ps,pe}}
   if(p==='mesant'){const ym=addYm(ymOf(t),-1),pym=addYm(ym,-1);s=ym+'-01';e=ym+'-'+pad(dim(ym));ps=pym+'-01';pe=pym+'-'+pad(dim(pym))}
   else if(p==='ano'){s=t.slice(0,4)+'-01-01';ps=addMonths(s,-12);pe=addMonths(e,-12)}
   else if(p==='mes'){s=ymOf(t)+'-01';ps=addMonths(s,-1);pe=addMonths(e,-1)}
@@ -2196,7 +2204,7 @@ function ecDemoGera(){const r=mulberry32(4242);
 function ecDemoApi(path,method,body){const D=EC.demo||(EC.demo=ecDemoGera());const [p,qs]=path.split('?'),q=new URLSearchParams(qs||'');
   const tax=Object.fromEntries(D.conexoes.map(c=>[c.id,Math.round(c.impostoPct*100)])),de=q.get('de'),ate=q.get('ate'),cn=q.get('canal');
   const ativos=new Set(D.conexoes.map(c=>c.id)),noPer=o=>ativos.has(o.connectionId)&&o.dia>=de&&o.dia<=ate&&(!cn||o.channel===cn);
-  if(p==='/ecom')return {canais:Object.keys(EC_CH).map(c=>({canal:c,nome:ecNome(c),slug:c.toLowerCase(),modo:c==='VENDASCONEX'?'chave':'oauth',disponivel:c!=='AMAZON'})),
+  if(p==='/ecom')return {canais:Object.keys(EC_CH).map(c=>({canal:c,nome:ecNome(c),slug:c.toLowerCase(),modo:c==='VENDASCONEX'?'chave':'oauth',disponivel:!['AMAZON','MAGALU','TIKTOK'].includes(c)})),
     conexoes:D.conexoes.map(c=>({...c,ultimaSync:new Date().toISOString(),sincronizando:false,erro:null,pedidos:D.orders.filter(o=>o.connectionId===c.id).length}))};
   if(p==='/ecom/analise')return ecAnalisa(D.orders.filter(noPer),D.custos,tax);
   if(p==='/ecom/diario'){const soma=new Set(D.conexoes.filter(c=>c.somaNoResultado).map(c=>c.id));return {dias:ecAnalisa(D.orders.filter(o=>soma.has(o.connectionId)&&o.dia>=de&&o.dia<=ate),D.custos,tax).dias}}
@@ -2218,11 +2226,13 @@ const ecGet=(path,o)=>ecReal()?api(path,o):Promise.resolve().then(()=>ecDemoApi(
 
 /* ---------- carregamento ---------- */
 async function ecCarregaDias(){if(IOS)return;try{const r=await ecGet(`/ecom/diario?de=${addDays(TODAY,-430)}&ate=${TODAY}`);EC.dias=r.dias||{};if(ui.tab==='painel'&&logged)render(true)}catch(e){}}
-async function ecCarregaInfo(){try{EC.info=await ecGet('/ecom');EC.err=''}catch(e){EC.err=e.message}
+async function ecCarregaInfo(){try{EC.info=await ecGet('/ecom');EC.infoAt=Date.now();EC.err=''}catch(e){EC.err=e.message}
   clearTimeout(EC.pollT);
   // enquanto alguma conta sincroniza, confere de novo a cada 5 s
   if(EC.info&&EC.info.conexoes.some(c=>c.sincronizando))EC.pollT=setTimeout(async()=>{const antes=EC.info.conexoes.filter(c=>c.sincronizando).length;await ecCarregaInfo();
     if(EC.info&&EC.info.conexoes.filter(c=>c.sincronizando).length<antes)ecInvalida();if(ui.tab==='ecommerce')render(true)},5000)}
+// Início e aba E-commerce: ao entrar, a API busca as vendas novas; com o app aberto, confere de novo a cada 2 min
+function ecAtualiza(){if(IOS||EC.infoLoad||(EC.info&&Date.now()-(EC.infoAt||0)<120000))return;EC.infoLoad=true;ecCarregaInfo().then(()=>{EC.infoLoad=false;if(ui.tab==='ecommerce')render(true)})}
 function ecInvalida(){EC.key='';EC.prod=null;EC.pedKey='';ecCarregaDias()}
 async function ecCarregaAn(){const R=ecRange(),cn=ui.ecCanal&&ui.ecCanal!=='geral'?'&canal='+ui.ecCanal:'',key=R.s+'|'+R.e+cn;EC.key=key;EC.carregando=true;
   try{const [a,b]=await Promise.all([ecGet(`/ecom/analise?de=${R.s}&ate=${R.e}${cn}`),ecGet(`/ecom/analise?de=${R.ps}&ate=${R.pe}${cn}`)]);if(EC.key===key){EC.cur=a;EC.prev=b;EC.err=''}}
@@ -2233,7 +2243,8 @@ async function ecCarregaPed(pg){const R=ecRange(),cn=ui.ecCanal&&ui.ecCanal!=='g
   if(ui.tab==='ecommerce')render(true)}
 async function ecCarregaProd(){EC.prod={carregando:true,produtos:[]};try{EC.prod=await ecGet('/ecom/produtos')}catch(e){EC.prod=null;EC.err=e.message}if(ui.tab==='ecommerce')render(true)}
 function ecPrecisa(){const sec=ui.ecSec||'analise',R=ecRange(),cn=ui.ecCanal&&ui.ecCanal!=='geral'?'&canal='+ui.ecCanal:'';
-  if(!EC.info&&!EC.infoLoad){EC.infoLoad=true;setTimeout(()=>ecCarregaInfo().then(()=>{EC.infoLoad=false;render(true)}),0);return}
+  if(!EC.info){setTimeout(ecAtualiza,0);return}
+  setTimeout(ecAtualiza,0);
   if(!EC.info||!EC.info.conexoes.length)return;
   if(sec==='analise'&&!EC.carregando&&EC.key!==R.s+'|'+R.e+cn)setTimeout(ecCarregaAn,0);
   if(sec==='analise'&&EC.pedOn&&!(EC.pedKey||'').startsWith(R.s+'|'+R.e+cn+'|'))setTimeout(()=>ecCarregaPed(1),0);
@@ -2242,18 +2253,18 @@ function ecPrecisa(){const sec=ui.ecSec||'analise',R=ecRange(),cn=ui.ecCanal&&ui
 /* ---------- tela ---------- */
 const ecSt={OK:['Conectada','good'],ERRO:['Falha na última busca','warn'],REAUTORIZAR:['Conecte de novo','bad']};
 const ecDot=c=>`<i class="ec-dot" style="background:${ecCor(c)}"></i>`;
-const ecPct=(a,b)=>b?Math.round(a/b*1000)/10+'%':'–';
+const ecPct=(a,b)=>b?(Math.round(a/b*1000)/10).toLocaleString('pt-BR')+'%':'–';
 function vEcom(){ecPrecisa();const I=EC.info,sec=ui.ecSec||'analise';
   const head=`${topbar('E-commerce','Vendas, custos e lucro dos seus canais on-line')}
     <div class="seg ec-seg" role="group" aria-label="Seção">${[['analise','Análise'],['produtos','Custos'],['contas','Contas']].map(([k,l])=>`<button data-act="ec-sec" data-v="${k}" aria-pressed="${sec===k}">${l}</button>`).join('')}</div>`;
   if(!I)return head+`<section class="card"><p class="note" style="margin:0">${EC.err?esc(EC.err):'Carregando…'}</p></section>`;
   if(sec==='contas')return head+ecContas();
-  if(!I.conexoes.length)return head+`<section class="card"><div class="cta"><div><b>Conecte seu primeiro canal de venda on-line</b><span class="muted" style="font-size:.86rem">VendasConex, Mercado Livre, Amazon e Shopee. As vendas, comissões, fretes e impostos chegam sozinhos.</span></div><button class="btn pri" data-act="ec-sec" data-v="contas">Conectar</button></div></section>`;
+  if(!I.conexoes.length)return head+`<section class="card"><div class="cta"><div><b>Conecte seu primeiro canal de venda on-line</b><span class="muted" style="font-size:.86rem">VendasConex, Mercado Livre, Amazon, Shopee, Magalu e TikTok Shop. As vendas, comissões, fretes e impostos chegam sozinhos.</span></div><button class="btn pri" data-act="ec-sec" data-v="contas">Conectar</button></div></section>`;
   return head+(sec==='produtos'?ecProdutos():ecAnalise())}
 
 function ecAnalise(){const I=EC.info,canais=[...new Set(I.conexoes.map(c=>c.canal))].sort((a,b)=>EC_CH[a].k-EC_CH[b].k),cn=ui.ecCanal&&canais.includes(ui.ecCanal)?ui.ecCanal:'geral';ui.ecCanal=cn;
   const ctl=`<div class="controls"><div class="seg ec-seg" role="group" aria-label="Canal">${[['geral','Todos'],...canais.map(c=>[c,ecNome(c)])].map(([k,l])=>`<button data-act="ec-canal" data-v="${k}" aria-pressed="${cn===k}">${k!=='geral'?ecDot(k):''}${l}</button>`).join('')}</div>
-    <select class="sel" id="ecP" aria-label="Período">${EC_P.map(([k,l])=>`<option value="${k}" ${(ui.ecP||'mes')===k?'selected':''}>${l}</option>`).join('')}</select></div>`;
+    <select class="sel" id="ecP" aria-label="Período">${EC_P.map(([k,l])=>`<option value="${k}" ${(ui.ecP||'mes')===k?'selected':''}>${l}</option>`).join('')}</select>${ui.ecP==='custom'?(R0=>`<span class="ec-datas"><input type="date" class="sel" id="ec-de" aria-label="De" value="${R0.s}" max="${TODAY}"><span class="muted">até</span><input type="date" class="sel" id="ec-ate" aria-label="Até" value="${R0.e}" max="${TODAY}"></span>`)(ecRange()):''}</div>`;
   if(!EC.cur)return ctl+`<section class="card"><p class="note" style="margin:0">${EC.err?esc(EC.err):'Calculando…'}</p></section>`;
   const R=ecRange(),A=EC.cur,k=A.total,b=EC.prev.total,quem=cn==='geral'?'nos seus canais':'no '+ecNome(cn);
   const kpi=(l,v,d,s,cls='')=>`<div class="kpi ${cls}"><div class="eyebrow">${l}</div><div class="v ${v.neg?'neg':''}">${v.t}</div>${d}<div class="s">${s}</div></div>`;
@@ -2263,12 +2274,17 @@ function ecAnalise(){const I=EC.info,canais=[...new Set(I.conexoes.map(c=>c.cana
     ${kpi('Margem',{t:k.receita?Math.round(k.margem*100)+'%':'–',neg:k.margem<0},b.receita?`<span class="d ${k.margem>=b.margem?'good':'bad'}">${k.margem>=b.margem?'▲':'▼'} ${Math.abs(Math.round((k.margem-b.margem)*100))} pts</span>`:'<span class="d flat">–</span>','de cada R$ 100 vendidos')}
     ${kpi('Ticket médio',{t:cb0(k.ticket)},delta(k.ticket,b.ticket),'receita por pedido')}
     ${kpi('Pedidos',{t:num(k.pedidos)},delta(k.pedidos,b.pedidos),`${num(k.unidades)} ${k.unidades===1?'unidade':'unidades'}`)}
-    ${kpi('Custos',{t:cb0(k.custos)},delta(k.custos,b.custos,{inv:true}),'produto, canal, frete e imposto')}</div>`;
+    ${kpi('Custos',{t:cb0(k.custos)},delta(k.custos,b.custos,{inv:true}),'produto, canal, frete e imposto')}</div>
+    <div class="kpis k4" aria-label="Custos">
+    ${kpi('Custo dos produtos',{t:cb0(k.cmv)},delta(k.cmv,b.cmv,{inv:true}),`${ecPct(k.cmv,k.receita)} da receita`)}
+    ${kpi('Comissão + taxas',{t:cb0(k.comissao+k.taxas)},delta(k.comissao+k.taxas,b.comissao+b.taxas,{inv:true}),`${ecPct(k.comissao+k.taxas,k.receita)} da receita · cobradas pelo canal`)}
+    ${kpi('Frete pago por você',{t:cb0(k.freteVendedor)},delta(k.freteVendedor,b.freteVendedor,{inv:true}),`${ecPct(k.freteVendedor,k.receita)} da receita`)}
+    ${kpi('Impostos',{t:cb0(k.imposto)},delta(k.imposto,b.imposto,{inv:true}),`${ecPct(k.imposto,k.receita)} da receita`)}</div>`;
   const aviso=k.semCusto?`<div class="pend"><span><b>${num(k.semCusto)} ${k.semCusto>1?'unidades vendidas':'unidade vendida'} sem custo cadastrado.</b> Sem o custo do produto, o lucro aparece maior do que é.</span><button class="btn sm" data-act="ec-sec" data-v="produtos">Cadastrar custos</button></div>`:'';
   // para onde vai cada R$ 100 vendidos
   const parts=[['Produto (custo)',k.cmv],['Comissão do canal',k.comissao],['Outras taxas',k.taxas],['Frete pago por você',k.freteVendedor],['Impostos',k.imposto]];
   const r100=v=>k.receita?`R$ ${(v/k.receita*100).toLocaleString('pt-BR',{maximumFractionDigits:1,minimumFractionDigits:v&&v/k.receita<.1?1:0})}`:'–';
-  const onde=`<section class="card"><div class="card-h"><h2>Para onde vai cada R$ 100 vendidos</h2><p>${esc(EC_P.find(x=>x[0]===(ui.ecP||'mes'))[1].toLowerCase())}, ${quem}</p></div>
+  const onde=`<section class="card"><div class="card-h"><h2>Para onde vai cada R$ 100 vendidos</h2><p>${ui.ecP==='custom'?esc(rangeTxt(R)):esc(EC_P.find(x=>x[0]===(ui.ecP||'mes'))[1].toLowerCase())}, ${quem}</p></div>
     <div class="ec-onde">${parts.map(([n,v])=>`<div class="ec-or"><span>${n}</span><div class="ec-bar"><i style="width:${k.receita?Math.min(100,v/k.receita*100):0}%;background:var(--cost)"></i></div><b>${r100(v)}</b><small>${cb0(v)}</small></div>`).join('')}
     <div class="ec-or lucro"><span>Sobrou (lucro)</span><div class="ec-bar"><i style="width:${k.receita?Math.max(0,Math.min(100,k.lucro/k.receita*100)):0}%;background:var(--profit)"></i></div><b class="${k.lucro<0?'tb':''}">${r100(k.lucro)}</b><small>${cb0(k.lucro)}</small></div></div>
     <p class="note" style="margin:12px 0 0">O canal deposita para você <b>${cb0(k.repasse)}</b> (receita menos comissão, taxas e frete). ${k.cancelados||k.devolvidos?`Fora da conta: ${k.cancelados?`${num(k.cancelados)} ${k.cancelados>1?'pedidos cancelados':'pedido cancelado'} (${cb0(k.canceladosValor)})`:''}${k.cancelados&&k.devolvidos?' e ':''}${k.devolvidos?`${num(k.devolvidos)} ${k.devolvidos>1?'devolvidos':'devolvido'} (${cb0(k.devolvidosValor)})`:''}.`:''}${k.pendentes?` ${num(k.pendentes)} aguardando pagamento.`:''}</p></section>`;
@@ -2331,19 +2347,21 @@ function ecProdutos(){const P=EC.prod;if(!P||P.carregando)return '<section class
     :'<p class="note" style="margin:0">Nenhum produto vendido ainda. Eles aparecem aqui depois da primeira sincronização.</p>'}</section>`}
 
 function ecContas(){const I=EC.info,cs=I.conexoes;
+  const pd=EC.pend?`<div class="pend" role="alert"><span><b>Conectar ${esc(EC.pend.nome||"a loja")} (${ecNome(EC.pend.canal)}) à sua conta?</b> Ela foi autorizada agora na loja de apps ${ecNome(EC.pend.canal)}. Os pedidos dela passam a aparecer aqui.</span><span class="btns"><button class="btn pri sm" data-act="ec-pend-ok">Conectar à minha conta</button><button class="btn sm" data-act="ec-pend-x">Agora não</button></span></div>`:'';
+  const av=EC.aviso?`<div class="pend" role="alert"><span><b>A conexão não deu certo.</b> ${esc(EC.aviso)}</span><button class="btn sm" data-act="ec-aviso-x">Fechar</button></div>`:'';
   const conta=c=>{const [st,cl]=ecSt[c.status]||[c.status,'warn'],s=c.sincronizando;
-    return `<section class="card"><div class="card-h"><h2>${ecDot(c.canal)}${esc(c.nome)}</h2><span class="status ${s?'warn':cl}"><i></i>${s?'Buscando pedidos…':st}</span></div>
-      <p class="note" style="margin:0 0 12px">${ecNome(c.canal)} · ${num(c.pedidos)} ${c.pedidos===1?'pedido':'pedidos'}${c.ultimaSync?` · última busca ${new Date(c.ultimaSync).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:''}${c.erro&&!s?`<br><span class="tb">${esc(c.erro)}</span>`:''}</p>
+    return `<section class="card"><div class="card-h"><h2>${ecDot(c.canal)}${ecNome(c.canal)} <span class="faint" style="font-weight:500;font-size:.86em">· ${esc(c.nome)}</span></h2><span class="status ${s?'warn':cl}"><i></i>${s?'Buscando pedidos…':st}</span></div>
+      <p class="note" style="margin:0 0 12px">Conta ${esc(c.nome)} · ${num(c.pedidos)} ${c.pedidos===1?'pedido':'pedidos'}${c.ultimaSync?` · última busca ${new Date(c.ultimaSync).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:''}${c.erro&&!s?`<br><span class="tb">${esc(c.erro)}</span>`:''}</p>
       <div class="ec-opts"><label class="ec-chk"><input type="checkbox" data-ecsoma="${c.id}" ${c.somaNoResultado?'checked':''}> Somar no Início <small class="faint">(faturamento, custos e lucro)</small></label>
         <div class="field ec-imp"><label for="ecimp-${c.id}">Imposto sobre a venda (%)</label><input class="inp" id="ecimp-${c.id}" inputmode="decimal" data-ecimp="${c.id}" value="${fmtIn(c.impostoPct).replace(/,00$/,'')}"></div></div>
       <p class="note" style="margin:6px 0 12px">Use a alíquota do seu regime (ex.: Simples Nacional). Quando o canal informa o imposto do pedido, vale o do canal.</p>
-      <div class="btns">${c.status==='REAUTORIZAR'&&c.canal!=='VENDASCONEX'?`<button class="btn pri sm" data-act="ec-con" data-v="${c.canal}">Conectar de novo</button>`:''}<button class="btn sm" data-act="ec-sync" data-id="${c.id}" ${s?'disabled':''}>Atualizar agora</button><button class="btn sm danger" data-act="ec-del" data-id="${c.id}">Desconectar</button></div></section>`};
+      <div class="btns">${(c.status==='REAUTORIZAR'||c.status==='ERRO')&&c.canal!=='VENDASCONEX'?`<button class="btn pri sm" data-act="ec-con" data-v="${c.canal}">Conectar de novo</button>`:''}<button class="btn sm" data-act="ec-sync" data-id="${c.id}" ${s?'disabled':''}>Atualizar agora</button><button class="btn sm danger" data-act="ec-del" data-id="${c.id}">Desconectar</button></div></section>`};
   const novo=I.canais.map(k=>{const tem=cs.some(c=>c.canal===k.canal);
     return `<div class="ec-novo"><div>${ecDot(k.canal)}<b>${k.nome}</b><small class="faint">${!k.disponivel?'em breve':k.modo==='chave'?'com a chave gerada no painel do VendasConex':'você autoriza no site do canal'}</small></div>
       ${k.disponivel?`<button class="btn sm ${tem?'':'pri'}" data-act="ec-con" data-v="${k.canal}">${tem?'Conectar outra conta':'Conectar'}</button>`:'<span class="chip">em breve</span>'}</div>
       ${k.canal==='VENDASCONEX'&&EC.vc?`<form class="ec-vc" id="f-ec-vc"><p class="note" style="margin:0">No painel do VendasConex, abra <b>Ajustes → Integração com o Gestor Conex</b>, toque em <b>Gerar chave</b> e cole aqui. A chave só lê os pedidos (sem dados dos seus clientes).</p>
         <div class="field"><label for="ec-chave">Chave do VendasConex</label><input class="inp" id="ec-chave" autocomplete="off" placeholder="vcx_gc_…"></div><div class="btns"><button class="btn pri sm">Conectar</button><button class="btn sm" type="button" data-act="ec-vc-x">Cancelar</button></div></form>`:''}`}).join('');
-  return `${cs.map(conta).join('')}
+  return `${pd}${av}${cs.map(conta).join('')}
     <section class="card"><div class="card-h"><h2>Conectar um canal</h2><p>as vendas chegam sozinhas a cada 30 minutos</p></div><div class="ec-novos">${novo}</div>
     <p class="note" style="margin:12px 0 0">Para analisar, o Gestor Conex guarda nos servidores os pedidos dos canais conectados (data, itens, valores, comissões, frete e impostos), sem nome nem endereço dos compradores. Esses dados não usam a criptografia de ponta a ponta dos dados que você lança à mão. Ao desconectar, os pedidos daquela conta são apagados.</p></section>`}
 
@@ -2353,6 +2371,9 @@ async function ecAct(a,b){const id=b.dataset.id;
   if(a==='ec-ped'){EC.pedOn=true;EC.ped=null;EC.pedKey='';render(true);return}
   if(a==='ec-pg'){const n=+b.dataset.n;if(n>0)ecCarregaPed(n);return}
   if(a==='ec-vc-x'){EC.vc=false;render(true);return}
+  if(a==='ec-aviso-x'){EC.aviso='';render(true);return}
+  if(a==='ec-pend-ok'){const pe=EC.pend;if(!pe)return;b.disabled=true;try{const r=await ecGet('/ecom/pendente/'+encodeURIComponent(pe.p)+'/confirmar',{method:'POST'});ecPendSet(null);await ecCarregaInfo();ecInvalida();render(true);toast(`${r.nome} conectada. Buscando os pedidos…`)}catch(e){ecPendSet(null);EC.aviso=e.message;render(true)}return}
+  if(a==='ec-pend-x'){const pe=EC.pend;ecPendSet(null);render(true);if(pe)ecGet('/ecom/pendente/'+encodeURIComponent(pe.p),{method:'DELETE'}).catch(()=>{});return}
   if(a==='ec-con'){const ch=b.dataset.v;if(ch==='VENDASCONEX'){EC.vc=true;render(true);setTimeout(()=>{const i=$('#ec-chave');if(i)i.focus()},50);return}
     b.disabled=true;try{const r=await ecGet('/ecom/'+ch.toLowerCase()+'/conectar',{method:'POST'});location.href=r.url}catch(e){toast(e.message);b.disabled=false}return}
   if(a==='ec-sync'){b.disabled=true;try{await ecGet(`/ecom/conexoes/${id}/sincronizar`,{method:'POST'});if(!ecReal())toast('No protótipo os pedidos já estão em dia.');await ecCarregaInfo();render(true)}catch(e){toast(e.message);b.disabled=false}return}
@@ -2371,7 +2392,7 @@ function render(keepScroll){
   if(A.chave){document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#main').innerHTML=vChave();return}
   if(!(S.fixasRep&&S.fixasRep[ymOf(TODAY)]))repeteFixas();
   document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#auth').innerHTML='';
-  montaNav(!!(C.admin&&!NATIVO));if(!VIEWS[ui.tab]||(ui.tab==='admin'&&!(C.admin&&!NATIVO))||(IOS&&ui.tab==='ecommerce'))ui.tab='painel';
+  montaNav(!!(C.admin&&!NATIVO));if(!VIEWS[ui.tab]||(ui.tab==='admin'&&!(C.admin&&!NATIVO))||(IOS&&(ui.tab==='ecommerce'||ui.tab==='assinatura')))ui.tab='painel';
   document.querySelectorAll('nav [data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===ui.tab?'page':'false'));
   $('#biz-side').textContent=S.negocio.nome;
   const sy=window.scrollY;
@@ -2430,6 +2451,7 @@ document.addEventListener('change',e=>{
   const el=e.target;
   if(el.id==='adm-sit'){ADM.sit=el.value;admCarrega();return}
   if(el.id==='ecP'){ui.ecP=el.value;EC.ped=null;render(true);return}
+  if(el.id==='ec-de'||el.id==='ec-ate'){if(el.value&&el.value<=TODAY){ui[el.id==='ec-de'?'ecDe':'ecAte']=el.value;EC.ped=null;render(true)}return}
   if(el.id==='ec-semcusto'){ui.ecSemCusto=el.checked;render(true);return}
   if(el.dataset.ecsku!=null){ecSalvaCusto(el);return}
   if(el.dataset.ecsoma){ecSalvaConexao(el.dataset.ecsoma,{somaNoResultado:el.checked});return}
