@@ -65,6 +65,9 @@ function write(dir, { pagesFiles }) {
     writeFileSync(join(dir, 'index.html'), readFileSync(join(here, 'landing.html'), 'utf8'));
     mkdirSync(join(dir, 'app'), { recursive: true });
     writeFileSync(join(dir, 'app', 'index.html'), html);
+    // política de segurança pública em /seguranca (citada nas avaliações do TikTok Shop e da Shopee)
+    mkdirSync(join(dir, 'seguranca'), { recursive: true });
+    writeFileSync(join(dir, 'seguranca', 'index.html'), readFileSync(join(here, 'seguranca.html'), 'utf8'));
     if (existsSync(join(here, 'public', 'og.png'))) cpSync(join(here, 'public', 'og.png'), join(dir, 'og.png'));
   } else writeFileSync(join(dir, 'index.html'), html);
   writeFileSync(join(dir, 'manifest.webmanifest'), JSON.stringify(manifest, null, 2));

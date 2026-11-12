@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Security and Data Protection · Gestor Conex</title>
+<meta name="description" content="Information Security and Data Protection Policy of Gestor Conex (FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA): data classification, access control, encryption, incident response and data subject rights under the LGPD.">
+<meta name="theme-color" content="#0e1726">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@600;700&display=swap">
+<style>
+/* Política de segurança pública (citada nas avaliações de marketplaces). Mesma identidade da landing. */
+:root{--bg:#f2f4f7;--card:#fff;--ink:#0e1726;--muted:#526075;--line:#e1e5eb;--navy:#0e1726;--gold:#c39a3e;--acc:#1e3f8f;
+  --f-display:"Sora","Segoe UI",system-ui,sans-serif;--f-body:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6}
+a{color:var(--acc)}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.top{background:var(--navy);color:#fff}
+.top .in{max-width:860px;margin:0 auto;padding:18px max(20px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:12px}
+.top img{width:36px;height:36px}
+.top b{font-family:var(--f-display);font-size:1.05rem;letter-spacing:.02em}.top b span{color:var(--gold)}
+.top a{color:#fff;text-decoration:none;display:flex;align-items:center;gap:12px}
+main{max-width:860px;margin:0 auto;padding:28px max(20px,env(safe-area-inset-left,0px)) 56px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px clamp(18px,4vw,36px)}
+h1{font-family:var(--f-display);font-size:clamp(1.5rem,4vw,2rem);line-height:1.2;margin:0 0 8px;letter-spacing:-.02em}
+h2{font-family:var(--f-display);font-size:1.1rem;margin:28px 0 8px;padding-top:16px;border-top:1px solid var(--line)}
+.meta{color:var(--muted);font-size:.9rem;margin:0}
+.pt{background:#eef2fb;border-radius:10px;padding:12px 14px;font-size:.92rem;margin:18px 0 0}
+ul,ol{padding-left:1.25rem}li{margin:4px 0}
+.tbl{overflow-x:auto;margin:8px 0}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#f6f8fb}
+footer{color:var(--muted);font-size:.85rem;text-align:center;margin-top:24px}
+</style>
+</head>
+<body>
+<header class="top"><div class="in"><a href="/"><img src="/icons/icon-192.png" alt=""><b>Gestor <span>Conex</span></b></a></div></header>
+<main><article class="card">
+<h1>Information Security and Data Protection Policy</h1>
+<p class="meta">FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA (CNPJ 56.911.022/0001-68) · product: Gestor Conex<br>
+Version 1.0 · Effective date: 6 November 2026 · Reviewed at least annually and whenever systems or data flows change<br>
+Owner: Founder / Data Protection Officer (<a href="mailto:suporte@gestorconex.com.br">suporte@gestorconex.com.br</a>)</p>
+<p class="pt" lang="pt-BR">Política de segurança da informação e proteção de dados do Gestor Conex. Para saber quais dados coletamos e seus direitos pela LGPD, veja a <a href="/app/#privacidade">Política de privacidade</a>.</p>
+
+<h2>1. Purpose and scope</h2>
+<p>This policy defines how Gestor Conex protects the confidentiality, integrity and availability of customer data, including data obtained from marketplace integrations (Mercado Livre, Amazon, Magalu, Shopee, TikTok Shop and VendasConex). It applies to all systems, people and providers that process Gestor Conex data, and complements our public <a href="/app/#privacidade">Privacy Policy</a>, which follows the Brazilian General Data Protection Law (LGPD, Law 13.709/2018).</p>
+
+<h2>2. Roles and responsibilities</h2>
+<ul>
+<li><strong>Founder / Security owner / DPO:</strong> approves this policy, controls all production access, handles data subject requests and leads incident response. Contact: <a href="mailto:suporte@gestorconex.com.br">suporte@gestorconex.com.br</a> (security reports: <a href="mailto:apps@gestorconex.com.br">apps@gestorconex.com.br</a>).</li>
+<li><strong>Service providers</strong> (cloud hosting, payment processors, e-mail delivery): selected for their security practices and used only for their contracted purpose.</li>
+</ul>
+
+<h2>3. Data classification and handling</h2>
+<div class="tbl"><table>
+<thead><tr><th>Class</th><th>Examples</th><th>Protection</th></tr></thead>
+<tbody>
+<tr><td>Secret</td><td>Marketplace access/refresh tokens, API keys, password hashes</td><td>Encrypted at rest with AES-256-GCM (application-level key held only in the hosting secret store); never logged or displayed; passwords stored only as salted bcrypt hashes.</td></tr>
+<tr><td>Confidential</td><td>Business data entered by users (sales, expenses, products)</td><td>End-to-end encrypted on the user's device before upload; Gestor Conex cannot read it.</td></tr>
+<tr><td>Internal</td><td>Marketplace order data (date, items, amounts, fees, shipping, taxes)</td><td>Stored in a private database; visible only to the owning company account. <strong>No buyer names, addresses or contact details are stored.</strong></td></tr>
+<tr><td>Public</td><td>Website, documentation</td><td>Integrity controls only.</td></tr>
+</tbody></table></div>
+<p>Data minimization: marketplace integrations are <strong>read-only</strong> and request only the scopes needed to read orders, financial settlements and shop authorization.</p>
+
+<h2>4. Access control (least privilege)</h2>
+<ul>
+<li>Production systems (hosting, database, code repository, marketplace developer consoles) are accessible only to the founder.</li>
+<li>Multi-factor authentication is required on all administrative accounts; strong unique passwords are kept in a password manager.</li>
+<li>Each customer can access only the data of their own company account; this is enforced server-side on every request (authenticated sessions with signed tokens).</li>
+<li>Secrets are stored only in the hosting provider's secret store, never in source code; access is removed immediately when no longer needed.</li>
+</ul>
+
+<h2>5. Network and infrastructure security</h2>
+<ul>
+<li>All traffic uses HTTPS/TLS. The database runs on a private network and is reachable only by the API service, not from the internet.</li>
+<li>The API applies rate limiting, temporary lockout after repeated failed logins, and bot protection (Cloudflare Turnstile) on website sign-up and login.</li>
+<li>Hosting is on managed cloud infrastructure whose providers patch the underlying systems and provide DDoS protection and monitoring.</li>
+</ul>
+
+<h2>6. Endpoint security and daily operations</h2>
+<ul>
+<li>Company computers run up-to-date operating systems with Microsoft Defender Antivirus (real-time protection) enabled.</li>
+<li>Screen lock on inactivity, disk-level device protection, and a clean-desk practice for any printed material.</li>
+</ul>
+
+<h2>7. Vulnerability and change management</h2>
+<ul>
+<li>Third-party dependencies are scanned for known vulnerabilities (GitHub Dependabot, npm audit); high and critical issues are fixed within 7 days, others in the next release.</li>
+<li>Changes are version-controlled, tested with automated tests before deployment, and can be rolled back.</li>
+</ul>
+
+<h2>8. Incident response</h2>
+<ol>
+<li><strong>Detect and report:</strong> anyone may report a suspected incident to <a href="mailto:apps@gestorconex.com.br">apps@gestorconex.com.br</a>.</li>
+<li><strong>Contain:</strong> the founder revokes or rotates affected credentials and tokens and isolates affected systems.</li>
+<li><strong>Investigate and log:</strong> scope, data affected, root cause and timeline are recorded.</li>
+<li><strong>Notify:</strong> when personal data is involved, affected customers and sellers, the relevant marketplace (e.g., TikTok Shop, Shopee) and the ANPD (Brazilian data protection authority) are notified without undue delay and within 72 hours.</li>
+<li><strong>Recover and improve:</strong> restore service, apply corrective actions and review this policy.</li>
+</ol>
+
+<h2>9. Data retention, deletion and data subject rights</h2>
+<ul>
+<li>Users can export and delete their data in the app (My account → Privacy and data). Disconnecting a marketplace shop immediately deletes its tokens and order data.</li>
+<li>Account deletion removes all data within 30 days, including backups, except payment and tax records that Brazilian law requires us to keep.</li>
+<li>Requests from users, sellers or marketplaces to access, correct or delete data are answered within 15 days via <a href="mailto:suporte@gestorconex.com.br">suporte@gestorconex.com.br</a>.</li>
+</ul>
+
+<h2>10. Data location and providers</h2>
+<p>Application and database are hosted on Railway (managed cloud, United States); the static website is served by Cloudflare. Payments are processed by Mercado Pago, Apple and Google; card data is never received or stored by Gestor Conex. International transfers follow LGPD article 33.</p>
+
+<h2>11. Review</h2>
+<p>This policy is reviewed at least once a year and whenever there is a significant change to systems, providers or data flows.</p>
+</article>
+<footer>© 2026 FUSARO FERNANDES TECNOLOGIA DE DADOS LTDA · <a href="/">gestorconex.com.br</a> · <a href="/app/#privacidade">Privacidade</a> · <a href="/app/#termos">Termos</a></footer>
+</main>
+</body>
+</html>
