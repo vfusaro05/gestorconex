@@ -342,8 +342,9 @@ tr:last-child td{border-bottom:0}
 
 /* lançamentos */
 .entry-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
-.datebox{display:flex;align-items:center;gap:8px}
-.datebox input{border:1px solid var(--line-2);background:var(--bg-2);border-radius:12px;padding:9px 10px}
+.datebox{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%}
+.datebox .icon-btn{flex:none}
+.datebox input{border:1px solid var(--line-2);background:var(--bg-2);border-radius:12px;padding:9px 10px;min-width:0;flex:1 1 auto}
 .group-t{margin:2px 0 4px;font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
 .vlist{display:flex;flex-direction:column}
 .vrow{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n s" "p s";column-gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line)}
