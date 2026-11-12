@@ -505,6 +505,11 @@ textarea.inp{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;resize
 @media (max-width:899px){#toast{bottom:auto;top:calc(12px + env(safe-area-inset-top,0px))}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 /* iPhone: campo com letra menor que 16px faz o iOS dar zoom ao tocar e a tela fica maior que o aparelho (desliza para os lados). Em tela de toque os campos ficam com 16px. */
+/* Ajustes → Usuários */
+.eq-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.eq-row:first-of-type{border-top:0}
+.eq-vagas{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.eq-vagas output{min-width:32px;text-align:center;font-family:var(--f-display);font-weight:700;font-size:1.1rem}
 @media (pointer:coarse){input,select,textarea,textarea.inp{font-size:16px}select{max-width:100%;contain:paint}}
 </style>
 </head>
@@ -765,7 +770,9 @@ const IC={
 // App da Apple: sem a aba E-commerce por enquanto (fica fora da revisão da App Store; site e Android têm)
 const TABS=[['painel','Início'],['vendas','Vendas'],['despesas','Despesas'],['ecommerce','E-commerce','Online','ecom'],['cadastros','Cadastros'],['conta','Minha conta','Conta','perfil'],['ajustes','Ajustes']].filter(t=>!(IOS&&t[0]==='ecommerce'));
 let navKey='';
-function montaNav(adm){const t=TABS.concat(adm?[['admin','Administração','Admin']]:[]),k=t.map(x=>x[0]).join();if(k===navKey)return;navKey=k;
+const ABAS_LANC=['vendas','despesas','conta'];
+const ehLanc=()=>{try{return !!(C&&C.tipo==='lancador')}catch(e){return false}}; // o menu é montado antes de C existir
+function montaNav(adm){const t=(ehLanc()?TABS.filter(x=>ABAS_LANC.includes(x[0])):TABS).concat(adm?[['admin','Administração','Admin']]:[]),k=t.map(x=>x[0]).join();if(k===navKey)return;navKey=k;
   $('#nav-side').innerHTML=t.map(([k,l,,ic])=>`<button data-tab="${k}">${IC[ic||k]}${l}</button>`).join('')+`<button data-act="c-sair">${IC.sair}Sair</button>`;
   $('#nav-bottom').innerHTML=t.map(([k,l,c,ic])=>`<button data-tab="${k}">${IC[ic||k]}<span>${c||l}</span></button>`).join('');
   $('#nav-bottom').style.gridTemplateColumns=`repeat(${t.length},1fr)`}
@@ -1217,7 +1224,7 @@ function vCadastros(){
 /* ---------- AJUSTES ---------- */
 function vAjustes(){
   const dias=S.negocio.dias||[];
-  return `${topbar('Ajustes')}
+  return `${topbar('Ajustes')}${vEquipe()}
   <section class="card"><div class="card-h"><h2>Aparência</h2><p>Só muda neste aparelho.</p></div>
     <div class="seg" role="group" aria-label="Aparência">${[['clean','Clean (claro)'],['escuro','Escuro']].map(([k,l])=>`<button data-act="look" data-v="${k}" aria-pressed="${ui.look===k}">${l}</button>`).join('')}</div></section>
   <section class="card"><div class="card-h"><h2>Lembretes</h2><p>Avisos no celular para não esquecer de lançar.</p></div>
@@ -1310,7 +1317,7 @@ function assinStatus(){const s=assinStatusWeb();if(!NATIVO||C.assin.admin)return
   const l=daysBetween(TODAY,C.trialFim);return{...s,x:`Faltam ${l} ${l===1?'dia':'dias'} (até ${fmtD(C.trialFim)}).`}}
 function acessoOk(){const a=C.assin;if(a.admin)return true;if(C.real)return !!a.acessoSrv;if(a.status==='ativa')return a.renov||TODAY<=a.prox;return daysBetween(TODAY,C.trialFim)>=0}
 /* faixa de aviso no topo de todas as telas (teste grátis, vencimento, cobrança recusada). No app das lojas: texto neutro, sem botão de pagar. */
-function trialBanner(){if(!C||ui.tab==='assinatura'||C.assin.admin)return'';const a=C.assin,mail=' Os detalhes estão no seu e-mail.';
+function trialBanner(){if(ehLanc())return'';if(!C||ui.tab==='assinatura'||C.assin.admin)return'';const a=C.assin,mail=' Os detalhes estão no seu e-mail.';
   // App da Apple: nenhuma faixa de teste grátis, vencimento, cobrança, proposta ou aditivo (regra 3.1.1, igual ao VendasConex)
   if(IOS)return'';
   // proposta ou aditivo esperando o aceite: aparece no app do Android (não é pagamento)
@@ -1432,7 +1439,7 @@ function contaCards(){const st=assinStatus();
       <div class="field"><label for="c-new">Nova senha</label><div class="pw"><input class="inp" id="c-new" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-chg')}</div>
       <div class="field"><label for="c-new2">Repita a nova senha</label><div class="pw"><input class="inp" id="c-new2" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
       ${ui.chgErr?`<div class="a-err" role="alert">${esc(ui.chgErr)}</div>`:''}<button class="btn pri" type="submit">Salvar nova senha</button></form>`:''}</section>
-  ${IOS?'':`<section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:${NATIVO||C.assin.admin?'0':'0 0 12px'}">${st.x}</p>${NATIVO||C.assin.admin?'':`<button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button>`}</section>`}
+  ${IOS||ehLanc()?'':`<section class="card" data-tour="assin"><div class="card-h"><h2>Assinatura</h2><span class="status ${st.c}"><i></i>${st.t}</span></div><p class="note" style="margin:${NATIVO||C.assin.admin?'0':'0 0 12px'}">${st.x}</p>${NATIVO||C.assin.admin?'':`<button class="btn pri" data-tab="assinatura">${C.assin.status==='ativa'?'Gerenciar assinatura':'Ver planos e assinar'}</button>`}</section>`}
   <section class="card" id="priv"><div class="card-h"><h2>Privacidade e dados</h2><p>seus direitos pela LGPD</p></div>
     <div class="link-list"><button data-act="c-export">Exportar meus dados<span>›</span></button><button data-act="legal" data-v="privacidade">Política de privacidade<span>›</span></button><button data-act="legal" data-v="termos">Termos de uso<span>›</span></button><button data-act="legal" data-v="excluir-info">Como funciona a exclusão de conta<span>›</span></button></div>
     ${ui.export?`<div style="margin-top:12px"><p class="note">Copie o texto abaixo e guarde. Ele tem todos os seus dados (formato JSON, abre em qualquer planilha ou sistema).</p><textarea id="exp-txt" class="inp" rows="6" readonly>${esc(exportJson())}</textarea><button class="btn sm" data-act="c-copy" style="margin-top:8px">Copiar dados</button></div>`:''}
@@ -1559,7 +1566,7 @@ const aExcluida=()=>`<h1>Conta excluída</h1><p class="muted" style="margin:0">A
 function renderAuth(){
   document.body.classList.add('auth-on');const el=$('#auth');el.hidden=false;
   if(IOS&&(A.scr==='cadastro'||A.scr==='verificar'))A.scr='login';
-  const s=A.scr,F={'del-confirm':aDelConfirm,intro:aIntro,login:aLogin,cadastro:aCadastro,verificar:aVerificar,esqueci:aEsqueci,enviada:aEnviada,'nova-senha':aNovaSenha,excluida:aExcluida};
+  const s=A.scr,F={convite:aConvite,'del-confirm':aDelConfirm,intro:aIntro,login:aLogin,cadastro:aCadastro,verificar:aVerificar,esqueci:aEsqueci,enviada:aEnviada,'nova-senha':aNovaSenha,excluida:aExcluida};
   const body=LEGAL_SCR.includes(s)?`<button class="lnk" data-act="a-back">← Voltar</button><div class="legal">${legalHtml(s)}</div>`:(F[s]||aLogin)();
   el.innerHTML=`<div class="auth ${LEGAL_SCR.includes(s)?'is-legal':''}">
     <aside class="auth-side"><div class="brand"><div class="mark" role="img" aria-label="Gestor Conex">G</div><div><b>Gestor <span class="cx">Conex</span></b><small>Gestão para pequenos negócios</small></div></div>
@@ -1590,7 +1597,7 @@ function authAct(a,b){
   else if(a==='a-resend'&&REAL){api('/auth/register/resend',{body:{pendingId:A.pend&&A.pend.pendingId}}).then(()=>{A.info='Enviamos um novo código.';render()}).catch(e=>{A.err=e.message;render()})}
   else if(a==='a-resend'){A.code=String(100000+Math.floor(Math.random()*9e5));A.info='Enviamos um novo código.';render()}
 }
-const AUTH_FORMS=['f-login','f-reg','f-ver','f-esq','f-nova','f-chg','f-del'];
+const AUTH_FORMS=['f-login','f-reg','f-ver','f-esq','f-nova','f-chg','f-del','f-conv'];
 async function onAuthSubmit(id){
   if(REAL)return onAuthSubmitReal(id);
   const g=k=>{const e=$('#'+k);return e?String(e.value).trim():''},chk=k=>{const e=$('#'+k);return !!(e&&e.checked)},rad=n=>(document.querySelector(`input[name="${n}"]:checked`)||{}).value;
@@ -1737,7 +1744,7 @@ async function pedeLembretes(forcar){const P=LN();if(!P)return;
     if(forcar&&p.display==='denied')toast('Notificações bloqueadas. Libere nas configurações do celular.');agendaAgora()}catch(e){}}
 if(NATIVO){const P=LN();if(P&&P.addListener)P.addListener('localNotificationActionPerformed',a=>{const x=(a.notification||{}).extra||{};
   if(!x.tab||!logged||!C)return;ui.tab=x.tab;if(x.tab==='vendas')ui.vDate=TODAY;if(x.freq)ui.gFreq=x.freq;render();window.scrollTo(0,0)})}
-const maybeTour=()=>{if(!C||!logged)return;agendaLembretes();if(!introVisto()){Object.assign(A,{overlay:true,scr:'intro',slide:0});render();window.scrollTo(0,0);return}if(!C.tourDone)setTimeout(startTour,600)};
+const maybeTour=()=>{if(!C||!logged)return;if(ehLanc()){agendaLembretes();return}agendaLembretes();if(!introVisto()){Object.assign(A,{overlay:true,scr:'intro',slide:0});render();window.scrollTo(0,0);return}if(!C.tourDone)setTimeout(startTour,600)};
 function finishTour(msg){tourOn=false;if(C){C.tourDone=true;saveC()}pedeLembretes();ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg)}
 function runTourAt(i){const t=TOURS[i];if(!t)return finishTour('Pronto! Agora é com você.');if(t.prep)t.prep();ui.tab=t.tab;render();window.scrollTo(0,0);const alvo=t.tab;
   setTimeout(()=>{
@@ -1841,10 +1848,17 @@ function aplicaAssin(a){C.trialFim=dsIso(a.trialEndsAt);aplicaPlanos(a.planos);c
   if(!ui.planoEsc)ui.plano=plano; // tela de planos abre no plano atual, até a pessoa escolher outro
   C.assin={status:a.status,plano,metodo:a.method,renov:a.autoRenew,prox:dsIso(a.currentPeriodEnd),cardPending:a.cardPending,acessoSrv:a.acesso,falhou:!!a.cartaoFalhou,pago:!!a.pago,
     admin:!!a.admin,contrato:a.contrato||null,hist:(a.payments||[]).map(p=>({d:dsIso(p.d),plano:p.tipo==='CONTRATO'?'Contrato':p.tipo==='ADITIVO'?'Aditivo de contrato':(PLANOS[planoDe(p.meses||1)]||PLANOS.mensal).nome,metodo:p.metodo,valor:p.valor,st:'Pago'}))}}
-function aplicaMe(me){C={real:true,nome:me.nome,email:me.email,tel:me.tel,emp:me.emp,seg:me.seg,dt:me.dt,doc:me.doc,emailOk:me.emailOk,telOk:me.telOk,tourDone:me.tourDone,admin:!!me.admin,criado:dsIso(me.criado),termos:{versao:TERMOS_V}};aplicaAssin(me.assinatura)}
+function aplicaMe(me){C={real:true,nome:me.nome,email:me.email,tel:me.tel,emp:me.emp,seg:me.seg,dt:me.dt,doc:me.doc,emailOk:me.emailOk,telOk:me.telOk,tourDone:me.tourDone,admin:!!me.admin,criado:dsIso(me.criado),termos:{versao:TERMOS_V},
+    tipo:me.tipo||'dono',donoNome:me.donoNome||''};
+  // usuário adicional (Lançador): só sabe se o acesso está liberado; não vê valores, planos nem pagamentos
+  if(C.tipo==='lancador'){const a=me.assinatura||{};C.trialFim=TODAY;C.assin={status:a.status||'trial',plano:'mensal',acessoSrv:!!a.acesso,admin:!!a.admin,contrato:null,hist:[],pago:true};return}
+  aplicaAssin(me.assinatura)}
 function normalizaS(){S.gastos=S.gastos||{};S.gastosS=S.gastosS||{};S.gastosD=S.gastosD||{};S.vendas=S.vendas||{};S.itens=S.itens||[];S.despesas=S.despesas||[];S.negocio=S.negocio||{nome:C.emp,segmento:C.seg,dias:[1,2,3,4,5,6]};S.despesas.forEach(x=>{x.freq=x.freq||'mensal'})}
 async function carregaSessao(pw){const [me,st]=await Promise.all([api('/me'),api('/state')]);aplicaMe(me);stateVer=st.version;logged=true;A.chave=null;
   const cr=me.cripto||{};DK=await dkLocal(me.email);if(!DK&&pw)DK=await abre(pw,cr.pw);
+  if(C.tipo==='lancador'&&!DK){if(pw)MPW=pw;DK=await membroChave(cr,MPW);
+    if(!DK){A.aguarda=true;A.aguardaErr='';S=novoNegocio(C.seg,C.emp);normalizaS();return}MPW=null}
+  A.aguarda=false;
   if(cifrado(st.data)){
     if(DK){try{S=await decifra(st.data)}catch(e){DK=null}}
     // sem a chave (senha trocada pelo "Esqueci a senha", ou aparelho sem a cópia): tela para abrir ou recuperar os dados
@@ -1852,13 +1866,13 @@ async function carregaSessao(pw){const [me,st]=await Promise.all([api('/me'),api
   }else{
     S=st.data;normalizaS();
     // conta criada antes da criptografia: cifra agora (precisa da senha; sem ela fica para o próximo login)
-    if(pw){DK=DK||await novaChave();await api('/me/cripto',{method:'PUT',body:await chavesNovas(pw)});syncPend=true;await enviaEstado()}
+    if(pw&&C.tipo!=='lancador'){DK=DK||await novaChave();await api('/me/cripto',{method:'PUT',body:await chavesNovas(pw)});syncPend=true;await enviaEstado()}
   }
   normalizaS();if(DK)await guardaDK(me.email);EC={...EC,info:null,cur:null,prev:null,key:'',prod:null,ped:null,pedKey:'',dias:null,infoAt:0};ecCarregaDias();ecAtualiza();if(EC.pend&&!IOS){ui.tab='ecommerce';ui.ecSec='contas'}}
 // abre os dados com a chave recuperada (senha digitada ou código do suporte) e lacra de novo com a senha atual
 async function abreComChave(dk,pw,extra){DK=dk;const st=await api('/state');S=cifrado(st.data)?await decifra(st.data):st.data;stateVer=st.version;
   await api('/me/cripto',{method:'PUT',body:{pw:await lacra(pw,DK),...(extra||{})}});A.chave=null;normalizaS();await guardaDK(C.email)}
-function sairReal(msg){setTok('');apagaDK();A.chave=null;clearTimeout(EC.pollT);EC={...EC,info:null,cur:null,prev:null,key:'',prod:null,ped:null,pedKey:'',dias:null,vc:false};Object.assign(ADM,{res:null,lista:null,det:null,err:''});C=null;logged=false;syncPend=false;S=seedExemplo();Object.assign(A,{scr:'login',err:'',info:msg||'',overlay:false,cap:{}});render();window.scrollTo(0,0)}
+function sairReal(msg){setTok('');apagaDK();A.chave=null;A.aguarda=false;MPW=null;EQ.dados=null;EQ.pix=null;EQ.extras=null;clearTimeout(EC.pollT);EC={...EC,info:null,cur:null,prev:null,key:'',prod:null,ped:null,pedKey:'',dias:null,vc:false};Object.assign(ADM,{res:null,lista:null,det:null,err:''});C=null;logged=false;syncPend=false;S=seedExemplo();Object.assign(A,{scr:'login',err:'',info:msg||'',overlay:false,cap:{}});render();window.scrollTo(0,0)}
 
 /* gravação dos dados no servidor: espera 0,7 s de calma, envia com a versão; conflito traz a versão mais nova */
 let syncT=null,syncPend=false,syncBusy=false,offlineAvisado=false;
@@ -1872,7 +1886,9 @@ async function enviaEstado(){if(syncBusy){syncT=setTimeout(enviaEstado,500);retu
 // sessão única: ao voltar para o app/aba, confere se a conta não entrou em outro aparelho
 if(typeof document!=='undefined'&&document.addEventListener)document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&REAL&&C&&C.real&&logged)api('/me').then(aplicaMeSemPerder).catch(()=>{})});
 // login único: a cada minuto, com a tela à vista, confere se a conta não entrou em outro aparelho (SESSION_REPLACED derruba esta sessão)
-setInterval(()=>{if(typeof document!=='undefined'&&document.visibilityState==='visible'&&REAL&&C&&C.real&&logged)api('/me').then(aplicaMeSemPerder).catch(()=>{})},60000);
+setInterval(()=>{if(typeof document!=='undefined'&&document.visibilityState==='visible'&&REAL&&C&&C.real&&logged){
+  if(A.aguarda){tentaLiberar(false);return}
+  api('/me').then(aplicaMeSemPerder).catch(()=>{});entregaChaves()}},60000);
 function aplicaMeSemPerder(me){if(!C||!C.real)return;const tour=C.tourDone;aplicaMe(me);C.tourDone=tour||me.tourDone;if(['painel','assinatura','conta'].includes(ui.tab))render(true)}
 if(typeof window!=='undefined'&&window.addEventListener)window.addEventListener('beforeunload',e=>{if(REAL&&syncPend){e.preventDefault();e.returnValue=''}});
 
@@ -1904,6 +1920,112 @@ async function chaveAct(a,b){const k=A.chave;if(!k)return;const v=id=>(($('#'+id
       DK=await novaChave();await api('/me/cripto',{method:'PUT',body:{...(await chavesNovas(p)),clearRec:true}});A.chave=null;S=novoNegocio(C.seg,C.emp);normalizaS();
       syncPend=true;await enviaEstado();await guardaDK(C.email);ui.tab='painel';render();toast('Negócio novo criado')})
   }catch(e){falhou(e.message)}}
+
+/* ---------- USUÁRIOS ADICIONAIS (Lançador, R$ 9,90/mês cada) ----------
+   O dono convida por e-mail (Ajustes → Usuários). O convidado cria a senha pelo link e o aparelho dele gera um par de
+   chaves RSA-OAEP: a pública vai para o servidor; a privada vai lacrada pela senha. O aparelho do dono (único que tem
+   a chave do negócio) lacra a chave com a pública do convidado; no acesso seguinte o convidado abre e lacra com a
+   própria senha. O servidor continua sem conseguir ler os dados. */
+let MPW=null; // senha do convidado só em memória, enquanto espera o dono liberar
+const EQ={dados:null,carregando:false,err:'',pix:null,extras:null,salvando:false};
+const RSA_OAEP={name:'RSA-OAEP',hash:'SHA-256'};
+async function lacraBytes(segredo,bytes){const salt=rnd(16),iv=rnd(12),iter=210000;
+  const wk=await crypto.subtle.encrypt({name:'AES-GCM',iv},await kek(segredo,salt,iter),bytes);return {v:1,salt:b64(salt),iter,iv:b64(iv),wk:b64(wk)}}
+async function abreBytes(segredo,w){if(!w)return null;try{return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:ub64(w.iv)},await kek(segredo,ub64(w.salt),w.iter),ub64(w.wk)))}catch(e){return null}}
+async function parConvidado(senha){const k=await crypto.subtle.generateKey({...RSA_OAEP,modulusLength:2048,publicExponent:new Uint8Array([1,0,1])},true,['encrypt','decrypt']);
+  return {pub:b64(await crypto.subtle.exportKey('spki',k.publicKey)),priv:await lacraBytes(senha,await crypto.subtle.exportKey('pkcs8',k.privateKey))}}
+// convidado: abre a chave entregue pelo dono e lacra com a própria senha (vale nos outros aparelhos dele)
+async function membroChave(cr,pw){if(!pw||!cr||!cr.grant||!cr.priv)return null;const pk=await abreBytes(pw,cr.priv);if(!pk)return null;
+  try{const priv=await crypto.subtle.importKey('pkcs8',pk,RSA_OAEP,false,['decrypt']);
+    const dk=await importaDK(await crypto.subtle.decrypt({name:'RSA-OAEP'},priv,ub64(cr.grant)));
+    await api('/me/cripto',{method:'PUT',body:{pw:await lacra(pw,dk),esc:await lacraEmpresa(dk)}});return dk}catch(e){return null}}
+// dono: entrega a chave a quem aceitou o convite (ao abrir Ajustes e a cada minuto com o app aberto)
+let entregando=false;
+async function entregaChaves(){if(entregando||!REAL||!C||!C.real||ehLanc()||!DK||C.assin.admin)return;entregando=true;
+  try{let eq=await api('/equipe');const raw=await crypto.subtle.exportKey('raw',DK);
+    for(const m of eq.membros.filter(x=>x.situacao==='aguardando'&&x.chavePub)){
+      const pub=await crypto.subtle.importKey('spki',ub64(m.chavePub),RSA_OAEP,false,['encrypt']);
+      eq=await api('/equipe/membros/'+encodeURIComponent(m.id)+'/chave',{method:'PUT',body:{grant:b64(await crypto.subtle.encrypt({name:'RSA-OAEP'},pub,raw))}});
+      toast(`Acesso liberado para ${m.nome.split(' ')[0]}`)}
+    const antes=JSON.stringify(EQ.dados);EQ.dados=eq;if(ui.tab==='ajustes'&&antes!==JSON.stringify(eq))render(true)}
+  catch(e){if(e.status===403)EQ.dados=null}finally{entregando=false}}
+// convidado esperando: confere se o dono já liberou
+async function tentaLiberar(manual){
+  try{if(!MPW){const p=(($('#ag-pw')||{}).value||'');if(p){await api('/me/check-password',{body:{senha:p}});MPW=p}}
+    if(!MPW){if(manual){A.aguardaErr='Digite sua senha.';render()}return}
+    const me=await api('/me'),cr=me.cripto||{};const dk=cr.pw?await abre(MPW,cr.pw):await membroChave(cr,MPW);
+    if(!dk){if(manual){A.aguardaErr=`Ainda não liberado. Peça para ${(C.donoNome||'o dono').split(' ')[0]} abrir o Gestor Conex.`;render()}return}
+    DK=dk;const st=await api('/state');S=cifrado(st.data)?await decifra(st.data):st.data;stateVer=st.version;normalizaS();await guardaDK(C.email);
+    A.aguarda=false;A.aguardaErr='';MPW=null;ui.tab='vendas';render();window.scrollTo(0,0);toast('Acesso liberado! Bom trabalho.')}
+  catch(e){if(manual){A.aguardaErr=e.message;render()}}}
+function vAguarda(){const dn=esc((C.donoNome||'o dono').split(' ')[0]);
+  return `${topbar('Quase lá')}<section class="card" style="max-width:640px"><div class="card-h"><h2>Aguardando ${dn} liberar seu acesso</h2></div>
+    <p class="muted" style="margin:0 0 12px">Os dados de ${esc(C.emp)} são criptografados: só o aparelho de ${dn} consegue entregar a chave para você. Isso acontece sozinho quando ${dn} estiver com o Gestor Conex aberto, e esta tela confere a cada minuto.</p>
+    ${A.aguardaErr?`<div class="a-err" role="alert">${esc(A.aguardaErr)}</div>`:''}
+    ${MPW?'':`<div class="field" style="max-width:420px"><label for="ag-pw">Sua senha</label><div class="pw"><input class="inp" id="ag-pw" type="password" autocomplete="current-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>`}
+    <div class="btns"><button class="btn pri" data-act="eq-verificar">Verificar agora</button><button class="btn" data-act="c-sair">Sair da conta</button></div></section>`}
+
+/* Ajustes → Usuários (só o dono, só com conta real) */
+function vEquipe(){if(!REAL||!C||!C.real||ehLanc()||C.assin.admin)return'';
+  const d=EQ.dados;
+  if(!d){if(!EQ.carregando){EQ.carregando=true;(DK?entregaChaves():api('/equipe').then(r=>{EQ.dados=r})).catch(e=>{EQ.err=e.message}).finally(()=>{EQ.carregando=false;if(ui.tab==='ajustes')render(true)})}
+    return `<section class="card"><div class="card-h"><h2>Usuários</h2></div><p class="note" style="margin:0">${EQ.err?esc(EQ.err):'Carregando…'}</p></section>`}
+  const ext=EQ.extras==null?d.contratadas:EQ.extras,sit={ativo:'ativo',liberado:'acesso liberado, falta o primeiro login',aguardando:'aguardando liberação'};
+  const linhas=d.membros.map(m=>`<div class="eq-row"><div><b>${esc(m.nome)}</b> <span class="chip">Lançador</span><br><small class="faint">${esc(m.email)} · ${sit[m.situacao]||''}</small></div><button class="btn sm danger" data-act="eq-remover" data-id="${esc(m.id)}">Remover</button></div>`)
+    .concat(d.convites.map(i=>`<div class="eq-row"><div><b>${esc(i.nome)}</b> <span class="chip">convite enviado</span><br><small class="faint">${esc(i.email)} · vale até ${fmtD(dsIso(i.expira))}</small></div><button class="btn sm" data-act="eq-cancelar" data-id="${esc(i.id)}">Cancelar</button></div>`)).join('');
+  const vagas=NATIVO||C.assin.contrato?`<p class="note" style="margin:0">${NATIVO?'Para acrescentar vagas, acesse gestorconex.com.br pelo navegador.':'As vagas do seu contrato são combinadas com o suporte.'}</p>`
+    :`<div class="eq-vagas"><span>Vagas de usuário adicional</span><div class="step"><button data-act="eq-menos" aria-label="Menos vagas" ${ext<=d.ocupadas?'disabled':''}>−</button><output>${ext}</output><button class="plus" data-act="eq-mais" aria-label="Mais vagas" ${ext>=d.max?'disabled':''}>+</button></div>
+        ${ext!==d.contratadas?`<button class="btn pri sm" data-act="eq-salvar" ${EQ.salvando?'disabled':''}>${EQ.salvando?'Salvando…':'Salvar vagas'}</button>`:''}</div>
+      <p class="note" style="margin:6px 0 0">${brl(d.valorCents/100)} por usuário, por mês, somado à sua assinatura.${C.assin.pago&&C.assin.status==='ativa'?' Acrescentando no meio do período pago, você paga só a diferença dos dias que faltam.':''}</p>`;
+  const pix=EQ.pix?`<div class="pix" style="margin-top:12px">${EQ.pix.img?`<img class="qr" src="data:image/png;base64,${EQ.pix.img}" alt="QR code do Pix">`:''}<div class="pane" style="margin:0;min-width:0"><p style="margin:0;font-weight:600">Pix de ${brl(EQ.pix.valor)} pelas vagas novas. Assim que cair, as vagas ficam liberadas.</p>
+      <div class="codebox">${EQ.pix.code}</div><div class="btns" style="margin:0"><button class="btn sm" data-act="eq-pixcopy">Copiar código</button><button class="btn pri sm" data-act="eq-pixok">Já paguei, verificar</button></div></div></div>`:'';
+  const conv=d.livres>0?`<form id="f-eq-conv" class="form-row dq" style="margin-top:14px;align-items:end"><div class="field"><label for="eq-nome">Nome</label><input class="inp" id="eq-nome" autocomplete="off" placeholder="Ex.: Maria"></div>
+      <div class="field"><label for="eq-email">E-mail</label><input class="inp" id="eq-email" type="email" autocomplete="off" placeholder="maria@email.com"></div><div><button class="btn pri" type="submit">Convidar</button></div></form>`
+    :`<p class="note" style="margin:12px 0 0">${d.contratadas?'Todas as vagas estão ocupadas.':'Você ainda não tem vagas de usuário adicional.'}${NATIVO||C.assin.contrato?'':' Acrescente uma vaga acima para convidar.'}</p>`;
+  return `<section class="card" id="equipe"><div class="card-h"><h2>Usuários</h2><p>Quem lança vendas e despesas com você. O Lançador não vê lucro, custos, E-commerce nem assinatura.</p></div>
+    ${EQ.err?`<div class="a-err" role="alert">${esc(EQ.err)}</div>`:''}
+    <div class="eq-row"><div><b>${esc(C.nome)}</b> <span class="chip">Dono</span><br><small class="faint">${esc(C.email)}</small></div></div>${linhas}
+    <div style="margin-top:14px">${vagas}</div>${pix}${conv}</section>`}
+async function eqConvida(){const nome=(($('#eq-nome')||{}).value||'').trim(),email=(($('#eq-email')||{}).value||'').trim();
+  if(!nome||!email){EQ.err='Informe o nome e o e-mail.';return render(true)}
+  try{EQ.dados=await api('/equipe/convites',{body:{nome,email}});EQ.err='';render(true);toast(`Convite enviado para ${email}`)}catch(e){EQ.err=e.message;render(true)}}
+let eqPoll=null;
+async function eqConferePix(manual){if(!EQ.pix)return;try{const r=await api('/subscription/pix/'+encodeURIComponent(EQ.pix.id));aplicaAssin(r.assinatura);
+  if(r.status==='APPROVED'){EQ.pix=null;EQ.extras=null;clearInterval(eqPoll);EQ.dados=await api('/equipe');render(true);toast('Pagamento confirmado. Vagas liberadas!')}else if(manual)toast('Ainda não recebemos o Pix. Pode levar alguns segundos.')}catch(e){if(manual)toast(e.message)}}
+function eqAct(a,b){const d=EQ.dados;
+  if(a==='eq-verificar'){tentaLiberar(true);return}
+  if(!d)return;
+  if(a==='eq-mais'||a==='eq-menos'){const cur=EQ.extras==null?d.contratadas:EQ.extras;EQ.extras=Math.max(d.ocupadas,Math.min(d.max,cur+(a==='eq-mais'?1:-1)));render(true);return}
+  if(a==='eq-salvar'){EQ.salvando=true;render(true);
+    api('/subscription/usuarios',{body:{extras:EQ.extras}}).then(async r=>{if(r.assinatura)aplicaAssin(r.assinatura);
+      if(r.pix){EQ.pix={id:r.pix.id,code:r.pix.qrCode,img:r.pix.qrCodeBase64,valor:r.pix.valor};clearInterval(eqPoll);eqPoll=setInterval(()=>{if(!EQ.pix||ui.tab!=='ajustes'){clearInterval(eqPoll);return}eqConferePix(false)},5000)}
+      else{EQ.extras=null;toast('Vagas atualizadas')}EQ.dados=await api('/equipe');EQ.err=''})
+      .catch(e=>{EQ.err=e.message}).finally(()=>{EQ.salvando=false;render(true)});return}
+  if(a==='eq-pixcopy'){navigator.clipboard&&navigator.clipboard.writeText(EQ.pix.code).then(()=>toast('Código Pix copiado'));return}
+  if(a==='eq-pixok'){eqConferePix(true);return}
+  if(a==='eq-cancelar'){api('/equipe/convites/'+encodeURIComponent(b.dataset.id),{method:'DELETE'}).then(r=>{EQ.dados=r;render(true);toast('Convite cancelado')}).catch(e=>{EQ.err=e.message;render(true)});return}
+  if(a==='eq-remover'){arm(b,()=>api('/equipe/membros/'+encodeURIComponent(b.dataset.id),{method:'DELETE'}).then(r=>{EQ.dados=r;render(true);toast('Usuário removido')}).catch(e=>{EQ.err=e.message;render(true)}));return}
+}
+
+/* Aceitar convite (link do e-mail): cria a senha e gera as chaves do convidado */
+async function carregaConvite(){try{A.conv.info=await api('/convites/'+encodeURIComponent(A.conv.tok))}catch(e){A.conv.err=e.message}renderAuth()}
+function aConvite(){const c=A.conv||{},i=c.info;
+  if(c.err)return `<h1>Convite</h1><div class="a-err" role="alert">${esc(c.err)}</div><button class="btn big" data-act="a-go" data-v="login">Ir para o login</button>`;
+  if(!i)return `<h1>Convite</h1><p class="muted" style="margin:0">Carregando o convite…</p>`;
+  return `<h1>Você foi convidado</h1><p class="muted" style="margin:0"><b>${esc(i.quem)}</b> convidou você para lançar as vendas e despesas de <b>${esc(i.negocio)}</b>.</p>${errBox()}
+  <form id="f-conv" class="a-form"><div class="field"><label>E-mail</label><input class="inp" value="${esc(i.email)}" disabled></div>
+    <div class="field"><label for="cv-nome">Seu nome</label><input class="inp" id="cv-nome" value="${esc(i.nome)}" autocomplete="name"></div>
+    <div class="field"><label for="cv-pw">Crie uma senha</label><div class="pw"><input class="inp" id="cv-pw" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-conv')}</div>
+    <div class="field"><label for="cv-pw2">Repita a senha</label><div class="pw"><input class="inp" id="cv-pw2" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
+    <label class="chk"><input type="checkbox" id="cv-ok"><span>Li e aceito os <button type="button" class="lnk" data-act="a-go" data-v="termos">Termos de uso</button> e a <button type="button" class="lnk" data-act="a-go" data-v="privacidade">Política de privacidade</button>.</span></label>
+    <button class="btn pri big" type="submit">Aceitar e entrar</button></form>`}
+async function aceitaConvite(){const c=A.conv,i=c&&c.info;if(!i)return;
+  const nome=(($('#cv-nome')||{}).value||'').trim(),pw=($('#cv-pw')||{}).value||'',pw2=($('#cv-pw2')||{}).value||'';
+  const er=(nome.length<3?'Informe seu nome.':'')||pwError(pw,i.email)||(pw!==pw2?'As duas senhas não são iguais.':'')||(!($('#cv-ok')||{}).checked?'Aceite os termos de uso e a política de privacidade.':'');
+  if(er){A.err=er;return renderAuth()}
+  try{const cripto=await parConvidado(pw);const r=await api('/convites/aceitar',{body:{token:c.tok,nome,senha:pw,termos:true,cripto}});
+    setTok(r.token);setSess(true);MPW=pw;A.conv=null;A.err='';A.info='';await carregaSessao(pw);render();window.scrollTo(0,0);toast('Conta criada. Bem-vindo!')}
+  catch(e){A.err=e.message;renderAuth()}}
 /* ---------- Administração (só o administrador do sistema, só no site) ----------
    Clientes, situação da assinatura, pagamentos e ajuste do teste grátis. Os números dos negócios não aparecem:
    são criptografados no aparelho de cada cliente e o servidor não consegue abrir. */
@@ -2051,6 +2173,7 @@ function vAdmin(){if(!ADM.res&&!ADM.carregando&&!ADM.err)setTimeout(admCarrega,0
     ${kpi('Vencidas',num(r.vencida),`${num(r.desativada)} com acesso desativado`)}${kpi('Receita em 30 dias',brl(r.receita30),`total ${brl(r.receitaTotal)}`)}${kpi('Contratos em vigor',num(r.contratosEmVigor),`${num(r.feedbackAbertos)} feedback em aberto`)}</div>`:''}
   ${abas}${corpo}`}
 async function onAuthSubmitReal(id){
+  if(id==='f-conv')return aceitaConvite();
   const g=k=>{const e=$('#'+k);return e?String(e.value).trim():''},chk=k=>{const e=$('#'+k);return !!(e&&e.checked)},rad=n=>(document.querySelector(`input[name="${n}"]:checked`)||{}).value;
   const falha=(e,capId)=>{A.err=e.message;if(capId)A.cap[capId]=false;render();window.scrollTo(0,0)};
   const entrou=async(msg,pw)=>{await carregaSessao(pw);A.err='';A.info='';A.cap={};ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0);if(msg)toast(msg);maybeTour()};
@@ -2118,11 +2241,12 @@ function contaActReal(a,b){
 
 /* início no site: links que voltam do e-mail ou do Mercado Pago, e sessão salva */
 async function bootReal(){
-  const q=new URLSearchParams(location.search),del=q.get('excluir'),em=q.get('email'),ret=q.get('assinatura'),pg=q.get('pg'),mpId=q.get('payment_id')||q.get('collection_id');
+  const q=new URLSearchParams(location.search),conv=q.get('convite'),del=q.get('excluir'),em=q.get('email'),ret=q.get('assinatura'),pg=q.get('pg'),mpId=q.get('payment_id')||q.get('collection_id');
   // volta da autorização de um e-commerce (?ecom=ok|erro&canal=ml&nome=…#ecommerce)
   const eco=q.get('ecom'),ecoMsg=eco==='ok'?`${q.get('nome')||'Conta'} conectada. Buscando os pedidos…`:eco==='pendente'?`Loja ${q.get('nome')||''} autorizada. Confirme na aba E-commerce para conectar à sua conta.`:eco?(q.get('msg')||'Não foi possível conectar.'):'';
   if(eco==='pendente'&&q.get('p'))ecPendSet({p:q.get('p'),nome:q.get('nome')||'',canal:(q.get('canal')||'').toUpperCase()});
-  if(del||em||ret||eco)history.replaceState(null,'',location.pathname);
+  if(del||em||ret||eco||conv)history.replaceState(null,'',location.pathname);
+  if(conv){setTok('');apagaDK();A.conv={tok:conv,info:null,err:''};A.scr='convite';logged=false;renderAuth();carregaConvite();return}
   if(eco){ui.tab='ecommerce';ui.ecSec='contas';A.info=esc(ecoMsg)+' Entre para ver.';if(eco!=='ok'&&eco!=='pendente')EC.aviso=ecoMsg}
   if(del){A.delTok=del;A.scr='del-confirm';logged=false;return renderAuth()}
   if(getTok()){$('#main').innerHTML='<p class="note" style="padding:40px 0;text-align:center">Carregando seus dados…</p>';
@@ -2393,6 +2517,8 @@ function render(keepScroll){
   // sem sessão (ou tutorial aberto): telas de entrada no lugar do app
   if(!logged||!C||A.overlay){if(!logged)agendaLembretes();renderAuth();return} // sem sessão: cancela os lembretes do aparelho
   if(A.chave){document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#main').innerHTML=vChave();return}
+  if(A.aguarda){document.body.classList.remove('auth-on');$('#auth').hidden=true;montaNav(false);$('#main').innerHTML=vAguarda();return}
+  if(ehLanc()&&!ABAS_LANC.concat(['legal','excluir']).includes(ui.tab))ui.tab='vendas';
   if(!(S.fixasRep&&S.fixasRep[ymOf(TODAY)]))repeteFixas();
   document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#auth').innerHTML='';
   montaNav(!!(C.admin&&!NATIVO));if(!VIEWS[ui.tab]||(ui.tab==='admin'&&!(C.admin&&!NATIVO))||(IOS&&(ui.tab==='ecommerce'||ui.tab==='assinatura')))ui.tab='painel';
@@ -2417,6 +2543,7 @@ document.addEventListener('click',e=>{
   if(a.startsWith('k-')){chaveAct(a,b);return}
   if(a.startsWith('adm-')||a.startsWith('fb-')){admAct(a,b);return}
   if(a.startsWith('ec-')){ecAct(a,b);return}
+  if(a.startsWith('eq-')){eqAct(a,b);return}
   if(contaAct(a,b))return;
   // no modo Dia, abre no último dia com vendas lançadas (hoje só se já lançou)
   if(a==='mode'){ui.mode=b.dataset.v;ui.ref=ui.mode==='dia'?lastDataDay():TODAY;render(true)}
@@ -2482,6 +2609,7 @@ document.addEventListener('submit',e=>{
   if(e.target.id==='f-adm-teste'){admTeste();return}
   if(e.target.id==='f-fb'){enviaFeedback();return}
   if(e.target.id==='f-ec-vc'){ecConectaVC();return}
+  if(e.target.id==='f-eq-conv'){eqConvida();return}
   if(e.target.id==='f-adm-edit'){admSalva();return}
   if(e.target.id==='f-adm-del'){admExclui();return}
   if(e.target.id==='f-adm-ct'){admSalvaCt();return}
