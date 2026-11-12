@@ -1871,6 +1871,8 @@ async function enviaEstado(){if(syncBusy){syncT=setTimeout(enviaEstado,500);retu
   finally{syncBusy=false}}
 // sessão única: ao voltar para o app/aba, confere se a conta não entrou em outro aparelho
 if(typeof document!=='undefined'&&document.addEventListener)document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&REAL&&C&&C.real&&logged)api('/me').then(aplicaMeSemPerder).catch(()=>{})});
+// login único: a cada minuto, com a tela à vista, confere se a conta não entrou em outro aparelho (SESSION_REPLACED derruba esta sessão)
+setInterval(()=>{if(typeof document!=='undefined'&&document.visibilityState==='visible'&&REAL&&C&&C.real&&logged)api('/me').then(aplicaMeSemPerder).catch(()=>{})},60000);
 function aplicaMeSemPerder(me){if(!C||!C.real)return;const tour=C.tourDone;aplicaMe(me);C.tourDone=tour||me.tourDone;if(['painel','assinatura','conta'].includes(ui.tab))render(true)}
 if(typeof window!=='undefined'&&window.addEventListener)window.addEventListener('beforeunload',e=>{if(REAL&&syncPend){e.preventDefault();e.returnValue=''}});
 
