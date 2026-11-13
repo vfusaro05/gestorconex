@@ -130,7 +130,8 @@ main{min-width:0;padding-block:18px 112px;display:flex;flex-direction:column;gap
 .seg.view{width:100%;display:grid;grid-template-columns:1fr 1fr}
 .seg.view button{padding:10px}
 .seg.view button[aria-pressed="true"]{color:var(--acc)}
-.period{display:flex;align-items:center;gap:8px;min-width:0}
+.period{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+#mesSel{max-width:100%}
 .period .lbl{font-weight:700;font-family:var(--f-display);min-width:0}
 .period .lbl small{display:block;font-family:var(--f-body);font-weight:500;color:var(--muted);font-size:.78rem}
 select.sel{border:1px solid var(--line-2);background:var(--bg-2);border-radius:12px;padding:9px 10px;max-width:100%}
@@ -768,7 +769,7 @@ const IC={
 };
 // [aba, nome no menu lateral, nome curto na barra do celular, ícone]
 // App da Apple: sem a aba E-commerce por enquanto (fica fora da revisão da App Store; site e Android têm)
-const TABS=[['painel','Início'],['vendas','Vendas'],['despesas','Despesas'],['ecommerce','E-commerce','Online','ecom'],['cadastros','Cadastros'],['conta','Minha conta','Conta','perfil'],['ajustes','Ajustes']].filter(t=>!(IOS&&t[0]==='ecommerce'));
+const TABS=[['painel','Início'],['vendas','Vendas'],['despesas','Despesas'],['ecommerce','E-commerce','Online','ecom'],['cadastros','Cadastros'],['conta','Minha conta','Conta','perfil'],['ajustes','Ajustes']];
 let navKey='';
 const ABAS_LANC=['vendas','despesas','conta'];
 const ehLanc=()=>{try{return !!(C&&C.tipo==='lancador')}catch(e){return false}}; // o menu é montado antes de C existir
@@ -808,8 +809,13 @@ function periodNav(){
   const nextDisabled=getRange(ui.mode,stepRef(1)).s>TODAY;
   return `<div class="period"><button class="icon-btn" data-act="step" data-n="-1" aria-label="Período anterior">‹</button>
     <div class="lbl">${rangeLabel(ui.mode,P.r0)}<small>${P.partial?`até ${dShort(P.r.e)} · `:''}comparando com ${P.ctx}</small></div>
-    <button class="icon-btn" data-act="step" data-n="1" aria-label="Próximo período" ${nextDisabled?'disabled':''}>›</button></div>`;
+    <button class="icon-btn" data-act="step" data-n="1" aria-label="Próximo período" ${nextDisabled?'disabled':''}>›</button>${mesSel()}</div>`;
 }
+// Mês: escolher direto um mês específico (do primeiro lançamento até hoje)
+function mesSel(){if(ui.mode!=='mes')return'';const fim=ymOf(TODAY);let ym=ymOf(primeiraVenda());const ops=[];
+  while(ym<=fim&&ops.length<120){ops.push(ym);const [y,m]=ym.split('-').map(Number);ym=m===12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,'0')}`}
+  if(ops.length<2)return'';const at=ymOf(ui.ref||TODAY);
+  return `<select class="sel" id="mesSel" aria-label="Escolher o mês">${ops.reverse().map(v=>{const [y,m]=v.split('-').map(Number);return `<option value="${v}" ${v===at?'selected':''}>${MESES[m-1][0].toUpperCase()+MESES[m-1].slice(1)} de ${y}</option>`}).join('')}</select>`}
 const modeSeg=(labels)=>`<div class="seg" role="group" aria-label="Período" data-tour="periodo">${[['dia',labels[0]],['semana',labels[1]],['mes',labels[2]]].map(([k,l])=>`<button data-act="mode" data-v="${k}" aria-pressed="${ui.mode===k}">${l}</button>`).join('')}</div>`;
 const viewSeg=()=>`<div class="seg view" role="group" aria-label="Tipo de visão" data-tour="views">${[['geral','Resumo'],['detalhe','Detalhes']].map(([k,l])=>`<button data-act="view" data-v="${k}" aria-pressed="${ui.view===k}">${l}</button>`).join('')}</div>`;
 function vPainel(){if(ui.view!=='detalhe')ui.view='geral';if(ui.mode==='dia'&&ui.ref===TODAY&&!S.vendas[TODAY])ui.ref=lastDataDay();calc();return ui.view==='geral'?vGeral():vDetalhe()}
@@ -938,7 +944,7 @@ function vGeral(){
       :`<div class="peso flat"><div class="peso-h"><span>${ttl}</span></div><p>${good?'Nada fez diferença para cima.':'Nada atrapalhou. Ótimo sinal.'}</p></div>`};
   return `${topbar('Início')}
   ${viewSeg()}
-  <div class="controls">${modeSeg(['Dia','Semana','Mês'])}</div>
+  <div class="controls">${modeSeg(['Dia','Semana','Mês'])}${periodNav()}</div>
   ${pendencia()}
   <section class="hero" aria-label="Resultado">
     <div class="top"><div class="eyebrow">Quanto sobrou ${quando}</div><span class="status ${h.c}"><i></i>${h.t}</span></div>
@@ -1357,6 +1363,23 @@ function pixPane(){const p=PLANOS[ui.plano];
 const CT_FASE={aguardando_aceite:['Aguardando aceite','warn'],aguardando_pagamento:['Aguardando pagamento','warn'],pago_pix:['Pago no Pix','good'],cartao:['Cartão mensal','good'],concluido:['Concluído','good'],cancelado:['Cancelado','bad']};
 const mesesTxt=n=>`${n} ${n===1?'mês':'meses'}`;
 const ctVia=()=>NATIVO?'app':/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)?'mobile-web':'web';
+/* popup da proposta (regra geral dos apps Conex, 12/11/2026): só no site (no app das lojas fica o aviso no topo), só
+   para o dono, uma vez por sessão. O servidor só manda a proposta a partir de 3 dias úteis antes do fim do teste grátis,
+   então o popup aparece nessa janela e segue até o vencimento. O cliente pode aceitar e pagar ou só fechar. */
+function ctPopup(){const old=document.getElementById('ct-pop');if(old)old.remove();
+  if(NATIVO||!C||!C.assin||C.assin.admin||ui.tab==='assinatura')return;
+  const c=C.assin.contrato,pd=ctPendente(),pag=c&&c.fase==='aguardando_pagamento';if(!c||(!pd&&!pag))return;
+  const k='gc-oferta:'+c.id+':'+(pd||'pagamento');try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){}
+  const emTeste=C.assin.status==='trial'&&C.trialFim&&daysBetween(TODAY,C.trialFim)>=0;
+  const t=pd==='proposta'?(emTeste?`Seu teste grátis termina em ${fmtD(C.trialFim)}`:'Seu teste grátis terminou'):pd==='aditivo'?'Aditivo do seu contrato':'Proposta aceita';
+  const x=pd==='proposta'?`O Gestor Conex preparou uma proposta para ${esc(c.razao)} seguir com o plano. Você pode aceitar e pagar agora ou fechar e ver depois.`
+    :pd==='aditivo'?'Há uma alteração no seu contrato esperando a sua aprovação.':'Falta só o pagamento para liberar o seu plano.';
+  const el=document.createElement('div');el.id='ct-pop';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',t);
+  el.style.cssText='position:fixed;inset:0;background:rgba(14,23,38,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999';
+  el.innerHTML=`<div class="card" style="max-width:440px;width:100%;margin:0"><div class="card-h"><h2>${t}</h2></div><p style="margin:0 0 14px">${x}</p><div class="btns"><button class="btn pri" data-tab="assinatura">${pd==='proposta'?'Ver oferta':pd==='aditivo'?'Ver aditivo':'Ir para o pagamento'}</button><button class="btn" data-pop="fechar">Fechar</button></div></div>`;
+  // fecha no botão, no "Ver oferta" (o clique segue para a navegação por data-tab) ou fora do quadro
+  el.addEventListener('click',ev=>{if(ev.target===el||ev.target.closest('[data-pop],[data-tab]'))el.remove()});
+  document.body.appendChild(el)}
 function ctPendente(){const c=C&&C.assin&&C.assin.contrato;if(!c)return null;if(c.fase==='aguardando_aceite'&&!c.vencida)return'proposta';if(c.aceitarAditivo)return'aditivo';return null}
 const kvRows=r=>`<dl class="kv">${r.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
 // cláusula de rescisão (mesma do Chat Conex): vai no aceite, na proposta impressa e no e-mail
@@ -1868,7 +1891,7 @@ async function carregaSessao(pw){const [me,st]=await Promise.all([api('/me'),api
     // conta criada antes da criptografia: cifra agora (precisa da senha; sem ela fica para o próximo login)
     if(pw&&C.tipo!=='lancador'){DK=DK||await novaChave();await api('/me/cripto',{method:'PUT',body:await chavesNovas(pw)});syncPend=true;await enviaEstado()}
   }
-  normalizaS();if(DK)await guardaDK(me.email);EC={...EC,info:null,cur:null,prev:null,key:'',prod:null,ped:null,pedKey:'',dias:null,infoAt:0};ecCarregaDias();ecAtualiza();if(EC.pend&&!IOS){ui.tab='ecommerce';ui.ecSec='contas'}}
+  normalizaS();if(DK)await guardaDK(me.email);EC={...EC,info:null,cur:null,prev:null,key:'',prod:null,ped:null,pedKey:'',dias:null,infoAt:0};ecCarregaDias();ecAtualiza();if(EC.pend){ui.tab='ecommerce';ui.ecSec='contas'}}
 // abre os dados com a chave recuperada (senha digitada ou código do suporte) e lacra de novo com a senha atual
 async function abreComChave(dk,pw,extra){DK=dk;const st=await api('/state');S=cifrado(st.data)?await decifra(st.data):st.data;stateVer=st.version;
   await api('/me/cripto',{method:'PUT',body:{pw:await lacra(pw,DK),...(extra||{})}});A.chave=null;normalizaS();await guardaDK(C.email)}
@@ -2102,6 +2125,8 @@ function admAct(a,b){const d=ADM.det,id=d&&encodeURIComponent(d.id);
   else if(a==='adm-ct-ver')admAbreCt(b.dataset.id);
   else if(a==='adm-ct-edit'){ADM.ctEdit=!ADM.ctEdit;ADM.err='';render(true)}
   else if(a==='adm-ct-pdf')imprimeProposta(ADM.ct);
+  else if(a==='adm-ct-liberar')arm(b,()=>api('/painel/contratos/'+encodeURIComponent(ADM.ct.id)+'/liberar',{method:'POST'}).then(()=>{toast('Proposta liberada e enviada por e-mail ao cliente');admAbreCt(ADM.ct.id)}).catch(falha));
+  else if(a==='adm-ct-esconder')arm(b,()=>api('/painel/contratos/'+encodeURIComponent(ADM.ct.id)+'/esconder',{method:'POST'}).then(()=>{toast('Proposta escondida até a janela de aceite');admAbreCt(ADM.ct.id)}).catch(falha));
   else if(a==='adm-ct-cancel'){const m=vIn('ct-cmotivo');if(m.length<3){ADM.err='Escreva o motivo do cancelamento.';return render(true)}
     arm(b,()=>api('/painel/contratos/'+encodeURIComponent(ADM.ct.id)+'/cancelar',{body:{motivo:m}}).then(r=>{toast(r.rescisao&&r.rescisao.tipo!=='sem_pagamento'?'Contrato cancelado. Multa registrada no histórico.':'Contrato cancelado');admAbreCt(ADM.ct.id)}).catch(falha))}
   else if(a==='fb-mail')location.href='mailto:'+b.dataset.v+'?subject='+encodeURIComponent('Sua mensagem ao Gestor Conex');
@@ -2143,6 +2168,8 @@ function vAdmContrato(){const c=ADM.ct,cl=c.cliente,emVigor=!['concluido','cance
       <dt>Aceite</dt><dd>${c.aceitoEm?`${dBR(c.aceitoEm)} ${({web:'pelo site','mobile-web':'pelo site no celular',app:'pelo app'})[c.aceitoPor]||''}`:'ainda não'}</dd>
       <dt>Pagamento</dt><dd>${c.forma==='pix'?'Pix à vista':c.forma==='cartao'?`cartão: ${c.parcelas} de ${c.prazo} cobranças`:'ainda não'}${c.fim?` · válido até ${dBR(c.fim)}`:''}</dd>
       ${ad.length?`<dt>Aditivo pendente</dt><dd>${ad.map(([k,v])=>`${k}: ${v}`).join('; ')}${c.aditivo.aceitoEm?` · aceito em ${dBR(c.aditivo.aceitoEm)}${c.aditivo.pix!=null?', falta o Pix':''}`:' · aguardando o aceite'}</dd>`:''}</dl>
+      ${emVigor&&c.liberacao&&c.liberacao.hiddenUntil?`<div class="banner" style="margin:0 0 10px"><span>O cliente vê a proposta (popup para aceitar e pagar) a partir de <b>${dBR(c.liberacao.hiddenUntil)}</b>, 3 dias úteis antes do fim do teste grátis, até o vencimento. O e-mail sai nesse dia.</span><button class="btn sm" data-act="adm-ct-liberar">Liberar proposta para o cliente agora</button></div>`:''}
+      ${emVigor&&c.liberacao&&c.liberacao.canWithdraw?`<div class="banner" style="margin:0 0 10px"><span>Proposta liberada antes da janela de aceite. Esconder de novo desfaz o aceite e cancela o cartão pendente (nada foi cobrado).</span><button class="btn sm" data-act="adm-ct-esconder">Esconder até a janela de aceite</button></div>`:''}
       <div class="btns"><button class="btn sm" data-act="adm-ct-pdf">Imprimir proposta</button>${emVigor?`<button class="btn sm" data-act="adm-ct-edit">${c.forma?'Criar aditivo':'Alterar contrato'}</button>`:''}</div>
       ${emVigor?`<div class="form-row dq" style="grid-template-columns:minmax(0,1fr) auto;align-items:end;margin-top:10px"><div class="field"><label for="ct-cmotivo">Cancelar contrato: motivo</label><input class="inp" id="ct-cmotivo" placeholder="Ex.: cliente pediu o cancelamento"></div><div><button class="btn danger" data-act="adm-ct-cancel">Cancelar contrato</button></div></div>
         ${c.rescisao?`<p class="note" style="margin:6px 0 0"><b>Se cancelar hoje:</b> ${esc(c.rescisao.texto)}${c.rescisao.tipo!=='sem_pagamento'?' A multa e o reembolso são tratados fora do sistema: nada é cobrado nem estornado automaticamente; o valor fica registrado no histórico.':''}</p>`:''}
@@ -2157,7 +2184,7 @@ function vAdmin(){if(!ADM.res&&!ADM.carregando&&!ADM.err)setTimeout(admCarrega,0
   const abas=`<div class="seg" role="group" aria-label="Seções da administração">${[['clientes','Clientes'],['contratos','Contratos'],['feedback',`Feedback${r&&r.feedbackAbertos?` (${r.feedbackAbertos})`:''}`]].map(([k,l])=>`<button data-act="adm-aba" data-v="${k}" aria-pressed="${ADM.aba===k}">${l}</button>`).join('')}</div>`;
   let corpo='';
   if(ADM.aba==='contratos'){const l=ADM.cts;
-    corpo=`<section class="card"><div class="card-h"><h2>Contratos negociados</h2><p>Para criar, abra o cliente em Clientes e use Novo contrato.</p></div>${ADM.carregando&&!l?'<p class="note">Carregando…</p>':l&&l.length?`<div class="tbl-wrap"><table><thead><tr><th>Cliente</th><th>Situação</th><th>Prazo</th><th class="r">Cartão por mês</th><th class="r">Pix à vista</th><th>Criado</th></tr></thead><tbody>${l.map(c=>`<tr><td><button class="lnk" data-act="adm-ct-ver" data-id="${esc(c.id)}">${esc(c.razao)}</button><br><small class="faint">${esc(c.cliente.email)}</small></td><td>${ctSt(c.fase)}${c.aditivo?'<br><small class="faint">aditivo pendente</small>':''}</td><td>${mesesTxt(c.prazo)}</td><td class="r">${brl(c.mensal)}</td><td class="r">${brl(c.pixTotal)}</td><td>${dBR(c.criado)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="note" style="margin:0">Nenhum contrato ainda.</p>'}</section>`}
+    corpo=`<section class="card"><div class="card-h"><h2>Contratos negociados</h2><p>Para criar, abra o cliente em Clientes e use Novo contrato.</p></div>${ADM.carregando&&!l?'<p class="note">Carregando…</p>':l&&l.length?`<div class="tbl-wrap"><table><thead><tr><th>Cliente</th><th>Situação</th><th>Prazo</th><th class="r">Cartão por mês</th><th class="r">Pix à vista</th><th>Criado</th></tr></thead><tbody>${l.map(c=>`<tr><td><button class="lnk" data-act="adm-ct-ver" data-id="${esc(c.id)}">${esc(c.razao)}</button><br><small class="faint">${esc(c.cliente.email)}</small></td><td>${ctSt(c.fase)}${c.aditivo?'<br><small class="faint">aditivo pendente</small>':''}${c.liberacao&&c.liberacao.hiddenUntil?`<br><small class="faint">cliente vê a partir de ${dBR(c.liberacao.hiddenUntil)}</small>`:''}</td><td>${mesesTxt(c.prazo)}</td><td class="r">${brl(c.mensal)}</td><td class="r">${brl(c.pixTotal)}</td><td>${dBR(c.criado)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="note" style="margin:0">Nenhum contrato ainda.</p>'}</section>`}
   else if(ADM.aba==='feedback'){const l=ADM.fb;
     corpo=`<section class="card"><div class="card-h"><h2>Feedback dos clientes</h2><p>Enviado em Minha conta → Ajuda. Em aberto aparecem primeiro.</p></div><div class="seg" role="group" aria-label="Filtro">${[['ABERTO','Em aberto'],['RESOLVIDO','Resolvidos'],['','Todos']].map(([k,t])=>`<button data-act="fb-st" data-v="${k}" aria-pressed="${ADM.fbSt===k}">${t}</button>`).join('')}</div>
       ${ADM.carregando&&!l?'<p class="note">Carregando…</p>':l&&l.length?l.map(f=>`<div class="pane" style="border-top:1px solid var(--line);padding-top:12px"><div><span class="chip">${FB_LBL[f.categoria]||f.categoria}</span> <b>${esc(f.nome)}</b> <small class="faint">${esc(f.email)} · ${dBR(f.em)}${f.tela?' · tela '+esc(f.tela):''}</small> ${f.status==='RESOLVIDO'?`<span class="status good"><i></i>Resolvido ${dBR(f.resolvidoEm)}</span>`:'<span class="status warn"><i></i>Em aberto</span>'}</div>
@@ -2352,14 +2379,14 @@ function ecDemoApi(path,method,body){const D=EC.demo||(EC.demo=ecDemoGera());con
 const ecGet=(path,o)=>ecReal()?api(path,o):Promise.resolve().then(()=>ecDemoApi(path,o&&o.method,o&&o.body));
 
 /* ---------- carregamento ---------- */
-async function ecCarregaDias(){if(IOS)return;try{const r=await ecGet(`/ecom/diario?de=${addDays(TODAY,-430)}&ate=${TODAY}`);EC.dias=r.dias||{};if(ui.tab==='painel'&&logged)render(true)}catch(e){}}
+async function ecCarregaDias(){try{const r=await ecGet(`/ecom/diario?de=${addDays(TODAY,-430)}&ate=${TODAY}`);EC.dias=r.dias||{};if(ui.tab==='painel'&&logged)render(true)}catch(e){}}
 async function ecCarregaInfo(){try{EC.info=await ecGet('/ecom');EC.infoAt=Date.now();EC.err=''}catch(e){EC.err=e.message}
   clearTimeout(EC.pollT);
   // enquanto alguma conta sincroniza, confere de novo a cada 5 s
   if(EC.info&&EC.info.conexoes.some(c=>c.sincronizando))EC.pollT=setTimeout(async()=>{const antes=EC.info.conexoes.filter(c=>c.sincronizando).length;await ecCarregaInfo();
     if(EC.info&&EC.info.conexoes.filter(c=>c.sincronizando).length<antes)ecInvalida();if(ui.tab==='ecommerce')render(true)},5000)}
 // Início e aba E-commerce: ao entrar, a API busca as vendas novas; com o app aberto, confere de novo a cada 2 min
-function ecAtualiza(){if(IOS||EC.infoLoad||(EC.info&&Date.now()-(EC.infoAt||0)<120000))return;EC.infoLoad=true;ecCarregaInfo().then(()=>{EC.infoLoad=false;if(ui.tab==='ecommerce')render(true)})}
+function ecAtualiza(){if(EC.infoLoad||(EC.info&&Date.now()-(EC.infoAt||0)<120000))return;EC.infoLoad=true;ecCarregaInfo().then(()=>{EC.infoLoad=false;if(ui.tab==='ecommerce')render(true)})}
 function ecInvalida(){EC.key='';EC.prod=null;EC.pedKey='';ecCarregaDias()}
 async function ecCarregaAn(){const R=ecRange(),cn=ui.ecCanal&&ui.ecCanal!=='geral'?'&canal='+ui.ecCanal:'',key=R.s+'|'+R.e+cn;EC.key=key;EC.carregando=true;
   try{const [a,b]=await Promise.all([ecGet(`/ecom/analise?de=${R.s}&ate=${R.e}${cn}`),ecGet(`/ecom/analise?de=${R.ps}&ate=${R.pe}${cn}`)]);if(EC.key===key){EC.cur=a;EC.prev=b;EC.err=''}}
@@ -2521,12 +2548,13 @@ function render(keepScroll){
   if(ehLanc()&&!ABAS_LANC.concat(['legal','excluir']).includes(ui.tab))ui.tab='vendas';
   if(!(S.fixasRep&&S.fixasRep[ymOf(TODAY)]))repeteFixas();
   document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#auth').innerHTML='';
-  montaNav(!!(C.admin&&!NATIVO));if(!VIEWS[ui.tab]||(ui.tab==='admin'&&!(C.admin&&!NATIVO))||(IOS&&(ui.tab==='ecommerce'||ui.tab==='assinatura')))ui.tab='painel';
+  montaNav(!!(C.admin&&!NATIVO));if(!VIEWS[ui.tab]||(ui.tab==='admin'&&!(C.admin&&!NATIVO))||(IOS&&ui.tab==='assinatura'))ui.tab='painel';
   document.querySelectorAll('nav [data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===ui.tab?'page':'false'));
   $('#biz-side').textContent=S.negocio.nome;
   const sy=window.scrollY;
   const pausado=['painel','vendas','despesas','cadastros','ecommerce'].includes(ui.tab)&&!acessoOk();
   $('#main').innerHTML=pausado?vBloqueado():VIEWS[ui.tab]();
+  if(!pausado)ctPopup();
   if(pausado){saveUi();return}
   if(ui.tab==='painel')drawCharts();
   if(ui.tab==='ecommerce')ecDraw();
@@ -2594,6 +2622,7 @@ document.addEventListener('change',e=>{
   if(el.id&&el.id.startsWith('r-')&&!el.id.includes('pw')){A.reg=A.reg||{};A.reg[el.id]=el.type==='checkbox'?el.checked:el.value;return}
   if(el.id==='vdate'){if(el.value&&el.value<=TODAY){ui.vDate=el.value;render(true)}return}
   if(el.id==='cmpSel'){ui.cmp=el.value;render(true);return}
+  if(el.id==='mesSel'){const v=el.value;ui.ref=v===ymOf(TODAY)?TODAY:v+'-15';render(true);return}
   if(el.id==='chartRange'){ui.cr=el.value;if(el.value==='custom'&&!ui.crDe){ui.crDe=addDays(lastDataDay(),-29);ui.crAte=lastDataDay()}render(true);return}
   if(el.id==='cr-de'||el.id==='cr-ate'){if(el.value){ui[el.id==='cr-de'?'crDe':'crAte']=el.value;render(true)}return}
   if(el.dataset.gid){el.value=fmtIn((gStore()[gKey()]||{})[el.dataset.gid]);return}
@@ -2632,6 +2661,31 @@ if(NATIVO){const AppP=(window.Capacitor.Plugins&&window.Capacitor.Plugins.App)||
     if(!logged||!C){if(A.scr==='login'||A.scr==='excluida')return AppP.exitApp();A.scr=LEGAL_SCR.includes(A.scr)?(A.legalBack||'login'):'login';A.err='';render();window.scrollTo(0,0);return}
     if(ui.tab!=='painel'){ui.tab='painel';ui.view='geral';render();window.scrollTo(0,0)}else AppP.exitApp()})}
 if(REAL)bootReal();else{ecCarregaDias();render()}
+
+/* aviso de versão nova na loja (12/11/2026, padrão Conex): só no app instalado. Compara a versão do app com a que
+   cada loja distribui (GET /app-version da API, atualizado sozinho por um robô no GitHub) ao abrir e quando o app
+   volta ao primeiro plano; o cliente pode atualizar ou fechar (volta a avisar na próxima abertura). */
+function versaoMaisNova(a,b){const pa=String(a||'0').split('.').map(n=>parseInt(n,10)||0),pb=String(b||'0').split('.').map(n=>parseInt(n,10)||0);
+  for(let i=0;i<Math.max(pa.length,pb.length);i++){if((pa[i]||0)!==(pb[i]||0))return(pa[i]||0)>(pb[i]||0)}return false}
+async function avisoLoja(){
+  if(!NATIVO||document.getElementById('aviso-loja'))return;
+  try{if(sessionStorage.getItem('gc-aviso-loja-fechado'))return}catch(e){}
+  try{
+    const P=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;if(!P||!P.getInfo)return;
+    const info=await P.getInfo();
+    const r=await fetch(API_BASE+'/app-version?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;
+    const e=(await r.json())[IOS?'ios':'android'];
+    if(!e||!e.store||!versaoMaisNova(e.latest,info.version))return;
+    const el=document.createElement('div');el.id='aviso-loja';el.setAttribute('role','status');
+    el.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:9998;max-width:520px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#0e1726;color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.25);font-size:.9rem';
+    el.innerHTML='<span style="flex:1;min-width:160px">Há uma versão nova do app Gestor Conex na loja.</span><a class="btn sm pri" target="_blank" rel="noopener"></a><button class="btn sm" type="button">Fechar</button>';
+    const a=el.querySelector('a');a.href=e.store;a.textContent='Atualizar';
+    el.querySelector('button').onclick=()=>{el.remove();try{sessionStorage.setItem('gc-aviso-loja-fechado','1')}catch(x){}};
+    document.body.appendChild(el);
+  }catch(x){/* sem rede: tenta de novo na próxima abertura */}
+}
+setTimeout(avisoLoja,4000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')avisoLoja()});
 </script>
 
 </body>
