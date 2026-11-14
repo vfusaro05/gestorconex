@@ -2686,6 +2686,38 @@ async function avisoLoja(){
 }
 setTimeout(avisoLoja,4000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')avisoLoja()});
+
+/* telas pela internet (14/11/2026, padrão do Chat Conex — "não pode ter diferença de versão entre site, Apple e
+   Android"): a cada deploy do site, mobile/scripts/make-app-bundle.mjs publica estas telas em
+   /app-bundle/latest.json + zip. O app instalado confere ao abrir e ao voltar pro primeiro plano; se houver pacote
+   novo, baixa em segundo plano e deixa marcado pra quando o app for pro segundo plano ou reabrir — nunca recarrega
+   no meio do uso. Seguranças: notifyAppReady logo abaixo (se o pacote novo não chegar aqui em 10s, o plugin volta
+   sozinho pro anterior); minNative (pacote que precisa de algo nativo mais novo é ignorado: esse app recebe o aviso
+   da loja); checksum SHA-256 conferido pelo plugin; app de loja novo descarta os pacotes baixados. App sem o plugin
+   (anterior a 14/11/2026) não faz nada aqui. */
+const GC_PACOTE_URL='https://gestorconex.com.br/app-bundle/latest.json';
+const gcUpdater=()=>{const C=window.Capacitor;if(!NATIVO||!(C.isPluginAvailable&&C.isPluginAvailable('CapacitorUpdater')))return null;
+  return(C.Plugins&&C.Plugins.CapacitorUpdater)||(C.registerPlugin&&C.registerPlugin('CapacitorUpdater'))||null};
+let gcConferindoPacote=false;
+async function telasPelaInternet(){
+  const U=gcUpdater();if(!U||gcConferindoPacote)return;
+  gcConferindoPacote=true;
+  try{
+    const r=await fetch(GC_PACOTE_URL+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;
+    const L=await r.json();if(!L||!L.id||!L.url||!L.checksum)return;
+    const AppP=window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
+    const info=AppP&&AppP.getInfo?await AppP.getInfo():null;
+    if(L.minNative&&info&&versaoMaisNova(L.minNative,info.version))return;
+    const atual=await U.current();if(atual&&atual.bundle&&atual.bundle.version===L.id)return; // já está nestas telas
+    const lista=await U.list();
+    const pronto=((lista&&lista.bundles)||[]).find(b=>b.version===L.id&&b.status==='success');
+    const b=pronto||await U.download({url:L.url,version:L.id,checksum:L.checksum});
+    await U.next({id:b.id});
+  }catch(x){/* sem rede ou pacote com problema: fica com as telas atuais e tenta na próxima */}
+  finally{gcConferindoPacote=false}
+}
+{const U=gcUpdater();if(U){Promise.resolve(U.notifyAppReady()).catch(()=>{});setTimeout(telasPelaInternet,3000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')telasPelaInternet()})}}
 </script>
 
 </body>
