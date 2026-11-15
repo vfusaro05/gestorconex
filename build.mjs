@@ -15,7 +15,7 @@ const head = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Gestor Conex: gestão simples para pequenos negócios. Lance vendas e despesas e veja quanto entrou, quanto saiu e quanto sobrou.">
-<meta name="theme-color" content="#0e1726">
+<meta name="theme-color" content="#132549">
 <meta name="gc-api" content="${API}">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
@@ -40,7 +40,7 @@ const manifest = {
   display: 'standalone',
   orientation: 'portrait',
   background_color: '#f2f4f7',
-  theme_color: '#0e1726',
+  theme_color: '#132549',
   icons: [
     { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
     { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },

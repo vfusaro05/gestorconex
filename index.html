@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Gestor Conex: gestão simples para pequenos negócios. Lance vendas e despesas e veja quanto entrou, quanto saiu e quanto sobrou.">
-<meta name="theme-color" content="#0e1726">
+<meta name="theme-color" content="#132549">
 <meta name="gc-api" content="https://api.gestorconex.com.br">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
@@ -26,15 +26,15 @@
   color-scheme:light;
   /* marinho + dourado discreto: painel financeiro sério */
   --bg:#f2f4f7; --bg-2:#ffffff; --glass:#ffffff; --glass-2:#f1f3f6; --line:#e1e5eb; --line-2:#cdd4de;
-  --ink:#0e1726; --muted:#526075; --faint:#8691a4;
-  --acc:#1e3f8f; --acc-soft:#edf1f9; --acc-bd:#c8d2e9; --violet:#7c5cff; --accent-ink:#ffffff; --pri:#0e1726; --gold:#c39a3e;
+  --ink:#132549; --muted:#526075; --faint:#8691a4;
+  --acc:#2b72cc; --acc-soft:#e8f1fc; --acc-bd:#c3d7f3; --violet:#7c5cff; --accent-ink:#ffffff; --pri:#132549; --gold:#3080df;
   --good:#0b8457; --good-soft:#e7f5ee; --good-bd:#bfe3d2; --bad:#cc3645; --bad-soft:#fcedef; --bad-bd:#f3c6cc;
-  --warn:#a26300; --warn-soft:#fff4e1; --warn-bd:#efd4a2; --info:#1e3f8f; --info-soft:#edf1f9; --info-bd:#c8d2e9;
-  --s1:#1f4fb8; --s2:#9aa6b8; --cmp:#bcc4cf; --pos:#1f4fb8; --neg:#e34948;
-  --track:#edf0f4; --cost:#b9472f; --cost-ink:#ffffff; --profit:#1e3f8f; --profit-ink:#ffffff; --nav-bg:rgba(255,255,255,.96); --tip-bg:#ffffff;
-  --side-bg:#0e1726; --side-ink:#aeb8c9; --side-ink-strong:#ffffff; --side-hover:rgba(255,255,255,.06);
-  --hero-bg:#0e1726; --hero-ink:#ffffff; --hero-muted:#a3aec1; --hero-good:#4fd69c; --hero-bad:#ff8590;
-  --shadow:0 1px 2px rgba(14,23,38,.06); --glow:none; --glow-txt:none; --page-img:none; --hero-glow:transparent;
+  --warn:#a26300; --warn-soft:#fff4e1; --warn-bd:#efd4a2; --info:#2b72cc; --info-soft:#e8f1fc; --info-bd:#c3d7f3;
+  --s1:#3080df; --s2:#9aa6b8; --cmp:#bcc4cf; --pos:#3080df; --neg:#e34948;
+  --track:#edf0f4; --cost:#b9472f; --cost-ink:#ffffff; --profit:#2b72cc; --profit-ink:#ffffff; --nav-bg:rgba(255,255,255,.96); --tip-bg:#ffffff;
+  --side-bg:#132549; --side-ink:#aeb8c9; --side-ink-strong:#ffffff; --side-hover:rgba(255,255,255,.06);
+  --hero-bg:#132549; --hero-ink:#ffffff; --hero-muted:#a3aec1; --hero-good:#4fd69c; --hero-bad:#ff8590;
+  --shadow:0 1px 2px rgba(19,37,73,.06); --glow:none; --glow-txt:none; --page-img:none; --hero-glow:transparent;
   --f-display:"Sora","Segoe UI",system-ui,sans-serif;
   --f-body:"Plus Jakarta Sans","Segoe UI",system-ui,-apple-system,sans-serif;
   --r:12px;
@@ -46,15 +46,15 @@
   --ec1:#3987e5; --ec2:#d95926; --ec3:#199e70; --ec4:#c98500; --ec5:#d55181; --ec6:#008300;
   --bg:#05070d; --bg-2:#0a0f1a; --glass:rgba(16,23,38,.72); --glass-2:rgba(26,36,58,.6); --line:rgba(130,170,255,.13); --line-2:rgba(130,170,255,.24);
   --ink:#e9efff; --muted:#93a0bd; --faint:#5f6b86;
-  --acc:#3ee0ff; --acc-soft:rgba(62,224,255,.06); --acc-bd:rgba(62,224,255,.4); --violet:#8f7bff; --accent-ink:#04121a; --pri:linear-gradient(135deg,#3ee0ff,#6aa8ff);
+  --acc:#5a9cf0; --acc-soft:rgba(90,156,240,.06); --acc-bd:rgba(90,156,240,.4); --violet:#8f7bff; --accent-ink:#06152e; --pri:linear-gradient(135deg,#5a9cf0,#7fb3f5);
   --good:#3ff0a8; --good-soft:rgba(63,240,168,.12); --good-bd:rgba(63,240,168,.3); --bad:#ff5f7e; --bad-soft:rgba(255,95,126,.13); --bad-bd:rgba(255,95,126,.3);
   --warn:#ffc35a; --warn-soft:rgba(255,195,90,.12); --warn-bd:rgba(255,195,90,.3); --info:#7fb4ff; --info-soft:rgba(127,180,255,.12); --info-bd:rgba(127,180,255,.25);
-  --s1:#3ee0ff; --s2:#a48cff; --cmp:#55607a; --pos:#3ee0ff; --neg:#ff5f7e;
-  --track:rgba(255,255,255,.07); --cost:#ff8a70; --cost-ink:#2a0a03; --profit:#3ee0ff; --profit-ink:#04121a; --nav-bg:rgba(7,10,18,.88); --tip-bg:#0d1424;
-  --hero-bg:linear-gradient(160deg,rgba(62,224,255,.10),rgba(143,123,255,.10) 55%,rgba(10,15,26,.7)),rgba(16,23,38,.72);
-  --shadow:none; --glow:0 0 24px rgba(62,224,255,.25); --glow-txt:0 0 28px rgba(62,224,255,.35); --hero-glow:rgba(62,224,255,.22);
-  --page-img:radial-gradient(900px 500px at 85% -10%,rgba(143,123,255,.16),transparent 60%),radial-gradient(700px 420px at -10% 20%,rgba(62,224,255,.10),transparent 60%);
-  --side-bg:transparent; --side-ink:#93a0bd; --side-ink-strong:#e9efff; --side-hover:rgba(26,36,58,.6); --gold:#3ee0ff;
+  --s1:#5a9cf0; --s2:#a48cff; --cmp:#55607a; --pos:#5a9cf0; --neg:#ff5f7e;
+  --track:rgba(255,255,255,.07); --cost:#ff8a70; --cost-ink:#2a0a03; --profit:#5a9cf0; --profit-ink:#06152e; --nav-bg:rgba(7,10,18,.88); --tip-bg:#0d1424;
+  --hero-bg:linear-gradient(160deg,rgba(90,156,240,.10),rgba(143,123,255,.10) 55%,rgba(10,15,26,.7)),rgba(16,23,38,.72);
+  --shadow:none; --glow:0 0 24px rgba(90,156,240,.25); --glow-txt:0 0 28px rgba(90,156,240,.35); --hero-glow:rgba(90,156,240,.22);
+  --page-img:radial-gradient(900px 500px at 85% -10%,rgba(143,123,255,.16),transparent 60%),radial-gradient(700px 420px at -10% 20%,rgba(90,156,240,.10),transparent 60%);
+  --side-bg:transparent; --side-ink:#93a0bd; --side-ink-strong:#e9efff; --side-hover:rgba(26,36,58,.6); --gold:#5a9cf0;
   --hero-ink:#e9efff; --hero-muted:#93a0bd; --hero-good:#3ff0a8; --hero-bad:#ff5f7e;
   --f-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
 }
@@ -75,9 +75,9 @@ main{min-width:0;padding-block:18px 112px;display:flex;flex-direction:column;gap
 /* nav */
 .side{display:none}
 .brand{display:flex;align-items:center;gap:10px}
-.mark{width:40px;height:40px;flex:none;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%3E%20%3Cdefs%3E%20%3ClinearGradient%20id%3D%22gc-borda%22%20x1%3D%224%22%20y1%3D%224%22%20x2%3D%2244%22%20y2%3D%2244%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%20%3Cstop%20stop-color%3D%22%23A57A26%22%2F%3E%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23EBCB72%22%2F%3E%20%3C%2FlinearGradient%3E%20%3C%2Fdefs%3E%20%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%2240%22%20height%3D%2240%22%20rx%3D%2213%22%20fill%3D%22%230E1726%22%2F%3E%20%3Crect%20x%3D%225%22%20y%3D%225%22%20width%3D%2238%22%20height%3D%2238%22%20rx%3D%2212%22%20stroke%3D%22url(%23gc-borda)%22%20stroke-width%3D%222%22%2F%3E%20%3Crect%20x%3D%2213%22%20y%3D%2227%22%20width%3D%225.5%22%20height%3D%229%22%20rx%3D%221.6%22%20fill%3D%22%23F5F7FB%22%2F%3E%20%3Crect%20x%3D%2221.25%22%20y%3D%2222%22%20width%3D%225.5%22%20height%3D%2214%22%20rx%3D%221.6%22%20fill%3D%22%23F5F7FB%22%2F%3E%20%3Crect%20x%3D%2229.5%22%20y%3D%2217.5%22%20width%3D%225.5%22%20height%3D%2218.5%22%20rx%3D%221.6%22%20fill%3D%22%23F5F7FB%22%2F%3E%20%3Cpath%20d%3D%22M15.75%2023.2%20L24%2018.4%20L30.6%2013.6%22%20stroke%3D%22%23E2BE63%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%20%3Ccircle%20cx%3D%2233.4%22%20cy%3D%2211.6%22%20r%3D%223.3%22%20fill%3D%22%23E2BE63%22%2F%3E%20%3Ccircle%20cx%3D%2233.4%22%20cy%3D%2211.6%22%20r%3D%221.4%22%20fill%3D%22%230E1726%22%2F%3E%20%3C%2Fsvg%3E%20") center/contain no-repeat;font-size:0;color:transparent;box-shadow:none}
+.mark{width:40px;height:40px;flex:none;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%201024%201024%22%20width%3D%221024%22%20height%3D%221024%22%3E%3Crect%20width%3D%221024%22%20height%3D%221024%22%20rx%3D%22216%22%20fill%3D%22%23132549%22%2F%3E%3Crect%20x%3D%22215%22%20y%3D%22535%22%20width%3D%22150%22%20height%3D%22210%22%20rx%3D%2218%22%20fill%3D%22%23F5F6F1%22%2F%3E%3Crect%20x%3D%22435%22%20y%3D%22385%22%20width%3D%22150%22%20height%3D%22360%22%20rx%3D%2218%22%20fill%3D%22%23F5F6F1%22%2F%3E%3Crect%20x%3D%22655%22%20y%3D%22235%22%20width%3D%22150%22%20height%3D%22510%22%20rx%3D%2218%22%20fill%3D%22%233080DF%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;font-size:0;color:transparent;box-shadow:none}
 .brand .cx{color:var(--gold)}
-.auth-mbrand .cx{color:#b08a33}
+.auth-mbrand .cx{color:#3080df}
 .brand b{font-family:var(--f-display);font-size:1.08rem;display:block;line-height:1.1;font-weight:700;letter-spacing:.02em;color:var(--side-ink-strong)}
 .brand small{color:var(--side-ink);font-size:.8rem}
 .nav{display:flex;flex-direction:column;gap:2px}
@@ -137,7 +137,7 @@ main{min-width:0;padding-block:18px 112px;display:flex;flex-direction:column;gap
 select.sel{border:1px solid var(--line-2);background:var(--bg-2);border-radius:12px;padding:9px 10px;max-width:100%}
 
 /* VISÃO GERAL */
-.hero{position:relative;overflow:hidden;border-radius:14px;padding:24px 22px 22px;border:1px solid var(--line);background:var(--hero-bg);color:var(--hero-ink);box-shadow:0 12px 32px rgba(14,23,38,.16)}
+.hero{position:relative;overflow:hidden;border-radius:14px;padding:24px 22px 22px;border:1px solid var(--line);background:var(--hero-bg);color:var(--hero-ink);box-shadow:0 12px 32px rgba(19,37,73,.16)}
 .hero::before{content:"";position:absolute;left:22px;top:0;width:56px;height:3px;background:var(--gold)}
 .hero::after{content:"";position:absolute;inset:auto -30% -60% auto;width:340px;height:340px;border-radius:50%;background:radial-gradient(closest-side,var(--hero-glow),transparent);pointer-events:none}
 .hero .eyebrow{color:var(--hero-muted)}
@@ -490,7 +490,7 @@ textarea.inp{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;resize
 /* driver.js 1.3.1 (tour) */
 .driver-active .driver-overlay,.driver-active *{pointer-events:none}.driver-active .driver-active-element,.driver-active .driver-active-element *,.driver-popover,.driver-popover *{pointer-events:auto}@keyframes animate-fade-in{0%{opacity:0}to{opacity:1}}.driver-fade .driver-overlay{animation:animate-fade-in .2s ease-in-out}.driver-fade .driver-popover{animation:animate-fade-in .2s}.driver-popover{all:unset;box-sizing:border-box;color:#2d2d2d;margin:0;padding:15px;border-radius:5px;min-width:250px;max-width:300px;box-shadow:0 1px 10px #0006;z-index:1000000000;position:fixed;top:0;right:0;background-color:#fff}.driver-popover *{font-family:Helvetica Neue,Inter,ui-sans-serif,"Apple Color Emoji",Helvetica,Arial,sans-serif}.driver-popover-title{font:19px/normal sans-serif;font-weight:700;display:block;position:relative;line-height:1.5;zoom:1;margin:0}.driver-popover-close-btn{all:unset;position:absolute;top:0;right:0;width:32px;height:28px;cursor:pointer;font-size:18px;font-weight:500;color:#d2d2d2;z-index:1;text-align:center;transition:color;transition-duration:.2s}.driver-popover-close-btn:hover,.driver-popover-close-btn:focus{color:#2d2d2d}.driver-popover-title[style*=block]+.driver-popover-description{margin-top:5px}.driver-popover-description{margin-bottom:0;font:14px/normal sans-serif;line-height:1.5;font-weight:400;zoom:1}.driver-popover-footer{margin-top:15px;text-align:right;zoom:1;display:flex;align-items:center;justify-content:space-between}.driver-popover-progress-text{font-size:13px;font-weight:400;color:#727272;zoom:1}.driver-popover-footer button{all:unset;display:inline-block;box-sizing:border-box;padding:3px 7px;text-decoration:none;text-shadow:1px 1px 0 #fff;background-color:#fff;color:#2d2d2d;font:12px/normal sans-serif;cursor:pointer;outline:0;zoom:1;line-height:1.3;border:1px solid #ccc;border-radius:3px}.driver-popover-footer .driver-popover-btn-disabled{opacity:.5;pointer-events:none}:not(body):has(>.driver-active-element){overflow:hidden!important}.driver-no-interaction,.driver-no-interaction *{pointer-events:none!important}.driver-popover-footer button:hover,.driver-popover-footer button:focus{background-color:#f7f7f7}.driver-popover-navigation-btns{display:flex;flex-grow:1;justify-content:flex-end}.driver-popover-navigation-btns button+button{margin-left:4px}.driver-popover-arrow{content:"";position:absolute;border:5px solid #fff}.driver-popover-arrow-side-over{display:none}.driver-popover-arrow-side-left{left:100%;border-right-color:transparent;border-bottom-color:transparent;border-top-color:transparent}.driver-popover-arrow-side-right{right:100%;border-left-color:transparent;border-bottom-color:transparent;border-top-color:transparent}.driver-popover-arrow-side-top{top:100%;border-right-color:transparent;border-bottom-color:transparent;border-left-color:transparent}.driver-popover-arrow-side-bottom{bottom:100%;border-left-color:transparent;border-top-color:transparent;border-right-color:transparent}.driver-popover-arrow-side-center{display:none}.driver-popover-arrow-side-left.driver-popover-arrow-align-start,.driver-popover-arrow-side-right.driver-popover-arrow-align-start{top:15px}.driver-popover-arrow-side-top.driver-popover-arrow-align-start,.driver-popover-arrow-side-bottom.driver-popover-arrow-align-start{left:15px}.driver-popover-arrow-align-end.driver-popover-arrow-side-left,.driver-popover-arrow-align-end.driver-popover-arrow-side-right{bottom:15px}.driver-popover-arrow-side-top.driver-popover-arrow-align-end,.driver-popover-arrow-side-bottom.driver-popover-arrow-align-end{right:15px}.driver-popover-arrow-side-left.driver-popover-arrow-align-center,.driver-popover-arrow-side-right.driver-popover-arrow-align-center{top:50%;margin-top:-5px}.driver-popover-arrow-side-top.driver-popover-arrow-align-center,.driver-popover-arrow-side-bottom.driver-popover-arrow-align-center{left:50%;margin-left:-5px}.driver-popover-arrow-none{display:none}
 
-.driver-popover.gc-tour{background:var(--glass);color:var(--ink);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 48px rgba(14,23,38,.28);font-family:var(--f-body);max-width:340px;padding:18px}
+.driver-popover.gc-tour{background:var(--glass);color:var(--ink);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 18px 48px rgba(19,37,73,.28);font-family:var(--f-body);max-width:340px;padding:18px}
 .driver-popover.gc-tour .driver-popover-title{font-family:var(--f-display);font-size:1.05rem;font-weight:700}
 .driver-popover.gc-tour .driver-popover-description{color:var(--muted);font-size:.9rem;line-height:1.5}
 .driver-popover.gc-tour .driver-popover-description b{color:var(--ink)}
@@ -1343,9 +1343,9 @@ function aprovar(metodo){const p=PLANOS[ui.plano],a=C.assin,base=a.status==='ati
   saveC();ui.payStep=null;ui.pix=null;ui.payErr='';render(true);toast('Pagamento confirmado! Sua assinatura está ativa.')}
 const mmss=ms=>`${pad(Math.floor(ms/60000))}:${pad(Math.floor(ms/1000)%60)}`;
 function fakeQr(seed){const N=25,r=mulberry32([...seed].reduce((a,c)=>a+c.charCodeAt(0),0));let s='';
-  const fin=(x,y)=>`<rect x="${x}" y="${y}" width="7" height="7" fill="#0e1726"/><rect x="${x+1}" y="${y+1}" width="5" height="5" fill="#fff"/><rect x="${x+2}" y="${y+2}" width="3" height="3" fill="#0e1726"/>`;
-  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const f=(x<8&&y<8)||(x>N-9&&y<8)||(x<8&&y>N-9);if(!f&&r()<.48)s+=`<rect x="${x}" y="${y}" width="1" height="1" fill="#0e1726"/>`}
-  return `<svg class="qr" viewBox="0 0 ${N} ${N}" role="img" aria-label="QR code de exemplo" shape-rendering="crispEdges"><rect width="${N}" height="${N}" fill="#fff"/>${s}${fin(0,0)}${fin(N-7,0)}${fin(0,N-7)}<rect x="5.5" y="10.5" width="14" height="4" rx="1" fill="#fff" stroke="#c39a3e" stroke-width=".3"/><text x="12.5" y="13.3" text-anchor="middle" font-size="2.1" font-weight="700" fill="#a26300" font-family="sans-serif">PROTÓTIPO</text></svg>`}
+  const fin=(x,y)=>`<rect x="${x}" y="${y}" width="7" height="7" fill="#132549"/><rect x="${x+1}" y="${y+1}" width="5" height="5" fill="#fff"/><rect x="${x+2}" y="${y+2}" width="3" height="3" fill="#132549"/>`;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const f=(x<8&&y<8)||(x>N-9&&y<8)||(x<8&&y>N-9);if(!f&&r()<.48)s+=`<rect x="${x}" y="${y}" width="1" height="1" fill="#132549"/>`}
+  return `<svg class="qr" viewBox="0 0 ${N} ${N}" role="img" aria-label="QR code de exemplo" shape-rendering="crispEdges"><rect width="${N}" height="${N}" fill="#fff"/>${s}${fin(0,0)}${fin(N-7,0)}${fin(0,N-7)}<rect x="5.5" y="10.5" width="14" height="4" rx="1" fill="#fff" stroke="#3080df" stroke-width=".3"/><text x="12.5" y="13.3" text-anchor="middle" font-size="2.1" font-weight="700" fill="#a26300" font-family="sans-serif">PROTÓTIPO</text></svg>`}
 function cardPane(){const p=PLANOS[ui.plano];
   if(ui.payStep==='mp')return `<div class="proto"><b>Protótipo:</b> aqui abriria a página segura do Mercado Pago para digitar o cartão. Escolha o resultado:<div class="btns"><button class="btn pri sm" data-act="s-aprovar" data-v="cartao">Pagamento aprovado</button><button class="btn sm" data-act="s-recusar">Pagamento recusado</button><button class="btn sm" data-act="s-voltar">Voltar</button></div></div>`;
   return `<div class="pane"><p class="note" style="margin:0">Você vai para o ambiente seguro do Mercado Pago para digitar os dados do cartão. O Gestor Conex não vê nem guarda o número do seu cartão.</p>
@@ -1375,7 +1375,7 @@ function ctPopup(){const old=document.getElementById('ct-pop');if(old)old.remove
   const x=pd==='proposta'?`O Gestor Conex preparou uma proposta para ${esc(c.razao)} seguir com o plano. Você pode aceitar e pagar agora ou fechar e ver depois.`
     :pd==='aditivo'?'Há uma alteração no seu contrato esperando a sua aprovação.':'Falta só o pagamento para liberar o seu plano.';
   const el=document.createElement('div');el.id='ct-pop';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',t);
-  el.style.cssText='position:fixed;inset:0;background:rgba(14,23,38,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999';
+  el.style.cssText='position:fixed;inset:0;background:rgba(19,37,73,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999';
   el.innerHTML=`<div class="card" style="max-width:440px;width:100%;margin:0"><div class="card-h"><h2>${t}</h2></div><p style="margin:0 0 14px">${x}</p><div class="btns"><button class="btn pri" data-tab="assinatura">${pd==='proposta'?'Ver oferta':pd==='aditivo'?'Ver aditivo':'Ir para o pagamento'}</button><button class="btn" data-pop="fechar">Fechar</button></div></div>`;
   // fecha no botão, no "Ver oferta" (o clique segue para a navegação por data-tab) ou fora do quadro
   el.addEventListener('click',ev=>{if(ev.target===el||ev.target.closest('[data-pop],[data-tab]'))el.remove()});
@@ -1412,7 +1412,7 @@ function ctCard(){const c=C.assin.contrato;if(!c)return'';const [ft,fc]=CT_FASE[
 /* proposta para imprimir ou salvar em PDF, montada do mesmo cadastro (os números nunca divergem da cobrança) */
 function imprimeProposta(c){if(!c)return;const w=window.open('','_blank');if(!w){toast('Libere as janelas do navegador para ver a proposta.');return}
   const d=x=>x?new Date(x).toLocaleDateString('pt-BR',{timeZone:'America/Sao_Paulo'}):'—',e=esc;
-  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Proposta Gestor Conex - ${e(c.razao)}</title><style>body{font:14px/1.5 Arial,sans-serif;color:#0e1726;max-width:720px;margin:32px auto;padding:0 20px}h1{font-size:22px;margin:0}h2{font-size:15px;margin:22px 0 8px;color:#0e1726;border-bottom:1px solid #e1e5eb;padding-bottom:4px}.top{background:#0e1726;color:#fff;padding:18px 22px;border-radius:10px;display:flex;justify-content:space-between;align-items:center}.top b{color:#e2be63}table{width:100%;border-collapse:collapse}td{padding:7px 0;border-bottom:1px solid #eef0f3;vertical-align:top}td:first-child{color:#5b6576;width:42%}.nota{color:#5b6576;font-size:12px;margin-top:28px}@media print{.top{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
+  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Proposta Gestor Conex - ${e(c.razao)}</title><style>body{font:14px/1.5 Arial,sans-serif;color:#132549;max-width:720px;margin:32px auto;padding:0 20px}h1{font-size:22px;margin:0}h2{font-size:15px;margin:22px 0 8px;color:#132549;border-bottom:1px solid #e1e5eb;padding-bottom:4px}.top{background:#132549;color:#fff;padding:18px 22px;border-radius:10px;display:flex;justify-content:space-between;align-items:center}.top b{color:#5a9cf0}table{width:100%;border-collapse:collapse}td{padding:7px 0;border-bottom:1px solid #eef0f3;vertical-align:top}td:first-child{color:#5b6576;width:42%}.nota{color:#5b6576;font-size:12px;margin-top:28px}@media print{.top{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>
   <div class="top"><div style="font-size:20px;font-weight:bold">Gestor <b>Conex</b></div><div>Proposta comercial</div></div>
   <h1 style="margin-top:22px">${e(c.razao)}</h1><p style="margin:4px 0 0;color:#5b6576">${c.doc?e(c.doc)+' · ':''}${c.contato?'A/C '+e(c.contato)+' · ':''}Proposta de ${d(c.data)}, válida até ${d(c.validade)}</p>
   <h2>Condições</h2><table><tr><td>Prazo do contrato</td><td>${mesesTxt(c.prazo)}, valor fixo</td></tr><tr><td>Cartão de crédito</td><td>${c.prazo} × ${brl(c.mensal)} por mês (cobrança mensal automática), total de ${brl(c.cartaoTotal)}</td></tr>
@@ -2677,7 +2677,7 @@ async function avisoLoja(){
     const e=(await r.json())[IOS?'ios':'android'];
     if(!e||!e.store||!versaoMaisNova(e.latest,info.version))return;
     const el=document.createElement('div');el.id='aviso-loja';el.setAttribute('role','status');
-    el.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:9998;max-width:520px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#0e1726;color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.25);font-size:.9rem';
+    el.style.cssText='position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:9998;max-width:520px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#132549;color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.25);font-size:.9rem';
     el.innerHTML='<span style="flex:1;min-width:160px">Há uma versão nova do app Gestor Conex na loja.</span><a class="btn sm pri" target="_blank" rel="noopener"></a><button class="btn sm" type="button">Fechar</button>';
     const a=el.querySelector('a');a.href=e.store;a.textContent='Atualizar';
     el.querySelector('button').onclick=()=>{el.remove();try{sessionStorage.setItem('gc-aviso-loja-fechado','1')}catch(x){}};
