@@ -85,6 +85,7 @@ main{min-width:0;padding-block:18px 112px;display:flex;flex-direction:column;gap
 .nav button:hover{background:var(--side-hover);color:var(--side-ink-strong)}
 .nav button[aria-current="page"]{background:var(--side-hover);color:var(--side-ink-strong);box-shadow:inset 3px 0 0 var(--gold)}
 .side-foot{margin-top:auto;font-size:.75rem;color:var(--side-ink);opacity:.7}
+.gc-rod{margin-top:.7rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.12);text-align:center}.gc-rod b{display:block;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gc-rod span{display:block;margin-top:.3rem;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;opacity:.75}
 .nav svg,.bottom svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--nav-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);
   display:grid;grid-template-columns:repeat(6,1fr);
@@ -455,6 +456,36 @@ tr:last-child td{border-bottom:0}
 .code-in{letter-spacing:.4em;font-size:1.35rem;text-align:center;font-weight:700}
 .auth-legal{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
 .auth-legal button{border:0;background:none;color:var(--muted);font-size:.82rem;text-decoration:underline;padding:4px}
+/* Telas de acesso no padrão da família Conex (o mesmo do Chat Conex): fundo claro com pontinhos, cartão branco com o
+   logo, título centralizado, rótulos em maiúsculas, campos cinza, botão em degradê e links legais embaixo. Sempre claro. */
+.auth.conex{position:fixed;inset:0;overflow-y:auto;z-index:5;min-height:100vh;color:#14213d;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:linear-gradient(165deg,#fff 0%,#f3f5f9 55%,#e9edf4 100%);color-scheme:light}
+.auth.conex::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle at 1px 1px,rgba(43,114,204,.07) 1px,transparent 0);background-size:28px 28px}
+.auth.conex .auth-main{position:relative;margin:0;min-height:100vh;padding:max(32px,env(safe-area-inset-top)) 20px 16px;gap:16px;justify-content:flex-start}
+.auth.conex .auth-card{max-width:420px;background:#fff;border:1px solid rgba(16,35,61,.14);border-radius:16px;box-shadow:0 14px 44px rgba(10,25,40,.14),0 6px 28px rgba(43,114,204,.22);padding:28px 29.6px 24px;gap:13.6px;color:#14213d}
+.auth.conex.is-legal .auth-card{max-width:760px}
+.auth.conex .cx-logo{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:2px;font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-size:21px;font-weight:800;letter-spacing:-.03em;color:#132549}
+.auth.conex .cx-logo .mark{width:40px;height:40px}
+.auth.conex .cx-logo b{color:#3080df;font-weight:800}
+.auth.conex h1{text-align:center;margin:0 0 -6px;font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-size:21.6px;font-weight:800;color:#132549;letter-spacing:-.02em}
+.auth.conex h1+.muted{text-align:center;font-size:14.08px;line-height:1.45;color:#434c5a!important;margin-bottom:6px!important}
+.auth.conex .field label{font-size:11.52px;font-weight:700;color:#434c5a;letter-spacing:.04em}
+.auth.conex .inp{background:#f0f2f6;border:1px solid rgba(16,35,61,.14);border-radius:12px;padding:8.8px 12px;font-size:14.08px;color:#14213d}
+.auth.conex .inp:focus{background:#fff;border-color:#2b72cc;box-shadow:0 0 0 3px rgba(43,114,204,.15);outline:none}
+.auth.conex .inp::placeholder{color:#8a94a8}
+.auth.conex .pw-t{font-size:11.52px;font-weight:700;color:#2b72cc;padding:4px 6.4px}
+.auth.conex .btn.pri{border:0;border-radius:12px;padding:12.8px 21.6px;font-size:14.08px;font-weight:700;color:#fff;background:linear-gradient(135deg,#1f5aa8 0%,#2b72cc 55%,#5a9cf0 100%);box-shadow:0 4px 16px rgba(19,37,73,.28)}
+.auth.conex .btn.pri:hover{filter:brightness(1.05);color:#fff}
+.auth.conex .btn:not(.pri){background:#fff;color:#132549;border:1px solid rgba(16,35,61,.14);border-radius:12px}
+.auth.conex .lnk{color:#2b72cc;font-weight:600;font-size:13.12px}
+.auth.conex .lnk:hover{color:#1f5aa8}
+.auth.conex .a-forgot{display:flex;justify-content:flex-end;margin-top:-4px}
+.auth.conex .a-foot{margin-top:6px;padding-top:16px;border-top:1px solid rgba(16,35,61,.14);text-align:center;font-size:13.6px;color:#434c5a}
+.auth.conex .a-foot .lnk{font-size:13.6px}
+.auth.conex .auth-legal{width:100%;max-width:576px;margin-top:auto;gap:0;padding:6.4px 13.6px 8px;border-radius:10px;background:rgba(255,255,255,.55);font-size:10.4px;color:#434c5a}
+.auth.conex .auth-legal button,.auth.conex .auth-legal span{font-size:10.4px;font-weight:600;color:#3a4f78;text-decoration:none;padding:0}
+.auth.conex .auth-legal span{font-weight:400;color:#434c5a}
+.auth.conex .auth-legal button:hover{text-decoration:underline}
+.auth.conex .auth-legal>*+*::before{content:"·";display:inline-block;margin:0 6px;color:#8a94a8}
 .intro{display:flex;flex-direction:column;gap:12px}
 .intro-ic{width:56px;height:56px;border-radius:14px;background:var(--acc-soft);color:var(--acc);display:grid;place-items:center}
 .intro-ic svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -1545,15 +1576,14 @@ function aIntro(){const sl=SLIDES[A.slide],last=A.slide===SLIDES.length-1;
   return `<div class="intro"><div class="intro-ic">${IC[sl.ic]}</div><div class="eyebrow">Como funciona · ${A.slide+1} de ${SLIDES.length}</div><h1>${sl.t}</h1><p class="muted" style="margin:0">${sl.x}</p>
     <div class="dots" aria-hidden="true">${SLIDES.map((_,i)=>`<i class="${i===A.slide?'on':''}"></i>`).join('')}</div>
     <div class="a-row">${A.slide?'<button class="btn" data-act="a-slide" data-n="-1">Voltar</button>':'<button class="btn" data-act="a-intro-end">Pular</button>'}<button class="btn pri" data-act="${last?'a-intro-end':'a-slide'}" data-n="1">${last?'Começar':'Próximo'}</button></div></div>`}
-function aLogin(){return `<h1>Entrar</h1><p class="muted" style="margin:0">Use o e-mail e a senha da sua conta.</p>${errBox()}${infoBox()}
+function aLogin(){return `<h1>Entrar</h1><p class="muted" style="margin:0">Acesse o Gestor Conex com seu e-mail.</p>${errBox()}${infoBox()}
   <form id="f-login" class="a-form" novalidate>
     <div class="field"><label for="l-email">E-mail</label><input class="inp" id="l-email" type="email" autocomplete="email" placeholder="voce@empresa.com" value="${esc(A.lastEmail)}"></div>
     <div class="field"><label for="l-pw">Senha</label><div class="pw"><input class="inp" id="l-pw" type="password" autocomplete="current-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
+    <div class="a-forgot"><button type="button" class="lnk" data-act="a-go" data-v="esqueci">Esqueceu a senha?</button></div>
     ${capW('l-robo')}
     <button class="btn pri big" type="submit">Entrar</button></form>
-  <div class="a-links"><button class="lnk" data-act="a-go" data-v="esqueci">Esqueceu a senha?</button></div>
-  ${IOS?'':`<div class="a-sep"><span>Ainda não tem conta?</span></div>
-  <button class="btn big" data-act="a-go" data-v="cadastro">Criar conta · ${TRIAL_DIAS} dias grátis</button>`}`}
+  ${IOS?'':`<p class="a-foot">Não tem conta? <button class="lnk" data-act="a-go" data-v="cadastro">Criar conta grátis</button></p>`}`}
 function aCadastro(){const r=A.reg||{},dt=r['r-dt']||'CNPJ',v=k=>esc(r[k]||'');
   return `<button class="lnk" data-act="a-go" data-v="login">← Já tenho conta</button><h1>Criar conta</h1><p class="muted" style="margin:0">Etapa 1 de 2 · ${TRIAL_DIAS} dias grátis, sem cartão.</p>${errBox()}
   <form id="f-reg" class="a-form" novalidate>
@@ -1591,14 +1621,10 @@ function renderAuth(){
   if(IOS&&(A.scr==='cadastro'||A.scr==='verificar'))A.scr='login';
   const s=A.scr,F={convite:aConvite,'del-confirm':aDelConfirm,intro:aIntro,login:aLogin,cadastro:aCadastro,verificar:aVerificar,esqueci:aEsqueci,enviada:aEnviada,'nova-senha':aNovaSenha,excluida:aExcluida};
   const body=LEGAL_SCR.includes(s)?`<button class="lnk" data-act="a-back">← Voltar</button><div class="legal">${legalHtml(s)}</div>`:(F[s]||aLogin)();
-  el.innerHTML=`<div class="auth ${LEGAL_SCR.includes(s)?'is-legal':''}">
-    <aside class="auth-side"><div class="brand"><div class="mark" role="img" aria-label="Gestor Conex">G</div><div><b>Gestor <span class="cx">Conex</span></b><small>Gestão para pequenos negócios</small></div></div>
-      <h2 class="auth-tag">Saiba quanto entrou, quanto saiu e quanto sobrou.</h2>
-      <ul class="auth-pts"><li>Vendas do dia em 1 minuto</li><li>Despesas mensais, semanais e diárias</li><li>Lucro comparado com o mês passado</li></ul>
-      <p class="auth-foot">${REAL?'gestorconex.com.br':'Protótipo · os dados ficam só neste navegador'}</p></aside>
-    <div class="auth-main"><div class="brand auth-mbrand"><div class="mark" role="img" aria-label="Gestor Conex">G</div><div><b style="color:var(--ink)">Gestor <span class="cx">Conex</span></b><small style="color:var(--muted)">Gestão para pequenos negócios</small></div></div>
-      <div class="auth-card">${body}</div>
-      <nav class="auth-legal" aria-label="Documentos"><button data-act="a-go" data-v="termos">Termos de uso</button><button data-act="a-go" data-v="privacidade">Privacidade</button><button data-act="a-go" data-v="excluir-info">Excluir conta</button></nav></div></div>`;
+  el.innerHTML=`<div class="auth conex ${LEGAL_SCR.includes(s)?'is-legal':''}">
+    <div class="auth-main">
+      <div class="auth-card"><div class="cx-logo"><div class="mark" role="img" aria-label="Gestor Conex">G</div><span>Gestor <b>Conex</b></span></div>${body}</div>
+      <nav class="auth-legal" aria-label="Documentos"><button data-act="a-go" data-v="termos">Termos</button><button data-act="a-go" data-v="privacidade">Privacidade</button><button data-act="a-go" data-v="excluir-info">Excluir conta</button><span>© ${new Date().getFullYear()} Gestor Conex</span></nav></div></div>`;
   mountTurnstile();
 }
 async function entrarDemo(){
@@ -1871,7 +1897,7 @@ function aplicaAssin(a){C.trialFim=dsIso(a.trialEndsAt);aplicaPlanos(a.planos);c
   if(!ui.planoEsc)ui.plano=plano; // tela de planos abre no plano atual, até a pessoa escolher outro
   C.assin={status:a.status,plano,metodo:a.method,renov:a.autoRenew,prox:dsIso(a.currentPeriodEnd),cardPending:a.cardPending,acessoSrv:a.acesso,falhou:!!a.cartaoFalhou,pago:!!a.pago,
     admin:!!a.admin,contrato:a.contrato||null,hist:(a.payments||[]).map(p=>({d:dsIso(p.d),plano:p.tipo==='CONTRATO'?'Contrato':p.tipo==='ADITIVO'?'Aditivo de contrato':(PLANOS[planoDe(p.meses||1)]||PLANOS.mensal).nome,metodo:p.metodo,valor:p.valor,st:'Pago'}))}}
-function aplicaMe(me){C={real:true,nome:me.nome,email:me.email,tel:me.tel,emp:me.emp,seg:me.seg,dt:me.dt,doc:me.doc,emailOk:me.emailOk,telOk:me.telOk,tourDone:me.tourDone,admin:!!me.admin,criado:dsIso(me.criado),termos:{versao:TERMOS_V},
+function aplicaMe(me){setTimeout(()=>{try{gcRodape()}catch(e){}},0);C={real:true,nome:me.nome,email:me.email,tel:me.tel,emp:me.emp,seg:me.seg,dt:me.dt,doc:me.doc,emailOk:me.emailOk,telOk:me.telOk,tourDone:me.tourDone,admin:!!me.admin,criado:dsIso(me.criado),termos:{versao:TERMOS_V},
     tipo:me.tipo||'dono',donoNome:me.donoNome||''};
   // usuário adicional (Lançador): só sabe se o acesso está liberado; não vê valores, planos nem pagamentos
   if(C.tipo==='lancador'){const a=me.assinatura||{};C.trialFim=TODAY;C.assin={status:a.status||'trial',plano:'mensal',acessoSrv:!!a.acesso,admin:!!a.admin,contrato:null,hist:[],pago:true};return}
@@ -2653,7 +2679,26 @@ if(location.hash&&VIEWS[location.hash.slice(1)])ui.tab=location.hash.slice(1);
 // links públicos para as lojas (abrem sem login): /#privacidade, /#termos, /#excluir-conta
 {const lh={privacidade:'privacidade',termos:'termos','excluir-conta':'excluir-info'}[(location.hash||'').slice(1)];if(lh){A.scr=lh;A.legalBack='login';ui.legal=lh;if(logged&&C){ui.tab='legal'}}
  if(location.hash==='#cadastro'&&!(logged&&C)){A.scr='cadastro'}} // botões "Testar grátis" da página inicial
-if(REAL){const f=$('.side-foot');if(f)f.textContent='gestorconex.com.br'}
+/* rodapé do menu, padrão Conex (16/11/2026, "precisa aparecer a versão exatamente que está"): primeiro nome de quem
+   está usando + versão. App instalado: a versão do próprio app (a mesma nas duas lojas); site: a mais nova publicada
+   nas lojas (GET /app-version). Sem rede: só "Versão". */
+let gcVersao=null,gcVersaoBusca=null;
+function gcBuscaVersao(){
+  if(gcVersaoBusca)return gcVersaoBusca;
+  gcVersaoBusca=(async()=>{
+    const P=NATIVO&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;
+    if(P&&P.getInfo)return(await P.getInfo()).version||null;
+    const r=await fetch(API_BASE+'/app-version',{cache:'no-cache'});if(!r.ok)return null;
+    const d=await r.json();let v=null;
+    for(const k of['android','ios']){const x=d[k]&&d[k].latest;if(/^\d+(\.\d+){1,2}$/.test(x||'')&&x!=='0.0.0'&&(!v||versaoMaisNova(x,v)))v=x}
+    return v})().then(v=>{gcVersao=v;gcRodape();return v}).catch(()=>{gcVersaoBusca=null;return null});
+  return gcVersaoBusca}
+function gcRodape(){
+  if(!REAL)return;const f=$('.side-foot');if(!f)return;
+  const nome=(C&&C.nome||'').trim().split(/\s+/)[0];
+  f.innerHTML='gestorconex.com.br'+(C&&C.real?`<div class="gc-rod"><b title="${esc(C.nome||'')}">${esc(nome||'Conta')}</b><span>${gcVersao?'Versão '+esc(gcVersao):'Versão'}</span></div>`:'');
+  gcBuscaVersao()}
+gcRodape();
 // Android: o voltar do aparelho volta para o Painel (ou para o login) antes de fechar o app
 if(NATIVO){const AppP=(window.Capacitor.Plugins&&window.Capacitor.Plugins.App)||(window.Capacitor.registerPlugin&&window.Capacitor.registerPlugin('App'));
   if(AppP&&AppP.addListener)AppP.addListener('backButton',()=>{
