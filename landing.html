@@ -50,7 +50,7 @@ p{margin:0}
 .top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:68px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-family:var(--f-display);font-weight:700;font-size:1.15rem;letter-spacing:-.01em}
 .logo img{width:38px;height:38px}
-.logo .cx{color:var(--gold-2)}
+.logo .cx{color:#7fb3f5}
 .top nav{display:flex;align-items:center;gap:8px}
 .top nav a.link{color:#cdd5e3;text-decoration:none;font-weight:600;padding:10px 12px;border-radius:10px}
 .top nav a.link:hover{color:#fff}
@@ -121,7 +121,7 @@ section.blk{padding:84px 0}
 .ciclos b{font-family:var(--f-display)}.ciclos span{font-size:.9rem}.ciclos em{font-style:normal;font-size:.78rem;color:var(--good);font-weight:700}
 @media (max-width:600px){.ciclos{grid-template-columns:1fr}}
 .offer{position:relative;background:linear-gradient(135deg,#1b3160,#132549);color:#fff;border-radius:26px;padding:48px 32px;text-align:center;overflow:hidden;border:1px solid rgba(48,128,223,.35)}
-.offer .rib{display:inline-block;background:var(--gold);color:var(--navy);font-weight:800;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:99px;margin-bottom:16px}
+.offer .rib{display:inline-block;background:#286dc4;color:#fff;font-weight:800;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:99px;margin-bottom:16px}
 .offer p{color:#c3cbda;margin:12px auto 24px;max-width:36em}
 .offer ul{list-style:none;padding:0;margin:0 auto 28px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;color:#e9eef7;font-weight:600}
 .offer li:before{content:"✓ ";color:var(--gold-2)}
@@ -139,8 +139,11 @@ footer a{color:#cdd5e3;text-decoration:none}
 footer a:hover{color:#fff;text-decoration:underline}
 footer .sel{user-select:all;color:#fff}
 </style>
+<style>.pular-conteudo{position:absolute;left:12px;top:-60px;z-index:1000;background:#132549;color:#fff;padding:10px 16px;border-radius:8px;font-weight:700;text-decoration:none}.pular-conteudo:focus{top:12px}:focus-visible{outline:3px solid #2b72cc;outline-offset:2px}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}</style>
+<script src="/conex-erros.js" data-app="gestor" defer></script>
 </head>
 <body>
+<a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="top">
   <div class="wrap">
@@ -154,7 +157,7 @@ footer .sel{user-select:all;color:#fff}
   </div>
 </header>
 
-<main>
+<main id="conteudo">
 <section class="hero">
   <div class="wrap">
     <div>

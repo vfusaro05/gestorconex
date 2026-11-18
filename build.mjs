@@ -25,6 +25,7 @@ const head = `<!doctype html>
 <meta name="apple-mobile-web-app-title" content="Gestor Conex">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<script src="/conex-erros.js" data-app="gestor" defer></script>
 `;
 // o arquivo começa com <title>, <meta> e <style>: tudo até o fim do primeiro </style> vai para o <head>
 const cut = src.indexOf('</style>') + '</style>'.length;
@@ -47,7 +48,11 @@ const manifest = {
     { src: '/icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
   ],
 };
+// Cabeçalhos de segurança do padrão Conex (18/11/2026, iguais nos 7 apps): HSTS, CSP, frame-ancestors, nosniff, referrer.
+const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss:; frame-src 'self' https:; worker-src 'self' blob:; media-src 'self' data: blob: https:; object-src 'none'; base-uri 'self'; form-action 'self' https:; frame-ancestors 'self'; upgrade-insecure-requests";
 const headers = `/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: ${CSP}
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
@@ -72,6 +77,8 @@ function write(dir, { pagesFiles }) {
   } else writeFileSync(join(dir, 'index.html'), html);
   writeFileSync(join(dir, 'manifest.webmanifest'), JSON.stringify(manifest, null, 2));
   cpSync(join(here, 'public', 'icons'), join(dir, 'icons'), { recursive: true });
+  // alerta de erros do navegador (padrão Conex): o mesmo arquivo nos 7 apps
+  cpSync(join(here, 'public', 'conex-erros.js'), join(dir, 'conex-erros.js'));
   if (pagesFiles) { writeFileSync(join(dir, '_headers'), headers); writeFileSync(join(dir, '404.html'), notFound); }
 }
 writeFileSync(join(here, 'index.html'), html); // cópia versionada no repositório
