@@ -52,17 +52,17 @@ const manifest = {
 const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss:; frame-src 'self' https:; worker-src 'self' blob:; media-src 'self' data: blob: https:; object-src 'none'; base-uri 'self'; form-action 'self' https:; frame-ancestors 'self'; upgrade-insecure-requests";
 // Páginas do site (sem script inline): scripts só do próprio domínio — nota A+ no Mozilla Observatory (20/11/2026).
 // O sistema em /app/ mantém a política acima. A CSP não vai em /* porque a Cloudflare juntaria as duas.
+// Um bloco /* só: com dois, a Cloudflare fica só com o último (o HSTS sumiu assim em 20/11/2026).
 const CSP_SITE = CSP.replace("script-src 'self' 'unsafe-inline' https:", "script-src 'self'");
 const PAGINAS_SITE = ["/","/index.html","/seguranca","/seguranca/","/seguranca/index.html","/404.html"];
-const headers = `/*
-  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-${PAGINAS_SITE.map((p) => `${p}
+const headers = `${PAGINAS_SITE.map((p) => `${p}
   Content-Security-Policy: ${CSP_SITE}
 `).join('')}/app/*
   Content-Security-Policy: ${CSP}
 /app
   Content-Security-Policy: ${CSP}
 /*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
