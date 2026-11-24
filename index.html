@@ -1778,13 +1778,13 @@ async function agendaAgora(){const P=LN();if(!P)return;
       list.push({id:1200+w,title:'Lance as despesas da semana',body:'Toque para lançar as contas semanais no Gestor Conex.',schedule:{at:t,allowWhileIdle:true},extra:{tab:'despesas',freq:'semanal'}})}
     list.push(...vl);
     if(list.length)await P.schedule({notifications:list})}catch(e){}}
-/* avisos de vencimento no aparelho (mesmos dias do e-mail): teste grátis 3, 1 e 0 dias; pago sem renovação 5, 1 e 0 dias.
+/* avisos de vencimento no aparelho (mesmos dias do e-mail): teste grátis 3, 1 e 0 dias; pago sem renovação 5, 1, 0 dias e 3 dias depois (23/11/2026, igual ao Chat Conex).
    Texto neutro, sem preço nem chamada de pagamento (regra das lojas): "Os detalhes estão no seu e-mail." */
-function avisosVenc(){const a=C.assin,out=[],now=Date.now(),q=l=>l===0?'hoje':l===1?'amanhã':`em ${l} dias`;
+function avisosVenc(){const a=C.assin,out=[],now=Date.now(),q=l=>l<0?`há ${-l} dias`:l===0?'hoje':l===1?'amanhã':`em ${l} dias`;
   const add=(fim,dias,txt,base)=>dias.forEach((n,i)=>{const t=pd(addDays(fim,-n));t.setHours(10,0,0,0);if(t>now)out.push({id:base+i,title:txt(q(n)),body:'Os detalhes estão no seu e-mail.',schedule:{at:t,allowWhileIdle:true},extra:{tab:'assinatura'}})});
   if(a.falhou||a.admin||IOS)return out; // App da Apple: sem aviso de teste grátis ou vencimento
   if(a.status==='trial'&&!a.renov&&C.trialFim)add(C.trialFim,[3,1,0],w=>`Seu teste grátis termina ${w}`,1300);
-  else if(a.status==='ativa'&&!a.renov&&a.prox)add(a.prox,[5,1,0],w=>`Sua assinatura vence ${w}`,1310);
+  else if(a.status==='ativa'&&!a.renov&&a.prox)add(a.prox,[5,1,0,-3],w=>w.startsWith('há')?`Sua assinatura venceu ${w}`:`Sua assinatura vence ${w}`,1310);
   return out}
 // pede a permissão de notificação (uma vez, depois do tutorial, ou ao ligar um lembrete em Ajustes)
 async function pedeLembretes(forcar){const P=LN();if(!P)return;
