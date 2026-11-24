@@ -1323,7 +1323,8 @@ const MASK={
   tel:v=>{v=onlyD(v).slice(0,11);if(v.length<=2)return v.length?'('+v:v;if(v.length<=6)return `(${v.slice(0,2)}) ${v.slice(2)}`;return `(${v.slice(0,2)}) ${v.slice(2,v.length-4)}-${v.slice(-4)}`},
   cpf:v=>onlyD(v).slice(0,11).replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2'),
   cnpj:v=>onlyD(v).slice(0,14).replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2'),
-  code:v=>onlyD(v).slice(0,6)};
+  code:v=>onlyD(v).slice(0,6),
+  cep:v=>{v=onlyD(v).slice(0,8);return v.length>5?v.slice(0,5)+'-'+v.slice(5):v}};
 const PW_RULES=[['len','8 caracteres ou mais',p=>p.length>=8],['up','uma letra maiúscula',p=>/[A-Z]/.test(p)],['low','uma letra minúscula',p=>/[a-z]/.test(p)],['dig','um número',p=>/[0-9]/.test(p)],['sym','um símbolo (!@#$%&*)',p=>/[^A-Za-z0-9]/.test(p)]];
 function pwError(p,email){if(PW_RULES.some(r=>!r[2](p)))return 'A senha precisa ter 8 caracteres ou mais, com maiúscula, minúscula, número e símbolo.';const l=(email||'').split('@')[0].toLowerCase();if(l.length>=3&&p.toLowerCase().includes(l))return 'A senha não pode conter parte do seu e-mail.';return ''}
 const pwChecklist=id=>`<ul class="pwc" id="${id}">${PW_RULES.map(r=>`<li data-r="${r[0]}">${r[1]}</li>`).join('')}</ul>`;
@@ -1584,6 +1585,43 @@ function aLogin(){return `<h1>Entrar</h1><p class="muted" style="margin:0">Acess
     ${capW('l-robo')}
     <button class="btn pri big" type="submit">Entrar</button></form>
   ${IOS?'':`<p class="a-foot">Não tem conta? <button class="lnk" data-act="a-go" data-v="cadastro">Criar conta grátis</button></p>`}`}
+/* Endereço do cadastro (24/11/2026: CPF/CNPJ e endereço obrigatórios; são os dados da proposta da Rede Conex).
+   CEP pelo ViaCEP. p = prefixo dos ids ('r' no cadastro, 'cd' na tela de completar); v = valores já digitados. */
+function endCampos(p,v){const g=k=>esc((v||{})[p+'-'+k]||'');
+  return `<p class="a-sec">Endereço</p><p class="faint" style="margin:0">Digite o CEP: o endereço vem dos Correios. Fica só na sua conta.</p>
+    <div class="field"><label for="${p}-cep">CEP</label><input class="inp" id="${p}-cep" data-mask="cep" data-cep="${p}" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" value="${g('cep')}"><small class="faint" id="${p}-cep-msg" aria-live="polite"></small></div>
+    <div class="field"><label for="${p}-rua">Logradouro</label><input class="inp" id="${p}-rua" autocomplete="address-line1" placeholder="Rua, avenida…" value="${g('rua')}"></div>
+    <div class="field"><label for="${p}-num">Número</label><input class="inp" id="${p}-num" placeholder="123" value="${g('num')}"></div>
+    <div class="field"><label for="${p}-compl">Complemento (opcional)</label><input class="inp" id="${p}-compl" placeholder="Sala, bloco…" value="${g('compl')}"></div>
+    <div class="field"><label for="${p}-bairro">Bairro</label><input class="inp" id="${p}-bairro" value="${g('bairro')}"></div>
+    <div class="field"><label for="${p}-cidade">Cidade</label><input class="inp" id="${p}-cidade" autocomplete="address-level2" value="${g('cidade')}"></div>
+    <div class="field"><label for="${p}-uf">UF</label><input class="inp" id="${p}-uf" maxlength="2" autocomplete="address-level1" placeholder="SP" value="${g('uf')}"></div>`}
+function endLe(p){const g=k=>(($('#'+p+'-'+k)||{}).value||'').trim();return {cep:g('cep'),rua:g('rua'),num:g('num'),compl:g('compl'),bairro:g('bairro'),cidade:g('cidade'),uf:g('uf').toUpperCase()}}
+function endErro(e){if(onlyD(e.cep).length!==8)return 'Informe um CEP válido (8 dígitos).';if(e.rua.length<2)return 'Informe o logradouro.';if(!e.num)return 'Informe o número.';
+  if(e.bairro.length<2)return 'Informe o bairro.';if(e.cidade.length<2)return 'Informe a cidade.';if(!/^[A-Z]{2}$/.test(e.uf))return 'Informe o estado (UF com 2 letras).';return ''}
+async function buscaCep(p){const el=$('#'+p+'-cep');if(!el)return;const d=onlyD(el.value);if(d.length!==8||el.dataset.ok===d)return;el.dataset.ok=d;const msg=$('#'+p+'-cep-msg');if(msg)msg.textContent='Buscando CEP…';
+  try{const j=await (await fetch(`https://viacep.com.br/ws/${d}/json/`)).json();if(j.erro)throw new Error('cep');
+    const put=(k,val)=>{const i=$('#'+p+'-'+k);if(i&&val){i.value=val;if(p==='r'){A.reg=A.reg||{};A.reg[i.id]=val}}};
+    put('rua',j.logradouro);put('bairro',j.bairro);put('cidade',j.localidade);put('uf',(j.uf||'').toUpperCase());
+    if(msg)msg.textContent='Endereço preenchido pelo CEP. Confira e informe o número.';const n=$('#'+p+'-num');if(n)n.focus()}
+  catch(e){el.dataset.ok='';if(msg)msg.textContent='Não achamos esse CEP. Preencha o endereço.'}}
+/* Conta antiga com cadastro incompleto (24/11/2026): tela antes do painel pedindo só o que falta. Fora do iPhone
+   (regra da Apple), da conta de demonstração e de quem não é o dono. */
+const precisaCadastro=()=>REAL&&C&&C.real&&!IOS&&C.tipo==='dono'&&!!C.falta&&(C.falta.doc||C.falta.endereco);
+function vCadastro(){const f=C.falta||{},v=A.cad||{},dt=v.dt||'CNPJ';
+  return `<section class="auth conex" style="max-width:520px;margin:24px auto"><div class="auth-main"><h1>Complete o seu cadastro</h1>
+    <p class="muted" style="margin:0">Faltam alguns dados da sua conta. Eles ficam só com a gente: servem para a sua assinatura e para falarmos com você.</p>${errBox()}
+    <form id="f-cad" class="a-form" novalidate>
+      ${f.doc?`<div class="field"><label for="cd-doc">Documento</label><div class="days">${['CNPJ','CPF'].map(k=>`<label><input type="radio" name="cd-dt" value="${k}" ${dt===k?'checked':''}>${k}</label>`).join('')}</div>
+        <input class="inp" id="cd-doc" data-mask="doccd" inputmode="numeric" placeholder="${dt==='CNPJ'?'00.000.000/0000-00':'000.000.000-00'}" value="${esc(v.doc||'')}"></div>`:''}
+      ${f.endereco?endCampos('cd',v):''}
+      <button class="btn pri big" type="submit">Salvar e continuar</button></form></div></section>`}
+async function salvaCadastro(){const f=C.falta||{},dt=(document.querySelector('input[name="cd-dt"]:checked')||{}).value||'CNPJ',doc=(($('#cd-doc')||{}).value||'').trim(),end=endLe('cd');
+  A.cad={dt,doc};Object.keys(end).forEach(k=>{A.cad['cd-'+k]=end[k]});
+  let er='';if(f.doc&&(dt==='CNPJ'?!cnpjOk(doc):!cpfOk(doc)))er=`${dt} inválido. Confira os números.`;else if(f.endereco)er=endErro(end);
+  if(er){A.err=er;render();window.scrollTo(0,0);return}
+  try{const me=await api('/conta/cadastro',{body:{...(f.doc?{dt,doc}:{}),...(f.endereco?{end}:{})}});A.err='';A.cad=null;aplicaMe(me);render();window.scrollTo(0,0);toast('Cadastro completo. Obrigado!')}
+  catch(e){A.err=e.message||'Não foi possível salvar. Tente de novo.';render();window.scrollTo(0,0)}}
 function aCadastro(){const r=A.reg||{},dt=r['r-dt']||'CNPJ',v=k=>esc(r[k]||'');
   return `<button class="lnk" data-act="a-go" data-v="login">← Já tenho conta</button><h1>Criar conta</h1><p class="muted" style="margin:0">Etapa 1 de 2 · ${TRIAL_DIAS} dias grátis, sem cartão.</p>${errBox()}
   <form id="f-reg" class="a-form" novalidate>
@@ -1596,6 +1634,7 @@ function aCadastro(){const r=A.reg||{},dt=r['r-dt']||'CNPJ',v=k=>esc(r[k]||'');
     <div class="field"><label for="r-seg">Segmento</label><select class="inp" id="r-seg">${Object.keys(MODELOS).map(k=>`<option ${(r['r-seg']||'Barbearia')===k?'selected':''}>${k}</option>`).join('')}</select></div>
     <div class="field"><label for="r-doc">Documento</label><div class="days">${['CNPJ','CPF'].map(k=>`<label><input type="radio" name="r-dt" value="${k}" ${dt===k?'checked':''}>${k}</label>`).join('')}</div>
       <input class="inp" id="r-doc" data-mask="doc" inputmode="numeric" placeholder="${dt==='CNPJ'?'00.000.000/0000-00':'000.000.000-00'}" value="${v('r-doc')}"></div>
+    ${endCampos('r',r)}
     <p class="a-sec">Senha</p>
     <div class="field"><label for="r-pw">Crie uma senha</label><div class="pw"><input class="inp" id="r-pw" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div>${pwChecklist('pwc-reg')}</div>
     <div class="field"><label for="r-pw2">Repita a senha</label><div class="pw"><input class="inp" id="r-pw2" type="password" autocomplete="new-password"><button type="button" class="pw-t" data-act="a-showpw">Mostrar</button></div></div>
@@ -1661,10 +1700,12 @@ async function onAuthSubmit(id){
     if(!C||C.email!==em||h!==C.pw){A.err='E-mail ou senha incorretos.';A.cap['l-robo']=false;return render()}
     A.err='';A.cap={};setSess(true);ui.tab='painel';render();window.scrollTo(0,0);toast(`Bem-vindo de volta, ${C.nome.split(' ')[0]}!`);maybeTour()}
   else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini='zero';
-    A.reg={'r-nome':nome,'r-email':em,'r-tel':tel,'r-emp':emp,'r-seg':seg,'r-dt':dt,'r-doc':doc,'r-ini':ini,'r-ok':chk('r-ok'),'r-robo':chk('r-robo')};
+    const end=endLe('r');
+    A.reg={'r-nome':nome,'r-email':em,'r-tel':tel,'r-emp':emp,'r-seg':seg,'r-dt':dt,'r-doc':doc,'r-ini':ini,'r-ok':chk('r-ok'),'r-robo':chk('r-robo')};Object.keys(end).forEach(k=>{A.reg['r-'+k]=end[k]});
     let er='';
     if(nome.length<3)er='Informe seu nome completo.';else if(!emailOk(em))er='Informe um e-mail válido.';else if(onlyD(tel).length<10)er='Informe o celular com DDD.';
     else if(!emp)er='Informe o nome do negócio.';else if(dt==='CNPJ'?!cnpjOk(doc):!cpfOk(doc))er=`${dt} inválido. Confira os números.`;
+    else if(endErro(end))er=endErro(end);
     else if(pwError(pw,em))er=pwError(pw,em);else if(pw!==pw2)er='As duas senhas não são iguais.';
     else if(!chk('r-ok'))er='Para criar a conta, aceite os Termos de uso e a Política de privacidade.';else if(!chk('r-robo'))er='Complete a verificação de segurança.';
     else if(C&&C.email===em)er='Já existe uma conta com este e-mail. Entre ou use "Esqueceu a senha?".';
@@ -1898,7 +1939,7 @@ function aplicaAssin(a){C.trialFim=dsIso(a.trialEndsAt);aplicaPlanos(a.planos);c
   C.assin={status:a.status,plano,metodo:a.method,renov:a.autoRenew,prox:dsIso(a.currentPeriodEnd),cardPending:a.cardPending,acessoSrv:a.acesso,falhou:!!a.cartaoFalhou,pago:!!a.pago,
     admin:!!a.admin,contrato:a.contrato||null,hist:(a.payments||[]).map(p=>({d:dsIso(p.d),plano:p.tipo==='CONTRATO'?'Contrato':p.tipo==='ADITIVO'?'Aditivo de contrato':(PLANOS[planoDe(p.meses||1)]||PLANOS.mensal).nome,metodo:p.metodo,valor:p.valor,st:'Pago'}))}}
 function aplicaMe(me){setTimeout(()=>{try{gcRodape()}catch(e){}},0);C={real:true,nome:me.nome,email:me.email,tel:me.tel,emp:me.emp,seg:me.seg,dt:me.dt,doc:me.doc,emailOk:me.emailOk,telOk:me.telOk,tourDone:me.tourDone,admin:!!me.admin,criado:dsIso(me.criado),termos:{versao:TERMOS_V},
-    tipo:me.tipo||'dono',donoNome:me.donoNome||''};
+    tipo:me.tipo||'dono',donoNome:me.donoNome||'',falta:me.falta||null};
   // usuário adicional (Lançador): só sabe se o acesso está liberado; não vê valores, planos nem pagamentos
   if(C.tipo==='lancador'){const a=me.assinatura||{};C.trialFim=TODAY;C.assin={status:a.status||'trial',plano:'mensal',acessoSrv:!!a.acesso,admin:!!a.admin,contrato:null,hist:[],pago:true};return}
   aplicaAssin(me.assinatura)}
@@ -2238,14 +2279,16 @@ async function onAuthSubmitReal(id){
       if(r.mustChange){A.err='';A.scr='nova-senha';return render()}
       await entrou('Bem-vindo de volta!',pw)}catch(e){falha(e,'l-robo')}}
   else if(id==='f-reg'){const nome=g('r-nome'),em=g('r-email').toLowerCase(),tel=g('r-tel'),emp=g('r-emp'),seg=g('r-seg'),dt=rad('r-dt')||'CNPJ',doc=g('r-doc'),pw=($('#r-pw')||{}).value||'',pw2=($('#r-pw2')||{}).value||'',ini='zero';
-    A.reg={'r-nome':nome,'r-email':em,'r-tel':tel,'r-emp':emp,'r-seg':seg,'r-dt':dt,'r-doc':doc,'r-ini':ini,'r-ok':chk('r-ok')};
+    const end=endLe('r');
+    A.reg={'r-nome':nome,'r-email':em,'r-tel':tel,'r-emp':emp,'r-seg':seg,'r-dt':dt,'r-doc':doc,'r-ini':ini,'r-ok':chk('r-ok')};Object.keys(end).forEach(k=>{A.reg['r-'+k]=end[k]});
     let er='';
     if(nome.length<3)er='Informe seu nome completo.';else if(!emailOk(em))er='Informe um e-mail válido.';else if(onlyD(tel).length<10)er='Informe o celular com DDD.';
     else if(!emp)er='Informe o nome do negócio.';else if(dt==='CNPJ'?!cnpjOk(doc):!cpfOk(doc))er=`${dt} inválido. Confira os números.`;
+    else if(endErro(end))er=endErro(end);
     else if(pwError(pw,em))er=pwError(pw,em);else if(pw!==pw2)er='As duas senhas não são iguais.';
     else if(!chk('r-ok'))er='Para criar a conta, aceite os Termos de uso e a Política de privacidade.';else if(!NATIVO&&!A.capTok['r-robo'])er='Complete a verificação de segurança.';
     if(er){A.err=er;render();window.scrollTo(0,0);return}
-    try{const captcha=await capToken('r-robo');const r=await api('/auth/register/start',{body:{nome,email:em,tel,emp,seg,dt,doc,pw,aceite:true,captcha}});
+    try{const captcha=await capToken('r-robo');const r=await api('/auth/register/start',{body:{nome,email:em,tel,emp,seg,dt,doc,end,pw,aceite:true,captcha}});
       A.pend={pendingId:r.pendingId,via:r.via,destino:r.destino,email:em,tel,emp,seg,ini,pw};A.err='';A.info='';
       if(r.via==='none')return onAuthSubmitReal('f-ver'); // cadastro sem código (provisório): conclui direto
       A.scr='verificar';render();window.scrollTo(0,0)}catch(e){falha(e,'r-robo')}}
@@ -2571,6 +2614,7 @@ function render(keepScroll){
   if(!logged||!C||A.overlay){if(!logged)agendaLembretes();renderAuth();return} // sem sessão: cancela os lembretes do aparelho
   if(A.chave){document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#main').innerHTML=vChave();return}
   if(A.aguarda){document.body.classList.remove('auth-on');$('#auth').hidden=true;montaNav(false);$('#main').innerHTML=vAguarda();return}
+  if(precisaCadastro()){document.body.classList.remove('auth-on');$('#auth').hidden=true;montaNav(false);$('#main').innerHTML=vCadastro();return}
   if(ehLanc()&&!ABAS_LANC.concat(['legal','excluir']).includes(ui.tab))ui.tab='vendas';
   if(!(S.fixasRep&&S.fixasRep[ymOf(TODAY)]))repeteFixas();
   document.body.classList.remove('auth-on');$('#auth').hidden=true;$('#auth').innerHTML='';
@@ -2625,7 +2669,8 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('input',e=>{
   const el=e.target,mk=el.dataset&&el.dataset.mask;
-  if(mk){const m=mk==='doc'?(((A.reg||{})['r-dt']||(document.querySelector('input[name="r-dt"]:checked')||{}).value||'CNPJ')==='CPF'?'cpf':'cnpj'):mk;el.value=MASK[m](el.value)}
+  if(mk){const m=mk==='doc'?(((A.reg||{})['r-dt']||(document.querySelector('input[name="r-dt"]:checked')||{}).value||'CNPJ')==='CPF'?'cpf':'cnpj'):mk==='doccd'?((document.querySelector('input[name="cd-dt"]:checked')||{}).value==='CPF'?'cpf':'cnpj'):mk;el.value=MASK[m](el.value)}
+  if(mk==='cep'&&el.dataset.cep&&onlyD(el.value).length===8)buscaCep(el.dataset.cep);
   if(el.id&&el.id.startsWith('r-')&&!el.id.includes('pw')&&el.type!=='radio'){A.reg=A.reg||{};A.reg[el.id]=el.type==='checkbox'?el.checked:el.value}
   if(el.id==='r-pw')updPwc('pwc-reg',el.value);if(el.id==='n-pw')updPwc('pwc-nova',el.value);if(el.id==='c-new')updPwc('pwc-chg',el.value);
   const q=e.target.dataset.qid;if(q){setQty(q,e.target.value);return}
@@ -2660,6 +2705,7 @@ document.addEventListener('change',e=>{
 });
 document.addEventListener('submit',e=>{
   e.preventDefault();
+  if(e.target.id==='f-cad'){salvaCadastro();return}
   if(e.target.id==='f-adm-busca'){ADM.busca=($('#adm-busca')||{}).value||'';admCarrega();return}
   if(e.target.id==='f-adm-teste'){admTeste();return}
   if(e.target.id==='f-fb'){enviaFeedback();return}
