@@ -26,6 +26,7 @@ const head = `<!doctype html>
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <script src="/conex-erros.js" data-app="gestor" defer></script>
+<script src="/conex-barra.js" defer></script>
 `;
 // o arquivo começa com <title>, <meta> e <style>: tudo até o fim do primeiro </style> vai para o <head>
 const cut = src.indexOf('</style>') + '</style>'.length;
@@ -89,6 +90,7 @@ function write(dir, { pagesFiles }) {
   cpSync(join(here, 'public', 'icons'), join(dir, 'icons'), { recursive: true });
   // alerta de erros do navegador (padrão Conex): o mesmo arquivo nos 7 apps
   cpSync(join(here, 'public', 'conex-erros.js'), join(dir, 'conex-erros.js'));
+  cpSync(join(here, 'public', 'conex-barra.js'), join(dir, 'conex-barra.js'));
   if (pagesFiles) { writeFileSync(join(dir, '_headers'), headers); writeFileSync(join(dir, '404.html'), notFound); }
 }
 writeFileSync(join(here, 'index.html'), html); // cópia versionada no repositório
